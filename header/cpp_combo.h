@@ -6,8 +6,8 @@
 #define PPQA_CPP_CPP_COMBO_H
 
 #include "combo.h"
-#include "greedy.h"
+#include "instance.h"
 
-long cpp_combo_wrap(int n, int *p, int *w, stype c, double *timerecord, int first_item, int define_sol);
+long cpp_combo_wrap(int n, std::vector<int> p, std::vector<int> w, stype c, double *timerecord, int first_item, int define_sol);
 
 #endif //PPQA_CPP_CPP_COMBO_H

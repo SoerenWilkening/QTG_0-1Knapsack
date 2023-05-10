@@ -4,12 +4,13 @@
 
 #include "cpp_combo.h"
 
-long cpp_combo_wrap(int n, int *p, int *w, stype c, double *timerecord, int first_item, int define_sol){
+long cpp_combo_wrap(int n, std::vector<int> p, std::vector<int> w, stype c, double *timerecord, int first_item, int define_sol){
 
-    state_node gr = greedy(n, c, p, w, first_item);
-    if (gr.P == 0) return 0;
-    if (greedy_is_one(gr.vector, n - first_item)) return gr.P;
+    long P = 0;
+    int res = knapsack_instance_is_trivial(p, w, c, &P, first_item);
+//    std::cout << "check if trivial " << P << " " << res << std::endl;
+    if (res) return P;
 
-    return combo_wrap(n, p, w, c, timerecord, first_item, define_sol);
+    return combo_wrap(n, p.data(), w.data(), c, timerecord, first_item, define_sol);
 
 }

@@ -27,4 +27,6 @@ typedef struct {
 
 knapsack_instance read_instance(char *filename);
 
+int knapsack_instance_is_trivial(std::vector<int> p, std::vector<int> z, int Z, long *P, int first_item);
+
 #endif //PPQA_CPP_INSTANCE_H
