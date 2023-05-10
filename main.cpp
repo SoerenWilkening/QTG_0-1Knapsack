@@ -9,7 +9,11 @@ int main() {
 //    probability_distribution_sampling();
 
 //    char filename[] = "/Users/sorenwilkening/Desktop/Algorithms/PPQA_CPP/instances_01_KP/knapsackProblemInstances/problemInstances/n_400_c_100000000_g_10_f_0.2_eps_0.01_s_100/test.in";
+<<<<<<< HEAD
     char filename[] = "/Users/sorenwilkening/Desktop/Algorithms/PPQA_CPP/instances_01_KP/knapsackProblemInstances/problemInstances/n_400_c_100000000_g_2_f_0.2_eps_0.01_s_100/test.in";
+=======
+    char filename[] = "/Users/sorenwilkening/Desktop/Algorithms/instances_01_KP/knapsackProblemInstances/problemInstances/n_400_c_100000000_g_2_f_0.2_eps_0.01_s_100/test.in";
+>>>>>>> 124a209 (test if working)
 
     knapsack_instance data = read_instance(filename);
 
