@@ -1561,11 +1561,8 @@ main
 
 //#include "greedy.h"
 
-long long combo_wrap(int n, int *p, int *w, int *x, stype c, double *timerecord, int first_item, int define_sol) {
-    /*
-     * TODO:
-     *  - include saving the result of combo
-     * */
+long long combo_wrap(int n, int *p, int *w, stype c, double *timerecord, int first_item, int define_sol) {
+
     item *a;
     long zzz;
     /* allocate space for test example */
@@ -1587,10 +1584,8 @@ long long combo_wrap(int n, int *p, int *w, int *x, stype c, double *timerecord,
     }
     //Can I simply define the initial lower bound as zero?
     int lbi = 0;
-    long cap = (long) c;
     struct timespec start, finish;
     double tmptime = 0;
-    int noRuns = 1;
     boolean def = define_sol;
     boolean relx = FALSE;
     long ubi;
@@ -1598,15 +1593,7 @@ long long combo_wrap(int n, int *p, int *w, int *x, stype c, double *timerecord,
     double pallocrem = 0;
     clock_gettime(CLOCK_MONOTONIC, &start);
 
-    int *output;
-
-//    printf("greedy : %ld %lld %d %f\n", c, gr.P, greedy_is_one(gr.vector, n - first_item), gr.vector);
-//    fflush(stdout);
-
-//    state_node gr = greedy(n, c, p, w, first_item);
-//    if (gr.P == 0) return 0;
-//    if (greedy_is_one(gr.vector, n - first_item)) return gr.P;
-    zzz = combo(f, l, c, lbi, ubi, def, relx, output); //zzz is the solution from the algorithm
+    zzz = combo(f, l, c, lbi, ubi, def, relx, NULL); //zzz is the solution from the algorithm
 
     clock_gettime(CLOCK_MONOTONIC, &finish);
 
@@ -1614,7 +1601,6 @@ long long combo_wrap(int n, int *p, int *w, int *x, stype c, double *timerecord,
     tmptime += (finish.tv_nsec - start.tv_nsec) / 1000000000.0;
     tmptime -= pallocrem;
     *timerecord = tmptime;
-//	printf("time = %f\n", tmptime);
 
     return zzz; //returns algorithm solution
 

@@ -1,7 +1,7 @@
 #include <iostream>
 #include "header/RNG.h"
 #include "header/instance.h"
-#include "header/combo.h"
+#include "header/cpp_combo.h"
 
 int main() {
     std::cout << "Hello, World!" << std::endl;
@@ -21,7 +21,7 @@ int main() {
 
     std::vector<int> x(data.n, 0);
 
-    long long zzz = combo_wrap(data.n, data.p.data(), data.z.data(), x.data(), data.Z, t, 0, 0);
+    long long zzz = cpp_combo_wrap(data.n, data.p.data(), data.z.data(), data.Z, t, 0, 0);
 
     std::cout << zzz << std::endl;
     std::cout << *t << std::endl;

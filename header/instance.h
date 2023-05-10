@@ -14,9 +14,9 @@ typedef struct {
 } knapsack_instance;
 
 typedef struct {
-    long long P;
-    long long Z;
-    long long ub;
+    long P;
+    long Z;
+    long ub;
     double vector;
     double amplitude;
 } state_node;
