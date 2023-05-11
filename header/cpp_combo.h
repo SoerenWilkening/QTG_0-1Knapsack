@@ -8,6 +8,6 @@
 #include "combo.h"
 #include "instance.h"
 
-long cpp_combo_wrap(int n, std::vector<int> p, std::vector<int> w, stype c, double *timerecord, int first_item, int define_sol = 0);
+long cpp_combo_wrap(int n, std::vector<long> p, std::vector<long> w, long c, double *timerecord, int first_item, int define_sol = 0);
 
 #endif //PPQA_CPP_CPP_COMBO_H

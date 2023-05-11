@@ -1561,7 +1561,7 @@ main
 
 //#include "greedy.h"
 
-long long combo_wrap(int n, int *p, int *w, stype c, double *timerecord, int first_item, int define_sol) {
+long combo_wrap(int n, long *p, long *w, stype c, double *timerecord, int first_item, int define_sol) {
 
     item *a;
     long zzz;

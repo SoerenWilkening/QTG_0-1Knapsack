@@ -10,7 +10,8 @@ knapsack_instance read_instance(char *filename) {
 
     printf("name : %s\n", filename);
 
-    int a, b, c;
+    int a;
+    long b, c;
 
     FILE *file = fopen(filename, "r");
 
@@ -18,12 +19,12 @@ knapsack_instance read_instance(char *filename) {
     instance.p.resize(instance.n);
     instance.z.resize(instance.n);
 
-    for (int i = 0; i < instance.n; i++) fscanf(file, "%d %d %d", &a, &instance.p[i], &instance.z[i]);
-    fscanf(file, "%d", &instance.Z);
+    for (int i = 0; i < instance.n; i++) fscanf(file, "%d %ld %ld", &a, &instance.p[i], &instance.z[i]);
+    fscanf(file, "%ld", &instance.Z);
     fclose(file);
     for (int i = 0; i < instance.n; i++) {
         for (int j = 0; j < instance.n - 1; j++) {
-            if ((double) instance.p[j] / instance.z[j] < (double) instance.p[j + 1] / instance.z[j + 1]) {
+            if (static_cast<double>(instance.p[j]) / static_cast<double>(instance.z[j]) < static_cast<double>(instance.p[j + 1]) / static_cast<double>(instance.z[j + 1])) {
                 b = instance.p[j];
                 c = instance.z[j];
                 instance.p[j] = instance.p[j + 1];
@@ -38,7 +39,7 @@ knapsack_instance read_instance(char *filename) {
 }
 
 
-int knapsack_instance_is_trivial(std::vector<int> p, std::vector<int> z, int Z, long *P, int first_item) {
+int knapsack_instance_is_trivial(std::vector<long> p, std::vector<long> z, long Z, long *P, int first_item) {
     long Z_ = 0;
     int counter = 0;
     for (int i = first_item; i < p.size(); ++i) {
@@ -48,7 +49,6 @@ int knapsack_instance_is_trivial(std::vector<int> p, std::vector<int> z, int Z, 
             *P += p[i];
         }
     }
-//    std::cout << "trivial checking " << Z_ << " " << Z << " " << counter << std::endl;
     if (Z_ < Z) return 1;
     if (counter == 0) return 1;
     return 0;

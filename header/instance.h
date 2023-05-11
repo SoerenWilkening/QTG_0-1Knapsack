@@ -6,10 +6,12 @@
 #define PPQA_CPP_INSTANCE_H
 #include <vector>
 #include <iostream>
+#include <gmpxx.h>
 
 typedef struct {
-    int n, Z;
-    std::vector<int> p, z;
+    int n;
+    long Z;
+    std::vector<long> p, z;
     char name[1000];
 } knapsack_instance;
 
@@ -17,16 +19,12 @@ typedef struct {
     long P;
     long Z;
     long ub;
-    double vector;
+    mpz_t vector;
     double amplitude;
 } state_node;
 
-typedef struct {
-    std::vector<state_node> states;
-} all_info;
-
 knapsack_instance read_instance(char *filename);
 
-int knapsack_instance_is_trivial(std::vector<int> p, std::vector<int> z, int Z, long *P, int first_item);
+int knapsack_instance_is_trivial(std::vector<long> p, std::vector<long> z, long Z, long *P, int first_item);
 
 #endif //PPQA_CPP_INSTANCE_H

@@ -8,7 +8,6 @@
 #include "instance.h"
 #include <math.h>
 
-state_node greedy(int n, int Z, int *p, int *z, int first_item);
-int greedy_is_one(double vector, int n);
+state_node greedy(int n, long Z, std::vector<long> p, std::vector<long> z, int first_item);
 
 #endif //PPQA_CPP_GREEDY_H

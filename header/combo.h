@@ -8,7 +8,7 @@
 typedef long          stype;   /* sum of profit or weight  */
 #ifdef __cplusplus
 extern "C" {
-long long combo_wrap(int n, int *p, int *w, stype c, double *timerecord, int first_item, int define_sol);
+long combo_wrap(int n, long *p, long *w, stype c, double *timerecord, int first_item, int define_sol);
 }
 #endif
 
