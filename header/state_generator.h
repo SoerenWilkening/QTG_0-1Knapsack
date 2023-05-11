@@ -13,7 +13,7 @@ std::vector<state_node> breadth_first_search(knapsack_instance data,
                                              long exact,
                                              double bias = 0,
                                              std::string states = "single",
-                                             double previous_sol = 0,
+                                             mpz_t previous_sol = 0,
                                              std::string ub = "no");
 
 #endif //PPQA_CPP_STATE_GENERATOR_H

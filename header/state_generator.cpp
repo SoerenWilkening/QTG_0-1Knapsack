@@ -25,7 +25,7 @@ std::vector<state_node> breadth_first_search(knapsack_instance data,
                                              long exact,
                                              double bias,
                                              std::string states,
-                                             double previous_sol,
+                                             mpz_t previous_sol,
                                              std::string ub) {
     /**
      * TODO:
@@ -56,7 +56,8 @@ std::vector<state_node> breadth_first_search(knapsack_instance data,
                     children[a] = parent[k];
                     children[a].ub = zzz;
                     /* amplitudes have to be changed */
-                    if (states == "comp") children[a++].amplitude = 1; // need to check how to work with the integer (right now double) representation
+                    if (states == "comp")
+                        children[a++].amplitude = parent[k].amplitude * sqrt((1 + (1 - mpz_tstbit(previous_sol, data.n - item - 1)) * bias) / (bias + 2)); // need to check how to work with the integer (right now double) representation
                     else if (states == "single") children[a++].amplitude = parent[k].amplitude * sqrt(1. / (bias + 2));
 
                     if (statement2) {
@@ -70,7 +71,9 @@ std::vector<state_node> breadth_first_search(knapsack_instance data,
                             mpz_set(children[a].vector, parent[k].vector);
                             mpz_setbit(children[a].vector, data.n - 1 - item);
 
-                            if (states == "comp") children[a++].amplitude = 1; // need to check how to work with the integer (right now double) representation
+//                            if (states == "comp") children[a++].amplitude = 1; // need to check how to work with the integer (right now double) representation
+                            if (states == "comp")
+                                children[a++].amplitude = parent[k].amplitude * sqrt((1 + mpz_tstbit(previous_sol, data.n - item - 1) * bias) / (bias + 2)); // need to check how to work with the integer (right now double) representation
                             else if (states == "single") children[a++].amplitude = parent[k].amplitude * sqrt((1. + bias) / (bias + 2));
                         }
                     } else {
@@ -81,7 +84,8 @@ std::vector<state_node> breadth_first_search(knapsack_instance data,
                         mpz_set(children[a].vector, parent[k].vector);
                         mpz_setbit(children[a].vector, data.n - 1 - item);
 
-                        if (states == "comp") children[a++].amplitude = 1; // need to check how to work with the integer (right now double) representation
+                        if (states == "comp")
+                            children[a++].amplitude = parent[k].amplitude * sqrt((1 + mpz_tstbit(previous_sol, data.n - item - 1) * bias) / (bias + 2)); // need to check how to work with the integer (right now double) representation
                         else if (states == "single") children[a++].amplitude = parent[k].amplitude * sqrt((1. + bias) / (bias + 2));
                     }
                 } else {
@@ -92,7 +96,8 @@ std::vector<state_node> breadth_first_search(knapsack_instance data,
                     mpz_set(children[a].vector, parent[k].vector);
                     mpz_setbit(children[a].vector, data.n - 1 - item);
 
-                    if (states == "comp") children[a++].amplitude = 1; // need to check how to work with the integer (right now double) representation
+                    if (states == "comp")
+                        children[a++].amplitude = parent[k].amplitude * sqrt((1 + mpz_tstbit(previous_sol, data.n - item - 1) * bias) / (bias + 2)); // need to check how to work with the integer (right now double) representation
                     else if (states == "single") children[a++].amplitude = parent[k].amplitude * sqrt((1. + bias) / (bias + 2));
                 }
             }
