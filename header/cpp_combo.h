@@ -7,7 +7,16 @@
 
 #include "combo.h"
 #include "instance.h"
+#include <fstream>
+#include <filesystem>
 
-long cpp_combo_wrap(int n, std::vector<long> p, std::vector<long> w, long c, double *timerecord, int first_item, int define_sol = 0);
+namespace fs = std::filesystem;
+
+long cpp_combo_wrap(int n, std::vector<long> p, std::vector<long> w, long c,
+                    std::string name,
+                    double *timerecord,
+                    int first_item,
+                    int define_sol = 0,
+                    bool read = true);
 
 #endif //PPQA_CPP_CPP_COMBO_H

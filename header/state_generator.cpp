@@ -47,7 +47,7 @@ std::vector<state_node> breadth_first_search(knapsack_instance data,
             if (parent[k].Z - data.z[item] < 0) children[a++] = parent[k];
             else {
                 /* item can be included */
-                zzz = cpp_combo_wrap(data.n, data.p, data.z, parent[k].Z, t, item + 1);
+                zzz = cpp_combo_wrap(data.n, data.p, data.z, parent[k].Z, data.name, t, item + 1);
 
                 int statement = zzz + parent[k].P > threshold;
                 int statement2 = zzz == parent[k].ub;
@@ -62,7 +62,7 @@ std::vector<state_node> breadth_first_search(knapsack_instance data,
 
                     if (statement2) {
                         /* other state was upper bound of parent node, so this has also to be evaluated */
-                        zzz = cpp_combo_wrap(data.n, data.p, data.z, parent[k].Z - data.z[item], t, item + 1);
+                        zzz = cpp_combo_wrap(data.n, data.p, data.z, parent[k].Z - data.z[item], data.name, t, item + 1);
                         if (zzz + parent[k].P + data.p[item] > threshold) {
                             children[a].ub = zzz;
                             children[a].Z = parent[k].Z - data.z[item];
@@ -106,7 +106,7 @@ std::vector<state_node> breadth_first_search(knapsack_instance data,
         children.clear();
         number_of_states = a;
 
-        std::cout << item << " " << a << std::endl;
+//        std::cout << item << " " << a << std::endl;
     }
     parent.resize(number_of_states);
 

@@ -34,15 +34,25 @@ int main() {
     long zzz = cpp_combo_wrap(data.n, data.p, data.z, data.Z, t, 0, 1);
     state_node gr = greedy(data.n, data.Z, data.p, data.z, 0);
 
-    std::cout << *t << std::endl;
     std::cout << zzz << std::endl;
     std::cout << gr.P << std::endl;
 
-    std::vector<state_node> bnb = breadth_first_search(data, gr.P, zzz);
+    std::vector<state_node> bnb = breadth_first_search(data, gr.P, zzz, 99, "comp", gr.vector);
 
     auto stop = std::chrono::high_resolution_clock::now();
     auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(stop - start);
 
-    std::cout << "Time taken: " << duration.count() << " milliseconds" << std::endl;
+    printf("\n\n");
+    double total = 0;
+
+    for (int i = 0; i < bnb.size(); ++i) {
+        total += pow(bnb[i].amplitude, 2);
+        std::cout << bnb[i].P << " ";
+        std::cout << bnb[i].Z << " ";
+        std::cout << bnb[i].amplitude << " ";
+        std::cout << bnb[i].vector << std::endl;
+    }
+//    std::cout << "Time taken: " << duration.count() << " milliseconds" << std::endl;
+    std::cout << "\n\ntotal=" << 1. / sqrt(total) << std::endl;
     return 0;
 }

@@ -7,12 +7,13 @@
 #include <vector>
 #include <iostream>
 #include <gmpxx.h>
+#include <string>
 
 typedef struct {
     int n;
     long Z;
     std::vector<long> p, z;
-    char name[1000];
+    std::string name;
 } knapsack_instance;
 
 typedef struct {
@@ -23,7 +24,7 @@ typedef struct {
     double amplitude;
 } state_node;
 
-knapsack_instance read_instance(char *filename);
+knapsack_instance read_instance(std::string filename);
 
 int knapsack_instance_is_trivial(std::vector<long> p, std::vector<long> z, long Z, long *P, int first_item);
 

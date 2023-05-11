@@ -4,16 +4,18 @@
 
 #include "instance.h"
 #include <cstdio>
+#include <string>
+#include <regex>
 
-knapsack_instance read_instance(char *filename) {
+knapsack_instance read_instance(std::string filename) {
     knapsack_instance instance;
 
-    printf("name : %s\n", filename);
+//    printf("name : %s\n", filename);
 
     int a;
     long b, c;
 
-    FILE *file = fopen(filename, "r");
+    FILE *file = fopen(filename.c_str(), "r");
 
     fscanf(file, "%d", &instance.n);
     instance.p.resize(instance.n);
@@ -34,6 +36,9 @@ knapsack_instance read_instance(char *filename) {
             }
         }
     }
+
+    std::string sub = "instances_01_KP";
+    instance.name = std::regex_replace(filename.substr(filename.find(sub)), std::regex(sub), ".calculations");
 
     return instance;
 }
