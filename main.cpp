@@ -1,25 +1,36 @@
 #include <iostream>
-#include "header/RNG.h"
 #include "header/instance.h"
 #include "header/cpp_combo.h"
-#include "header/state_generator.h"
 #include "header/greedy.h"
 #include <gmpxx.h>
 #include <chrono>
+#include "header/simulator.h"
+#include <filesystem>
+#include <unistd.h>
+#include <string>
 
-int main() {
+namespace fs = std::filesystem;
+
+int main(int argc, char *argv[]) {
     /*
      * PPQA simulator written in pure C/C++
      *
      *
      * */
-//    probability_distribution_sampling();
+
+    /* change working directory to main.cpp level - for consistency with other platforms */
+    std::filesystem::path pathToSource(__FILE__);
+    std::filesystem::path pathToDir = pathToSource.parent_path();
+    chdir(pathToDir.c_str());
+
     knapsack_instance data;
 
-    char filename[] = "/Users/sorenwilkening/Desktop/Algorithms/instances_01_KP/knapsackProblemInstances/problemInstances/n_400_c_100000000_g_2_f_0.3_eps_0.001_s_100/test.in";
+    std::string filename = "/Users/sorenwilkening/Desktop/Algorithms/instances_01_KP/knapsackProblemInstances/problemInstances/n_400_c_10000000000_g_2_f_0.2_eps_0.001_s_300/test.in";
+    data = read_instance(filename);
+
 //    char filename[] = "/Users/sorenwilkening/Desktop/Algorithms/instances_01_KP/knapsackProblemInstances/problemInstances/n_400_c_100000000_g_10_f_0.2_eps_0.01_s_100/test.in";
 //    char filename[] = "/Users/sorenwilkening/Desktop/Algorithms/instances_01_KP/knapsackProblemInstances/problemInstances/n_400_c_100000000_g_14_f_0.2_eps_0.001_s_300/test.in";
-    data = read_instance(filename);
+
 
 //    data.n = 7;
 //    data.Z = 9;
@@ -28,31 +39,27 @@ int main() {
 //    std::reverse(data.p.begin(), data.p.end());
 //    std::reverse(data.z.begin(), data.z.end());
 
-    double *t = static_cast<double *>(calloc(1, sizeof(double)));
 
     auto start = std::chrono::high_resolution_clock::now();
-    long zzz = cpp_combo_wrap(data.n, data.p, data.z, data.Z, t, 0, 1);
+    auto *t = static_cast<double *>(calloc(1, sizeof(double)));
+
+    long zzz = cpp_combo_wrap(data.n, data.p, data.z, data.Z, data.name, t, 0, 1);
     state_node gr = greedy(data.n, data.Z, data.p, data.z, 0);
 
     std::cout << zzz << std::endl;
     std::cout << gr.P << std::endl;
 
-    std::vector<state_node> bnb = breadth_first_search(data, gr.P, zzz, 99, "comp", gr.vector);
+    std::vector<state_node> res = simulate(data, zzz, gr.P, 2); // execute the simulation algorithm
 
     auto stop = std::chrono::high_resolution_clock::now();
-    auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(stop - start);
+    auto duration = std::chrono::duration_cast<std::chrono::microseconds>(stop - start);
 
-    printf("\n\n");
-    double total = 0;
+    std::cout << (double) duration.count() / 1000000 << std::endl;
 
-    for (int i = 0; i < bnb.size(); ++i) {
-        total += pow(bnb[i].amplitude, 2);
-        std::cout << bnb[i].P << " ";
-        std::cout << bnb[i].Z << " ";
-        std::cout << bnb[i].amplitude << " ";
-        std::cout << bnb[i].vector << std::endl;
+
+    for (auto &i: res) {
+        std::cout << i.P << " " << i.vector << std::endl;
     }
-//    std::cout << "Time taken: " << duration.count() << " milliseconds" << std::endl;
-    std::cout << "\n\ntotal=" << 1. / sqrt(total) << std::endl;
+
     return 0;
 }
