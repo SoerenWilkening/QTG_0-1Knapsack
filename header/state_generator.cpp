@@ -32,6 +32,8 @@ std::vector<state_node> breadth_first_search(knapsack_instance data,
      *  - include calculations of amplitudes
      *  - enable multiprocessing
      * */
+    std::cout << "executing bnb" << std::endl;
+
     int number_of_states = 1, a;
     std::vector<state_node> parent = initialize_states(number_of_states, data.n);
     parent[0].ub = exact;

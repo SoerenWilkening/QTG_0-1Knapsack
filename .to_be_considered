@@ -3,7 +3,7 @@ combo runtimes without defining the vector
 easy instances: greedy very close to optimal
 
     n_400_c_100000000_g_2_f_0.2_eps_0.0001_s_100
-        - combo: 0.015 s
+        - combo: 0.015 s, ~ 0.9 MB RAM
     n_600_c_100000000_g_2_f_0.2_eps_0.0001_s_100
         - combo: 0.046 s
     n_800_c_100000000_g_2_f_0.2_eps_0.0001_s_100
@@ -12,7 +12,7 @@ easy instances: greedy very close to optimal
     n_1000_c_100000000_g_2_f_0.3_eps_0.0001_s_200
         - combo: 0.302 s
     n_1200_c_100000000_g_2_f_0.3_eps_0.0001_s_200
-        - combo: 0.461 s
+        - combo: 0.461 s, ~ 2 MB RAM
 
 
 hard instances: greedy is far away from optimal
