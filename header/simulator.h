@@ -16,6 +16,13 @@ public:
     knapsack_instance data;
     long exact;
 
+    double bias = 0;
+    std::string states = "single";
+    mpz_t presious_sol;
+    std::string ub = "no";
+
+
+
     int M_tot = 0;
     std::vector<state_node> bnb;
     std::vector<state_node> amplitude_amplification(long threshold, int M);

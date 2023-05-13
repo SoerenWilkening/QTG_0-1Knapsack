@@ -8,7 +8,7 @@
 std::vector<state_node> QMaxSearch::amplitude_amplification(long threshold, int calls) {
 
     /* at this point bnb is always empty, but in a later stage maybe not */
-    if (bnb.empty()) bnb = breadth_first_search(std::move(data), threshold, exact);
+    if (bnb.empty()) bnb = breadth_first_search(data, threshold, exact, bias, states, presious_sol);
 
     std::vector<state_node> sample; // result will contain a single state -> the result of simulate
 
@@ -69,9 +69,15 @@ std::vector<state_node> QMaxSearch::execute(int M) {
     std::vector<state_node> sample = greedy(data.n, data.Z, data.p, data.z, 0);
     std::vector<state_node> measured;
 
+    mpz_set(presious_sol, sample[0].vector);
+
     while (true) {
         measured = QSearch(sample[0].P, M);
-        if (measured[0].P > sample[0].P) sample[0] = measured[0];
+        if (measured[0].P > sample[0].P) {
+            sample[0] = measured[0];
+            mpz_set(presious_sol, measured[0].vector);
+            bnb.clear();
+        }
         else return sample;
         measured.clear();
     }
