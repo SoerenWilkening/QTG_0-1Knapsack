@@ -28,4 +28,10 @@ knapsack_instance read_instance(std::string filename);
 
 int knapsack_instance_is_trivial(std::vector<long> p, std::vector<long> z, long Z, long *P, int first_item);
 
+knapsack_instance subinstance(knapsack_instance data, int first_item);
+
+long total_Z(knapsack_instance data, int last_item);
+
+long total_P(knapsack_instance data, int last_item);
+
 #endif //PPQA_CPP_INSTANCE_H

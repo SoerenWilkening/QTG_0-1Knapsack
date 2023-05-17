@@ -53,20 +53,23 @@ std::vector<state_node> QMaxSearch::QSearch(long threshold, int M) {
         m = ceil(pow(c, l));
         j = rand() % m;
         m_tot += 2 * j + 1;
-        M_tot += m_tot;
 
         sample = QMaxSearch::amplitude_amplification(threshold, j);
 
-        if (sample[0].P > threshold) return sample;
-
+        if (sample[0].P > threshold){
+            M_tot += m_tot;
+            return sample;
+        }
         l++;
     }
+    M_tot += m_tot;
     return std::vector<state_node>(1, {0, 0});
 }
 
 std::vector<state_node> QMaxSearch::execute(int M) {
     M_tot = 0;
-    std::vector<state_node> sample = greedy(data.n, data.Z, data.p, data.z, 0);
+    int break_item = 0;
+    std::vector<state_node> sample = greedy(data.n, data.Z, data.p, data.z, 0, &break_item);
     std::vector<state_node> measured;
 
     mpz_set(presious_sol, sample[0].vector);
@@ -76,6 +79,7 @@ std::vector<state_node> QMaxSearch::execute(int M) {
         if (measured[0].P > sample[0].P) {
             sample[0] = measured[0];
             mpz_set(presious_sol, measured[0].vector);
+            std::cout << "P = " << sample[0].P << std::endl;
             bnb.clear();
         }
         else return sample;

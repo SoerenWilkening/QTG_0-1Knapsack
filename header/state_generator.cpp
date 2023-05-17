@@ -39,6 +39,7 @@ std::vector<state_node> breadth_first_search(knapsack_instance data,
     parent[0].ub = exact;
     parent[0].Z = data.Z;
     long zzz;
+    double discarded = 0;
     double *t = static_cast<double *>(calloc(1, sizeof(double)));
     for (int item = 0; item < data.n; item++) {
         a = 0;
@@ -108,12 +109,39 @@ std::vector<state_node> breadth_first_search(knapsack_instance data,
                 }
             }
         }
-        std::swap(parent, children);
-        children.clear();
-        number_of_states = a;
+
+
+
+
+
+
+
+
+        double total = 0, thr = 0.0001;
+        int count = 0;
+        for(int i = 0; i < a; i++) {
+            total += pow(children[i].amplitude, 2);
+            if (children[i].amplitude < thr and children[i].ub + children[i].P != exact) {
+                discarded += pow(children[i].amplitude, 2);
+                count++;
+            }
+        }
+//        std::cout << item << " " << a << " " << total << " " << count << " " << discarded << " " << discarded * pow(2, - (double) (data.n - item)) << std::endl;
+        parent.clear();
+//        printf("def\n");
+//        fflush(stdout);
+        parent.resize(a - count);
+        int d = 0;
+        for(int i = 0; i < a; i++) {
+            if (children[i].amplitude >= thr or children[i].ub + children[i].P == exact) parent[d++] = children[i];
+        }
+        printf("item = %d d = %d prob = %f\n", item, d, total);
+//        std::swap(parent, children);
+        number_of_states = d;
 
     }
     parent.resize(number_of_states);
+    std::cout << "total discarded = " << discarded << std::endl;
 
     return parent;
 }

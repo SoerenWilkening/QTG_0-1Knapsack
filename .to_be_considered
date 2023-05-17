@@ -1,7 +1,8 @@
 combo runtimes without defining the vector
 
 easy instances: greedy very close to optimal
-
+    n_400_c_100000000_g_2_f_0.3_eps_0.0001_s_300
+        - combo: 0.041 s,
     n_400_c_100000000_g_2_f_0.2_eps_0.0001_s_100
         - combo: 0.015 s, ~ 0.9 MB RAM
     n_600_c_100000000_g_2_f_0.2_eps_0.0001_s_100
