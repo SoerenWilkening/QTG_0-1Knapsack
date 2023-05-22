@@ -12,6 +12,8 @@ namespace fs = std::filesystem;
 
 
 int benching(std::string filename) {
+    knapsack_instance data = read_instance(filename);
+
     for (int x = 0; x < 10; ++x) {
         long peak_ram = 0;
         for (int i = 0; i <= 1; ++i) {
@@ -34,8 +36,14 @@ int benching(std::string filename) {
 
             // Close the pipe
             pclose(pipe);
+            if (i == 1){
+                fs::create_directories(data.name + "/benchmark/");
+                std::ofstream myfile(data.name + "/benchmark/combo_ram.txt", std::ios::app);
+                myfile << res * 8 << std::endl;
+            }
         }
-        std::cout << "peak ram " << (double) peak_ram / 1000000 * 8 << "Mbit" << std::endl;
+//        std::cout << "peak ram " << (double) peak_ram / 1000000 * 8 << "Mbit" << std::endl;
+
     }
 
     return 0;

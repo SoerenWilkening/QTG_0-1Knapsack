@@ -17,8 +17,11 @@ int main(int argc, char *argv[]){
 
     long zzz = cpp_combo_wrap(data.n, data.p, data.z, data.Z, data.name, t, 0, false, false, exec_combo);
 
-//    std::string f = "" + data.name;
-//    FILE *file = fopen(f.c_str());
+    if ((std::string) argv[2] == "0") return 0;
+
+    fs::create_directories(data.name + "/benchmark/");
+    std::ofstream myfile(data.name + "/benchmark/combo_runtime.txt", std::ios::app);
+    myfile << *t << std::endl;
 
     return 0;
 }
