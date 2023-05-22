@@ -15,9 +15,10 @@ namespace fs = std::filesystem;
 
 long cpp_combo_wrap(int n, std::vector<long> p, std::vector<long> w, long c,
                     std::string name,
-                    double *timerecord,
+                    long *timerecord,
                     int first_item,
                     int define_sol = 0,
-                    bool read = true);
+                    bool read = true,
+                    bool exec_combo = true);
 
 #endif //PPQA_CPP_CPP_COMBO_H

@@ -13,7 +13,7 @@ knapsack_instance read_instance(std::string filename) {
     long b, c;
 
     FILE *file = fopen(filename.c_str(), "r");
-    printf("name : %s\n", filename.c_str());
+//    printf("name : %s\n", filename.c_str());
 
     fscanf(file, "%d", &instance.n);
     instance.p.resize(instance.n);

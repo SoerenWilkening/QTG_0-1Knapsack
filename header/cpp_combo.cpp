@@ -19,10 +19,11 @@ uint64_t rdtsc() {
 
 long cpp_combo_wrap(int n, std::vector<long> p, std::vector<long> w, long c,
                     std::string name,
-                    double *timerecord,
+                    long *timerecord,
                     int first_item,
                     int define_sol,
-                    bool read) {
+                    bool read,
+                    bool exec_combo) {
 
     long P = 0, zzz;
     /* we fist check  i the instance is triviel. If it is, combo runs into problems */
@@ -59,27 +60,25 @@ long cpp_combo_wrap(int n, std::vector<long> p, std::vector<long> w, long c,
     long ubi;
     ubi = 0;
 
+    if(exec_combo) {
+        uint64_t start = rdtsc();
 
-    uint64_t start = rdtsc();
+        zzz = combo(f, l, c, lbi, ubi, def, relx, nullptr); //zzz is the solution from the algorithm
 
-    zzz = combo(f, l, c, lbi, ubi, def, relx, nullptr); //zzz is the solution from the algorithm
+        uint64_t end = rdtsc();
+        uint64_t elapsed_cycles = end - start;
 
-    uint64_t end = rdtsc();
-    uint64_t elapsed_cycles = end - start;
+        *timerecord = elapsed_cycles;
 
-    std::cout << "exact cout = " << elapsed_cycles << std::endl;
-
-    *timerecord = (double) elapsed_cycles / (2.6 *  pow(10, 9));
-
-    /* if combo took more than .0003 seconds, we save the result */
-    if (*timerecord > .0003) {
-        fs::create_directories(myFilePath.parent_path());
-        std::ofstream myfile(myFilePath);
-        if (myfile.is_open()) {
-            myfile << zzz << std::endl;
-            myfile.close();
-        } else std::cout << "Failed to open file.\n";
+        /* if combo took more than .0003 seconds, we save the result */
+        if ((double) *timerecord / (2.6 * pow(10, 9)) > .0003) {
+            fs::create_directories(myFilePath.parent_path());
+            std::ofstream myfile(myFilePath);
+            if (myfile.is_open()) {
+                myfile << zzz << std::endl;
+                myfile.close();
+            } else std::cout << "Failed to open file.\n";
+        }
     }
-
     return zzz;
 }

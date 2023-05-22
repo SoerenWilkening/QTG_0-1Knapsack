@@ -40,7 +40,7 @@ std::vector<state_node> breadth_first_search(knapsack_instance data,
     parent[0].Z = data.Z;
     long zzz;
     double discarded = 0;
-    double *t = static_cast<double *>(calloc(1, sizeof(double)));
+    long *t = static_cast<long *>(calloc(1, sizeof(long)));
     for (int item = 0; item < data.n; item++) {
         a = 0;
         std::vector<state_node> children = initialize_states(2 * number_of_states, data.n);

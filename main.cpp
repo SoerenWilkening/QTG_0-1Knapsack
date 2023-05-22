@@ -10,6 +10,38 @@
 
 namespace fs = std::filesystem;
 
+
+int benching(std::string filename) {
+    for (int x = 0; x < 10; ++x) {
+        long peak_ram = 0;
+        for (int i = 0; i <= 1; ++i) {
+
+            std::string command = "echo \"$(/usr/bin/time -l ./cmake-build-debug/bench " + filename +
+                                  " " + std::to_string(i) + " 2>&1)\" | grep \"maximum resident set size\"";
+
+            FILE *pipe = popen(command.c_str(), "r");
+            if (!pipe) {
+                std::cerr << "Error opening pipe." << std::endl;
+                return -1;
+            }
+
+            // Read the command output line by line
+            char buffer[128];
+            long res;
+
+            fscanf(pipe, "%ld %s\n", &res, buffer);
+            peak_ram += pow(-1, 1 - i) * res;
+
+            // Close the pipe
+            pclose(pipe);
+        }
+        std::cout << "peak ram " << (double) peak_ram / 1000000 * 8 << "Mbit" << std::endl;
+    }
+
+    return 0;
+}
+
+
 int main(int argc, char *argv[]) {
     /*
      * PPQA simulator written in pure C/C++
@@ -33,7 +65,7 @@ int main(int argc, char *argv[]) {
 
 //    std::string filename = "/Users/sorenwilkening/Desktop/Algorithms/instances_01_KP/knapsackProblemInstances/problemInstances/n_400_c_100000000_g_10_f_0.2_eps_0.01_s_100/test.in";
 //    std::string filename = "/Users/sorenwilkening/Desktop/Algorithms/instances_01_KP/knapsackProblemInstances/problemInstances/n_400_c_100000000_g_14_f_0.2_eps_0.001_s_300/test.in";
-    data = read_instance(filename);
+//    data = read_instance(filename);
 
 //    data.n = 7;
 //    data.Z = 9;
@@ -43,27 +75,29 @@ int main(int argc, char *argv[]) {
 //    std::reverse(data.z.begin(), data.z.end());
 //    data.name = ".calculations/sandor";
 
-    auto *t = static_cast<double *>(calloc(1, sizeof(double)));
+//    auto *t = static_cast<double *>(calloc(1, sizeof(double)));
+//
+//    auto start = std::chrono::high_resolution_clock::now();
+//
+//
+//    int break_item = 0;
+//    std::vector<state_node> gr = greedy(data.n, data.Z, data.p, data.z, 0, &break_item);
+//    break_item = 0;
+//    std::cout << break_item << std::endl;
+//
+//    long zzz = cpp_combo_wrap(data.n, data.p, data.z, data.Z, data.name, t, 0, false, false);
+//
+//    std::cout << zzz << std::endl;
+//    std::cout << greedy(data.n, data.Z, data.p, data.z, 0, &break_item)[0].P << std::endl;
+//
+//
+//    auto stop = std::chrono::high_resolution_clock::now();
+//    auto duration = std::chrono::duration_cast<std::chrono::microseconds>(stop - start);
+//
+//    std::cout << (double) duration.count() / 1000000 << " " << *t << std::endl;
 
-    auto start = std::chrono::high_resolution_clock::now();
 
-
-    int break_item = 0;
-    std::vector<state_node> gr = greedy(data.n, data.Z, data.p, data.z, 0, &break_item);
-    break_item = 0;
-    std::cout << break_item << std::endl;
-
-    long zzz = cpp_combo_wrap(data.n, data.p, data.z, data.Z, data.name, t, 0, false, false);
-
-    std::cout << zzz << std::endl;
-    std::cout << greedy(data.n, data.Z, data.p, data.z, 0, &break_item)[0].P << std::endl;
-
-
-    auto stop = std::chrono::high_resolution_clock::now();
-    auto duration = std::chrono::duration_cast<std::chrono::microseconds>(stop - start);
-
-    std::cout << (double) duration.count() / 1000000 << " " << *t << std::endl;
-
+    benching(filename);
 
 //
 //    knapsack_instance new_data = subinstance(data, break_item);
