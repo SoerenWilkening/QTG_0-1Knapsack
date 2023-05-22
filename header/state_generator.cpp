@@ -110,15 +110,16 @@ std::vector<state_node> breadth_first_search(knapsack_instance data,
             }
         }
 
+        double max_amp = 0, factor = 0.000075;
+        for(int i = 0; i < a; i++) {
+            if (children[i].amplitude > max_amp) max_amp = children[i].amplitude;
+        }
+        double total = 0, thr;
+        if (max_amp / 500 < factor) thr = max_amp / 500;
+        else thr = factor;
 
-
-
-
-
-
-
-        double total = 0, thr = 0.0001;
         int count = 0;
+
         for(int i = 0; i < a; i++) {
             total += pow(children[i].amplitude, 2);
             if (children[i].amplitude < thr and children[i].ub + children[i].P != exact) {
@@ -128,15 +129,12 @@ std::vector<state_node> breadth_first_search(knapsack_instance data,
         }
 //        std::cout << item << " " << a << " " << total << " " << count << " " << discarded << " " << discarded * pow(2, - (double) (data.n - item)) << std::endl;
         parent.clear();
-//        printf("def\n");
-//        fflush(stdout);
         parent.resize(a - count);
         int d = 0;
         for(int i = 0; i < a; i++) {
             if (children[i].amplitude >= thr or children[i].ub + children[i].P == exact) parent[d++] = children[i];
         }
-        printf("item = %d d = %d prob = %f\n", item, d, total);
-//        std::swap(parent, children);
+        printf("item = %d d = %d prob = %f, max_amp = %f, thr = %f\n", item, d, total, max_amp, thr);
         number_of_states = d;
 
     }

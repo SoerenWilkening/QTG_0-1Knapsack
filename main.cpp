@@ -66,32 +66,24 @@ int main(int argc, char *argv[]) {
 
     knapsack_instance new_data = subinstance(data, break_item);
 
-//    for (int i = break_item; i > 0; --i) {
-//
-//        knapsack_instance new_data = subinstance(data, i);
-//                  << std::endl;
-//        std::cout << std::endl;
-//    }
     std::cout << greedy(new_data.n, new_data.Z, new_data.p, new_data.z, 0, &break_item)[0].P << std::endl;
     std::cout << cpp_combo_wrap(new_data.n, new_data.p, new_data.z, new_data.Z, new_data.name, t, 0, 0, false)
               << std::endl;
+    zzz = cpp_combo_wrap(new_data.n, new_data.p, new_data.z, new_data.Z, new_data.name, t, 0, 0, false);
 
     int count = 0, mean_m = 0;
     for (int i = 0; i < 1; ++i) {
-//        QMaxSearch search{data, zzz, 75, "comp"};
         QMaxSearch search{new_data, zzz, 75, "comp"};
-        search.QSearch(greedy(new_data.n, new_data.Z, new_data.p, new_data.z, 0, &break_item)[0].P,
-                       200);
-//        gr = search.execute(200);
-//
-//        std::cout << gr[0].P << " " << search.M_tot << std::endl;
-//        if (gr[0].P == zzz) {
-//            count++;
-//            mean_m += search.M_tot;
-//        }
+        gr = search.execute(200);
+
+        std::cout << gr[0].P << " " << search.M_tot << std::endl;
+        if (gr[0].P == zzz) {
+            count++;
+            mean_m += search.M_tot;
+        }
     }
 
-//    std::cout << (double) count / 1 << "% " << (double) mean_m / count << std::endl;
+    std::cout << (double) count / 1 << "% " << (double) mean_m / count << std::endl;
 
     return 0;
 }
