@@ -9,6 +9,7 @@
 #include "instance.h"
 #include <fstream>
 #include <filesystem>
+#include <cstdint>
 
 namespace fs = std::filesystem;
 

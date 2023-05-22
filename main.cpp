@@ -28,8 +28,8 @@ int main(int argc, char *argv[]) {
 //    std::string filename = "/Users/sorenwilkening/Desktop/Algorithms/instances_01_KP/knapsackProblemInstances/problemInstances/n_400_c_1000000_g_2_f_0.2_eps_0.001_s_300/test.in";
 
 //    std::string filename = "/Users/sorenwilkening/Desktop/Algorithms/instances_01_KP/knapsackProblemInstances/problemInstances/n_1200_c_10000000000_g_2_f_0.3_eps_0.0001_s_200/test.in";
-//    std::string filename = "/Users/sorenwilkening/Desktop/Algorithms/instances_01_KP/knapsackProblemInstances/problemInstances/n_400_c_100000000_g_2_f_0.3_eps_0.0001_s_300/test.in";
-    std::string filename = "/Users/sorenwilkening/Desktop/Algorithms/instances_01_KP/knapsackProblemInstances/problemInstances/n_400_c_100000000_g_6_f_0.3_eps_0.0001_s_300/test.in";
+    std::string filename = "/Users/sorenwilkening/Desktop/Algorithms/instances_01_KP/knapsackProblemInstances/problemInstances/n_400_c_100000000_g_2_f_0.3_eps_0.0001_s_300/test.in";
+//    std::string filename = "/Users/sorenwilkening/Desktop/Algorithms/instances_01_KP/knapsackProblemInstances/problemInstances/n_400_c_100000000_g_6_f_0.3_eps_0.0001_s_300/test.in";
 
 //    std::string filename = "/Users/sorenwilkening/Desktop/Algorithms/instances_01_KP/knapsackProblemInstances/problemInstances/n_400_c_100000000_g_10_f_0.2_eps_0.01_s_100/test.in";
 //    std::string filename = "/Users/sorenwilkening/Desktop/Algorithms/instances_01_KP/knapsackProblemInstances/problemInstances/n_400_c_100000000_g_14_f_0.2_eps_0.001_s_300/test.in";
@@ -53,7 +53,7 @@ int main(int argc, char *argv[]) {
     break_item = 0;
     std::cout << break_item << std::endl;
 
-    long zzz = cpp_combo_wrap(data.n, data.p, data.z, data.Z, data.name, t, 0, 0, false);
+    long zzz = cpp_combo_wrap(data.n, data.p, data.z, data.Z, data.name, t, 0, false, false);
 
     std::cout << zzz << std::endl;
     std::cout << greedy(data.n, data.Z, data.p, data.z, 0, &break_item)[0].P << std::endl;
@@ -64,26 +64,28 @@ int main(int argc, char *argv[]) {
 
     std::cout << (double) duration.count() / 1000000 << " " << *t << std::endl;
 
-    knapsack_instance new_data = subinstance(data, break_item);
 
-    std::cout << greedy(new_data.n, new_data.Z, new_data.p, new_data.z, 0, &break_item)[0].P << std::endl;
-    std::cout << cpp_combo_wrap(new_data.n, new_data.p, new_data.z, new_data.Z, new_data.name, t, 0, 0, false)
-              << std::endl;
-    zzz = cpp_combo_wrap(new_data.n, new_data.p, new_data.z, new_data.Z, new_data.name, t, 0, 0, false);
-
-    int count = 0, mean_m = 0;
-    for (int i = 0; i < 1; ++i) {
-        QMaxSearch search{new_data, zzz, 75, "comp"};
-        gr = search.execute(200);
-
-        std::cout << gr[0].P << " " << search.M_tot << std::endl;
-        if (gr[0].P == zzz) {
-            count++;
-            mean_m += search.M_tot;
-        }
-    }
-
-    std::cout << (double) count / 1 << "% " << (double) mean_m / count << std::endl;
+//
+//    knapsack_instance new_data = subinstance(data, break_item);
+//
+//    std::cout << greedy(new_data.n, new_data.Z, new_data.p, new_data.z, 0, &break_item)[0].P << std::endl;
+//    std::cout << cpp_combo_wrap(new_data.n, new_data.p, new_data.z, new_data.Z, new_data.name, t, 0, 0, false)
+//              << std::endl;
+//    zzz = cpp_combo_wrap(new_data.n, new_data.p, new_data.z, new_data.Z, new_data.name, t, 0, 0, false);
+//
+//    int count = 0, mean_m = 0;
+//    for (int i = 0; i < 1; ++i) {
+//        QMaxSearch search{new_data, zzz, 75, "comp"};
+//        gr = search.execute(200);
+//
+//        std::cout << gr[0].P << " " << search.M_tot << std::endl;
+//        if (gr[0].P == zzz) {
+//            count++;
+//            mean_m += search.M_tot;
+//        }
+//    }
+//
+//    std::cout << (double) count / 1 << "% " << (double) mean_m / count << std::endl;
 
     return 0;
 }

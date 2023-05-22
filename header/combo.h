@@ -8,7 +8,20 @@
 typedef long          stype;   /* sum of profit or weight  */
 #ifdef __cplusplus
 extern "C" {
-long combo_wrap(int n, long *p, long *w, stype c, double *timerecord, int first_item, int define_sol);
+//typedef struct item item_;
+#endif
+
+typedef int boolean; /* logical variable         */
+typedef long itype;   /* item profits and weights */
+
+/* item record internal */
+typedef struct {
+    itype p;              /* profit                  */
+    itype w;              /* weight                  */
+    boolean x;              /* pointer solution variable       */
+} item;
+extern stype combo(item *f, item *l, stype c, stype lb, stype ub, boolean def, boolean relx, int *out);
+#ifdef __cplusplus
 }
 #endif
 

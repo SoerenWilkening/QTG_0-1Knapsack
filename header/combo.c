@@ -100,12 +100,12 @@ typedef double prod;    /* product of state, item   */
 
 typedef int(*funcptr)(const void *, const void *);
 
-/* item record internal */
-typedef struct {
-    itype p;              /* profit                  */
-    itype w;              /* weight                  */
-    boolean x;              /* pointer solution variable       */
-} item;
+///* item record internal */
+//typedef struct {
+//    itype p;              /* profit                  */
+//    itype w;              /* weight                  */
+//    boolean x;              /* pointer solution variable       */
+//} item;
 
 /* interval record */
 typedef struct {
@@ -1550,58 +1550,4 @@ extern stype combo(item *f, item *l, stype c, stype lb, stype ub,
     if ((def) && (a.z > a.lb)) definesolution(&a, out);
 
     return a.z;
-}
-
-/* ======================================================================
-main
-====================================================================== */
-
-// list of profits weights into exitem *f, exitem *l, stype cap
-// JTC
-
-//#include "greedy.h"
-
-long combo_wrap(int n, long *p, long *w, stype c, double *timerecord, int first_item, int define_sol) {
-
-    item *a;
-    long zzz;
-    /* allocate space for test example */
-    a = (item *) palloc(n, sizeof(item));
-    item *f = &a[first_item];
-    item *l = &a[n - 1];
-    /* copy test instance */
-    register item *j;
-    register stype sum;
-    itype r1;
-    sum = 0; //r1 = r/10;
-    int i = first_item;
-    for (j = f; j <= l; j++) {
-        j->p = p[i];
-        j->w = w[i];
-        sum += j->w;
-        i++;
-        //std::cout << j->p << " " << j->w << "\n";
-    }
-    //Can I simply define the initial lower bound as zero?
-    int lbi = 0;
-    struct timespec start, finish;
-    double tmptime = 0;
-    boolean def = define_sol;
-    boolean relx = FALSE;
-    long ubi;
-    ubi = 0;
-    double pallocrem = 0;
-    clock_gettime(CLOCK_MONOTONIC, &start);
-
-    zzz = combo(f, l, c, lbi, ubi, def, relx, NULL); //zzz is the solution from the algorithm
-
-    clock_gettime(CLOCK_MONOTONIC, &finish);
-
-    tmptime = (finish.tv_sec - start.tv_sec);
-    tmptime += (finish.tv_nsec - start.tv_nsec) / 1000000000.0;
-    tmptime -= pallocrem;
-    *timerecord = tmptime;
-
-    return zzz; //returns algorithm solution
-
 }
