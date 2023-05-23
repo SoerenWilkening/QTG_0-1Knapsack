@@ -70,7 +70,7 @@ int main(int argc, char *argv[]) {
             for (int eps = 0; eps < 4; ++eps) {
 
                 std::string filename =
-                        "/Users/sorenwilkening/Desktop/Algorithms/instances_01_KP/knapsackProblemInstances/problemInstances/n_600_c_10000000000_g_2_f_" +
+                        "/Users/sorenwilkening/Desktop/Algorithms/instances_01_KP/knapsackProblemInstances/problemInstances/n_1200_c_10000000000_g_2_f_" +
                         std::to_string(f).substr(0, 3) + "_eps_" +
                         std::to_string(pow(10, -eps - 1)).substr(0, eps + 3) + "_s_" + std::to_string(x) + "/test.in";
 
@@ -92,7 +92,7 @@ int main(int argc, char *argv[]) {
                 std::cout << "simulating" << std::endl;
                 int count = 0, mean_m = 0;
                 for (int i = 0; i < 100; ++i) {
-                    QMaxSearch search{data, zzz, 112, "comp"};
+                    QMaxSearch search{data, zzz, 200, "comp"};
                     gr = search.execute(200);
 
                     if (gr[0].P == zzz) {

@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 f = 0.1
 eps = 0.1
 x = 100
-n = 400
+n = 1000
 Z = 10000000000
 M = 200
 states = "comp"
