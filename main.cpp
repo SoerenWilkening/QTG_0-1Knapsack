@@ -60,14 +60,17 @@ int main(int argc, char *argv[]) {
     std::filesystem::path pathToSource(__FILE__);
     std::filesystem::path pathToDir = pathToSource.parent_path();
     chdir(pathToDir.c_str());
+    double ub = 0;
+    int break_item = 0;
 
     knapsack_instance data;
+
     for (double f = .1; f <= .31; f += .1) {
         for (int x = 100; x <= 300; x += 100) {
             for (int eps = 0; eps < 4; ++eps) {
 
                 std::string filename =
-                        "/Users/sorenwilkening/Desktop/Algorithms/instances_01_KP/knapsackProblemInstances/problemInstances/n_400_c_10000000000_g_2_f_" +
+                        "/Users/sorenwilkening/Desktop/Algorithms/instances_01_KP/knapsackProblemInstances/problemInstances/n_600_c_10000000000_g_2_f_" +
                         std::to_string(f).substr(0, 3) + "_eps_" +
                         std::to_string(pow(10, -eps - 1)).substr(0, eps + 3) + "_s_" + std::to_string(x) + "/test.in";
 
@@ -80,17 +83,16 @@ int main(int argc, char *argv[]) {
                 auto *t = static_cast<long *>(calloc(1, sizeof(long)));
 
                 int break_item = 0;
-                std::vector<state_node> gr = greedy(data.n, data.Z, data.p, data.z, 0, &break_item);
+                std::vector<state_node> gr = greedy(data.n, data.Z, data.p, data.z, 0, &break_item, &ub);
+                std::ofstream myfile(data.name + "/benchmark/fractional_greedy.txt");
+                myfile << (long) ceil(ub) << std::endl;
 
                 long zzz = cpp_combo_wrap(data.n, data.p, data.z, data.Z, data.name, t, 0, false, false);
-
-//            std::cout << zzz << std::endl;
-//            std::cout << greedy(data.n, data.Z, data.p, data.z, 0, &break_item)[0].P << std::endl;
 
                 std::cout << "simulating" << std::endl;
                 int count = 0, mean_m = 0;
                 for (int i = 0; i < 100; ++i) {
-                    QMaxSearch search{data, zzz, 75, "comp"};
+                    QMaxSearch search{data, zzz, 112, "comp"};
                     gr = search.execute(200);
 
                     if (gr[0].P == zzz) {

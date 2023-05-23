@@ -69,7 +69,8 @@ std::vector<state_node> QMaxSearch::QSearch(long threshold, int M) {
 std::vector<state_node> QMaxSearch::execute(int M) {
     M_tot = 0;
     int break_item = 0;
-    std::vector<state_node> sample = greedy(data.n, data.Z, data.p, data.z, 0, &break_item);
+    double upper_bound = 0;
+    std::vector<state_node> sample = greedy(data.n, data.Z, data.p, data.z, 0, &break_item, &upper_bound);
     std::vector<state_node> measured;
 
     mpz_set(presious_sol, sample[0].vector);
