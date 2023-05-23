@@ -26,6 +26,8 @@ hard instances: greedy is far away from optimal
     n_400_c_100000000_g_14_f_0.3_eps_0.0001_s_200
         - combo: 2.685
 
+    n_400_c_100000000_g_6_f_0.3_eps_0.0001_s_300
+
 very hard instance: huge runtime and/or memory usage
     n_400_c_100000000_g_14_f_0.2_eps_0.001_s_100
         - combo: 34.598 s, ~1.1 GB RAM

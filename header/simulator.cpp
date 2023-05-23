@@ -79,10 +79,16 @@ std::vector<state_node> QMaxSearch::execute(int M) {
         if (measured[0].P > sample[0].P) {
             sample[0] = measured[0];
             mpz_set(presious_sol, measured[0].vector);
-            std::cout << "P = " << sample[0].P << std::endl;
+//            std::cout << "P = " << sample[0].P << std::endl;
             bnb.clear();
         }
-        else return sample;
+        else {
+            fs::create_directories(data.name + "/benchmark/qtg/ub=" + ub + "/bias=" + std::to_string(bias) + "/M=" + std::to_string(M) + "/states=" + states + "/");
+            std::ofstream myfile(data.name + "/benchmark/qtg/ub=" + ub + "/bias=" + std::to_string(bias) + "/M=" + std::to_string(M) + "/states=" + states + "/runtime.txt", std::ios::app);
+            myfile << sample[0].P << " " << M_tot << std::endl;
+            myfile.close();
+            return sample;
+        }
         measured.clear();
     }
 }

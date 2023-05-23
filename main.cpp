@@ -11,10 +11,10 @@
 namespace fs = std::filesystem;
 
 
-int benching(std::string filename) {
+int benching(std::string filename, int reps) {
     knapsack_instance data = read_instance(filename);
 
-    for (int x = 0; x < 10; ++x) {
+    for (int x = 0; x < reps; ++x) {
         long peak_ram = 0;
         for (int i = 0; i <= 1; ++i) {
 
@@ -36,16 +36,14 @@ int benching(std::string filename) {
 
             // Close the pipe
             pclose(pipe);
-            if (i == 1){
+            if (i == 1) {
                 fs::create_directories(data.name + "/benchmark/");
                 std::ofstream myfile(data.name + "/benchmark/combo_ram.txt", std::ios::app);
                 myfile << res * 8 << std::endl;
+                myfile.close();
             }
         }
-//        std::cout << "peak ram " << (double) peak_ram / 1000000 * 8 << "Mbit" << std::endl;
-
     }
-
     return 0;
 }
 
@@ -64,70 +62,47 @@ int main(int argc, char *argv[]) {
     chdir(pathToDir.c_str());
 
     knapsack_instance data;
+    for (double f = .1; f <= .31; f += .1) {
+        for (int x = 100; x <= 300; x += 100) {
+            for (int eps = 0; eps < 4; ++eps) {
 
-//    std::string filename = "/Users/sorenwilkening/Desktop/Algorithms/instances_01_KP/knapsackProblemInstances/problemInstances/n_400_c_1000000_g_2_f_0.2_eps_0.001_s_300/test.in";
+                std::string filename =
+                        "/Users/sorenwilkening/Desktop/Algorithms/instances_01_KP/knapsackProblemInstances/problemInstances/n_400_c_10000000000_g_2_f_" +
+                        std::to_string(f).substr(0, 3) + "_eps_" +
+                        std::to_string(pow(10, -eps - 1)).substr(0, eps + 3) + "_s_" + std::to_string(x) + "/test.in";
 
-//    std::string filename = "/Users/sorenwilkening/Desktop/Algorithms/instances_01_KP/knapsackProblemInstances/problemInstances/n_1200_c_10000000000_g_2_f_0.3_eps_0.0001_s_200/test.in";
-    std::string filename = "/Users/sorenwilkening/Desktop/Algorithms/instances_01_KP/knapsackProblemInstances/problemInstances/n_400_c_100000000_g_2_f_0.3_eps_0.0001_s_300/test.in";
-//    std::string filename = "/Users/sorenwilkening/Desktop/Algorithms/instances_01_KP/knapsackProblemInstances/problemInstances/n_400_c_100000000_g_6_f_0.3_eps_0.0001_s_300/test.in";
+                std::cout << filename << std::endl;
+                std::cout << "benchmarking" << std::endl;
+                data = read_instance(filename);
 
-//    std::string filename = "/Users/sorenwilkening/Desktop/Algorithms/instances_01_KP/knapsackProblemInstances/problemInstances/n_400_c_100000000_g_10_f_0.2_eps_0.01_s_100/test.in";
-//    std::string filename = "/Users/sorenwilkening/Desktop/Algorithms/instances_01_KP/knapsackProblemInstances/problemInstances/n_400_c_100000000_g_14_f_0.2_eps_0.001_s_300/test.in";
-//    data = read_instance(filename);
+                benching(filename, 100);
 
-//    data.n = 7;
-//    data.Z = 9;
-//    data.p = {3, 7, 6, 9, 8, 5, 6};
-//    data.z = {4, 9, 5, 7, 6, 3, 2};
-//    std::reverse(data.p.begin(), data.p.end());
-//    std::reverse(data.z.begin(), data.z.end());
-//    data.name = ".calculations/sandor";
+                auto *t = static_cast<long *>(calloc(1, sizeof(long)));
 
-//    auto *t = static_cast<double *>(calloc(1, sizeof(double)));
-//
-//    auto start = std::chrono::high_resolution_clock::now();
-//
-//
-//    int break_item = 0;
-//    std::vector<state_node> gr = greedy(data.n, data.Z, data.p, data.z, 0, &break_item);
-//    break_item = 0;
-//    std::cout << break_item << std::endl;
-//
-//    long zzz = cpp_combo_wrap(data.n, data.p, data.z, data.Z, data.name, t, 0, false, false);
-//
-//    std::cout << zzz << std::endl;
-//    std::cout << greedy(data.n, data.Z, data.p, data.z, 0, &break_item)[0].P << std::endl;
-//
-//
-//    auto stop = std::chrono::high_resolution_clock::now();
-//    auto duration = std::chrono::duration_cast<std::chrono::microseconds>(stop - start);
-//
-//    std::cout << (double) duration.count() / 1000000 << " " << *t << std::endl;
+                int break_item = 0;
+                std::vector<state_node> gr = greedy(data.n, data.Z, data.p, data.z, 0, &break_item);
 
+                long zzz = cpp_combo_wrap(data.n, data.p, data.z, data.Z, data.name, t, 0, false, false);
 
-    benching(filename);
+//            std::cout << zzz << std::endl;
+//            std::cout << greedy(data.n, data.Z, data.p, data.z, 0, &break_item)[0].P << std::endl;
 
-//
-//    knapsack_instance new_data = subinstance(data, break_item);
-//
-//    std::cout << greedy(new_data.n, new_data.Z, new_data.p, new_data.z, 0, &break_item)[0].P << std::endl;
-//    std::cout << cpp_combo_wrap(new_data.n, new_data.p, new_data.z, new_data.Z, new_data.name, t, 0, 0, false)
-//              << std::endl;
-//    zzz = cpp_combo_wrap(new_data.n, new_data.p, new_data.z, new_data.Z, new_data.name, t, 0, 0, false);
-//
-//    int count = 0, mean_m = 0;
-//    for (int i = 0; i < 1; ++i) {
-//        QMaxSearch search{new_data, zzz, 75, "comp"};
-//        gr = search.execute(200);
-//
-//        std::cout << gr[0].P << " " << search.M_tot << std::endl;
-//        if (gr[0].P == zzz) {
-//            count++;
-//            mean_m += search.M_tot;
-//        }
-//    }
-//
-//    std::cout << (double) count / 1 << "% " << (double) mean_m / count << std::endl;
+                std::cout << "simulating" << std::endl;
+                int count = 0, mean_m = 0;
+                for (int i = 0; i < 100; ++i) {
+                    QMaxSearch search{data, zzz, 75, "comp"};
+                    gr = search.execute(200);
 
+                    if (gr[0].P == zzz) {
+                        count++;
+                        mean_m += search.M_tot;
+                    }
+                }
+
+                std::cout << (double) 100 * count / 100 << "% " << (double) mean_m / count << std::endl;
+
+            }
+        }
+    }
     return 0;
 }

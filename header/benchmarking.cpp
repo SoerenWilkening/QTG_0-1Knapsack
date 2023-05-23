@@ -22,6 +22,7 @@ int main(int argc, char *argv[]){
     fs::create_directories(data.name + "/benchmark/");
     std::ofstream myfile(data.name + "/benchmark/combo_runtime.txt", std::ios::app);
     myfile << *t << std::endl;
+    myfile.close();
 
     return 0;
 }

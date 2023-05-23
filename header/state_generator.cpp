@@ -134,12 +134,12 @@ std::vector<state_node> breadth_first_search(knapsack_instance data,
         for(int i = 0; i < a; i++) {
             if (children[i].amplitude >= thr or children[i].ub + children[i].P == exact) parent[d++] = children[i];
         }
-        printf("item = %d d = %d prob = %f, max_amp = %f, thr = %f\n", item, d, total, max_amp, thr);
+//        printf("item = %d d = %d prob = %f, max_amp = %f, thr = %f\n", item, d, total, max_amp, thr);
         number_of_states = d;
 
     }
     parent.resize(number_of_states);
-    std::cout << "total discarded = " << discarded << std::endl;
+//    std::cout << "total discarded = " << discarded << std::endl;
 
     return parent;
 }
