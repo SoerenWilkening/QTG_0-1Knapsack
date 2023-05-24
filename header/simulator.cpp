@@ -55,6 +55,7 @@ std::vector<state_node> QMaxSearch::QSearch(long threshold, int M) {
         m_tot += 2 * j + 1;
 
         sample = QMaxSearch::amplitude_amplification(threshold, j);
+        gates_amplitude_amplification(&data, &gates, &qtg, j, threshold);
 
         if (sample[0].P > threshold){
             M_tot += m_tot;
@@ -68,6 +69,9 @@ std::vector<state_node> QMaxSearch::QSearch(long threshold, int M) {
 
 std::vector<state_node> QMaxSearch::execute(int M) {
     M_tot = 0;
+    qtg = qtg_gatecount(data);
+    gates.resize(qtg.size());
+
     int break_item = 0;
     double upper_bound = 0;
     std::vector<state_node> sample = greedy(data.n, data.Z, data.p, data.z, 0, &break_item, &upper_bound);
@@ -86,7 +90,10 @@ std::vector<state_node> QMaxSearch::execute(int M) {
         else {
             fs::create_directories(data.name + "/benchmark/qtg/ub=" + ub + "/bias=" + std::to_string(bias) + "/M=" + std::to_string(M) + "/states=" + states + "/");
             std::ofstream myfile(data.name + "/benchmark/qtg/ub=" + ub + "/bias=" + std::to_string(bias) + "/M=" + std::to_string(M) + "/states=" + states + "/runtime.txt", std::ios::app);
-            myfile << sample[0].P << " " << M_tot << std::endl;
+            myfile << sample[0].P << " ";
+            for (auto &i:gates) myfile << i << " ";
+            myfile << std::endl;
+
             myfile.close();
             return sample;
         }

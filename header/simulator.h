@@ -8,6 +8,7 @@
 #include "state_generator.h"
 #include "RNG.h"
 #include "greedy.h"
+#include "gate_count.h"
 #include <cstdlib>
 
 
@@ -22,7 +23,7 @@ public:
     std::string ub = "no";
 
 
-
+    std::vector<long> qtg, gates;
     int M_tot = 0;
     std::vector<state_node> bnb;
     std::vector<state_node> amplitude_amplification(long threshold, int M);
