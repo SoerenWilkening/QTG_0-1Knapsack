@@ -138,9 +138,14 @@ int main(int argc, char *argv[]) {
                     gr = search.execute(200);
 
                     if (gr[0].P == zzz) count++;
+                    search.bnb.clear();
+                    search.bnb.shrink_to_fit();
+                    search.gates.clear();
+                    search.gates.shrink_to_fit();
+                    search.qtg.clear();
+                    search.qtg.shrink_to_fit();
                 }
-
-                std::cout << (double) 100 * count / 100 << "% " << (double) mean_m / count << std::endl;
+                std::cout << (double) count << "% " << std::endl;
 
             }
         }

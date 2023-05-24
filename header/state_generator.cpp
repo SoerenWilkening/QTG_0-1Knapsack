@@ -141,6 +141,7 @@ std::vector<state_node> breadth_first_search(knapsack_instance data,
 //        std::cout << item << " " << a << std::endl;
         std::swap(parent, children);
         children.clear();
+        children.shrink_to_fit();
         number_of_states = a;
 
     }

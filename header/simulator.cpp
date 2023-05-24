@@ -33,13 +33,18 @@ std::vector<state_node> QMaxSearch::amplitude_amplification(long threshold, int 
 
     /* executing a quantum measurement */
     int measurement = sampling(&probabilities); // sampling from the probability distribution
-    if (measurement == bnb.size()) sample.push_back({0, 0, 0, 0, 0});
+    sample.clear();
+    sample.shrink_to_fit();
+    if (measurement == bnb.size()) {
+        sample.push_back({0, 0, 0, 0, 0});
+    }
     else {
         sample.push_back({bnb[measurement].P, 0, 0, 0, 1});
         mpz_set(sample[0].vector, bnb[measurement].vector);
     }
 
     probabilities.clear();
+    probabilities.shrink_to_fit();
     return sample;
 }
 
@@ -54,6 +59,8 @@ std::vector<state_node> QMaxSearch::QSearch(long threshold, int M) {
         j = rand() % m;
         m_tot += 2 * j + 1;
 
+        sample.clear();
+        sample.shrink_to_fit();
         sample = QMaxSearch::amplitude_amplification(threshold, j);
         gates_amplitude_amplification(&data, &gates, &qtg, j, threshold);
 
@@ -82,10 +89,12 @@ std::vector<state_node> QMaxSearch::execute(int M) {
     while (true) {
         measured = QSearch(sample[0].P, M);
         if (measured[0].P > sample[0].P) {
+            sample.clear();
             sample[0] = measured[0];
             mpz_set(presious_sol, measured[0].vector);
 //            std::cout << "P = " << sample[0].P << std::endl;
             bnb.clear();
+            bnb.shrink_to_fit();
         }
         else {
             fs::create_directories(data.name + "/benchmark/qtg/ub=" + ub + "/bias=" + std::to_string(bias) + "/M=" + std::to_string(M) + "/states=" + states + "/");
