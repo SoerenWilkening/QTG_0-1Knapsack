@@ -107,27 +107,33 @@ int main(int argc, char *argv[]) {
 //    }
 //    std::cout << (double) count << " " << ratios / count << std::endl;
 
-    for (double f = .1; f <= .31; f += .1) {
-        for (int x = 100; x <= 300; x += 100) {
-            for (int eps = 0; eps < 4; ++eps) {
+    for (double f = .3; f <= .31; f += .1) {
+        for (int x = 300; x <= 300; x += 100) {
+//            for (int eps = 0; eps < 4; ++eps) {
 
                 std::string filename =
                         "/Users/sorenwilkening/Desktop/Algorithms/instances_01_KP/knapsackProblemInstances/problemInstances/n_1200_c_10000000000_g_2_f_" +
                         std::to_string(f).substr(0, 3) + "_eps_" +
-                        std::to_string(pow(10, -eps - 1)).substr(0, eps + 3) + "_s_" + std::to_string(x) + "/test.in";
+                        std::to_string(0) + "_s_" + std::to_string(x) + "/test.in";
 
                 std::cout << filename << std::endl;
                 std::cout << "benchmarking" << std::endl;
                 data = read_instance(filename);
 
-                benching(filename, 100);
+                benching(filename, 1);
 
                 auto *t = static_cast<long *>(calloc(1, sizeof(long)));
 
                 int break_item = 0;
                 std::vector<state_node> gr = greedy(data.n, data.Z, data.p, data.z, 0, &break_item, &ub);
+
                 std::ofstream myfile(data.name + "/benchmark/fractional_greedy.txt");
                 myfile << (long) ceil(ub) << std::endl;
+                myfile.close();
+
+                std::ofstream myfile1(data.name + "/benchmark/greedy.txt");
+                myfile1 << gr[0].P << std::endl;
+                myfile1.close();
 
                 long zzz = cpp_combo_wrap(data.n, data.p, data.z, data.Z, data.name, t, 0, false, false);
 
@@ -149,7 +155,7 @@ int main(int argc, char *argv[]) {
 
             }
         }
-    }
+//    }
 
     return 0;
 }
