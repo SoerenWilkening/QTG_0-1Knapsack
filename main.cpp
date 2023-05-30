@@ -67,95 +67,65 @@ int main(int argc, char *argv[]) {
     long t = 0;
 
     knapsack_instance data;
-    std::string filename =
-            "/Users/sorenwilkening/Desktop/Algorithms/instances_01_KP/knapsackProblemInstances/problemInstances/n_1200_c_10000000000_g_2_f_" +
-            std::to_string(0.3).substr(0, 3) + "_eps_" +
-            std::to_string(pow(10, -3 - 1)).substr(0, 3 + 3) + "_s_" + std::to_string(200) + "/test.in";
-    data.n = 7;
-    data.Z = 9;
-    data.p = {3, 7, 6, 9, 8, 5, 6};
-    data.z = {4, 9, 5, 7, 6, 3, 2};
-    std::reverse(data.p.begin(), data.p.end());
-    std::reverse(data.z.begin(), data.z.end());
+//    std::string filename =
+//            "/Users/sorenwilkening/Desktop/Algorithms/instances_01_KP/knapsackProblemInstances/problemInstances/n_1200_c_10000000000_g_2_f_" +
+//            std::to_string(0.3).substr(0, 3) + "_eps_" +
+//            std::to_string(pow(10, -3 - 1)).substr(0, 3 + 3) + "_s_" + std::to_string(200) + "/test.in";
+//    data.n = 7;
+//    data.Z = 9;
+//    data.p = {3, 7, 6, 9, 8, 5, 6};
+//    data.z = {4, 9, 5, 7, 6, 3, 2};
+//    std::reverse(data.p.begin(), data.p.end());
+//    std::reverse(data.z.begin(), data.z.end());
 
-
-    data = read_instance(filename);
-
-    int count = 0;
-    double ratios = 0;
-//    for (int i = 0; i < 50; ++i) {
-//        long zzz = cpp_combo_wrap(data.n, data.p, data.z, data.Z, data.name, &t, 0, false, false);
-//        QMaxSearch search{data, zzz, 300, "comp"};
-//        std::vector<state_node> gr = search.execute(200);
-//
-//        for (int i = 3; i < search.gates.size(); ++i) {
-//            search.gates[2] += search.gates[i] * 2 * (i - 1);
-//            search.gates[1] += search.gates[i];
-//            search.gates[i] = 0;
-//        }
-//
-//        std::cout << zzz << " " << gr[0].P << std::endl;
-//        std::cout << "quantum   gates = " << search.gates[0] + search.gates[1] + search.gates[2]
-//                  << "\n" << "classical gates = " << t << std::endl;
-//
-//        std::cout << "qgates / cgates = " << (double) (search.gates[0] + search.gates[1] + search.gates[2]) / t
-//                  << std::endl;
-//        if (zzz == gr[0].P){
-//            count++;
-//            ratios += (double) (search.gates[0] + search.gates[1] + search.gates[2]) / t;
-//        }
-//    }
-//    std::cout << (double) count << " " << ratios / count << std::endl;
-
-    for (double f = .3; f <= .31; f += .1) {
-        for (int x = 300; x <= 300; x += 100) {
-//            for (int eps = 0; eps < 4; ++eps) {
+    for (double f = .1; f <= .31; f += .1) {
+        for (int x = 100; x <= 300; x += 100) {
+            for (int eps = 0; eps < 1; ++eps) {
 
                 std::string filename =
-                        "/Users/sorenwilkening/Desktop/Algorithms/instances_01_KP/knapsackProblemInstances/problemInstances/n_1200_c_10000000000_g_2_f_" +
+                        "/Users/sorenwilkening/Desktop/Algorithms/instances_01_KP/knapsackProblemInstances/problemInstances/n_1200_c_10000000000_g_6_f_" +
                         std::to_string(f).substr(0, 3) + "_eps_" +
-                        std::to_string(0) + "_s_" + std::to_string(x) + "/test.in";
+                        "1e-05_s_" + std::to_string(x) + "/test.in";
 
                 std::cout << filename << std::endl;
                 std::cout << "benchmarking" << std::endl;
                 data = read_instance(filename);
 
-                benching(filename, 1);
+                benching(filename, 10);
 
-                auto *t = static_cast<long *>(calloc(1, sizeof(long)));
-
-                int break_item = 0;
-                std::vector<state_node> gr = greedy(data.n, data.Z, data.p, data.z, 0, &break_item, &ub);
-
-                std::ofstream myfile(data.name + "/benchmark/fractional_greedy.txt");
-                myfile << (long) ceil(ub) << std::endl;
-                myfile.close();
-
-                std::ofstream myfile1(data.name + "/benchmark/greedy.txt");
-                myfile1 << gr[0].P << std::endl;
-                myfile1.close();
-
-                long zzz = cpp_combo_wrap(data.n, data.p, data.z, data.Z, data.name, t, 0, false, false);
-
-                std::cout << "simulating" << std::endl;
-                int count = 0, mean_m = 0;
-                for (int i = 0; i < 100; ++i) {
-                    QMaxSearch search{data, zzz, 300, "comp"};
-                    gr = search.execute(200);
-
-                    if (gr[0].P == zzz) count++;
-                    search.bnb.clear();
-                    search.bnb.shrink_to_fit();
-                    search.gates.clear();
-                    search.gates.shrink_to_fit();
-                    search.qtg.clear();
-                    search.qtg.shrink_to_fit();
-                }
-                std::cout << (double) count << "% " << std::endl;
-
+//                auto *t = static_cast<long *>(calloc(1, sizeof(long)));
+//
+//                int break_item = 0;
+//                std::vector<state_node> gr = greedy(data.n, data.Z, data.p, data.z, 0, &break_item, &ub);
+//
+//                std::ofstream myfile(data.name + "/benchmark/fractional_greedy.txt");
+//                myfile << (long) ceil(ub) << std::endl;
+//                myfile.close();
+//
+//                std::ofstream myfile1(data.name + "/benchmark/greedy.txt");
+//                myfile1 << gr[0].P << std::endl;
+//                myfile1.close();
+//
+//                long zzz = cpp_combo_wrap(data.n, data.p, data.z, data.Z, data.name, t, 0, false, false);
+//
+//                std::cout << "simulating" << std::endl;
+//                int count = 0;
+//                for (int i = 0; i < 400; ++i) {
+//                    QMaxSearch search{data, zzz, 300, "comp"};
+//                    gr = search.execute(200);
+//
+//                    if (gr[0].P == zzz) count++;
+//                    search.bnb.clear();
+//                    search.bnb.shrink_to_fit();
+//                    search.gates.clear();
+//                    search.gates.shrink_to_fit();
+//                    search.qtg.clear();
+//                    search.qtg.shrink_to_fit();
+//                }
+//                std::cout << (double) count / 4 << "% " << std::endl;
             }
         }
-//    }
+    }
 
     return 0;
 }

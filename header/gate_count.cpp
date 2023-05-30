@@ -26,7 +26,8 @@ int gates_quantum_fourier_transform(std::vector<long> *gates) {
     int bits = gates->size() - 1;
 
     gates->at(0) += bits;
-    gates->at(1) += (long) pow(bits, 2);
+//    gates->at(1) += (long) (pow(bits, 2) / 2) - bits / 2 + 1;
+    gates->at(1) += (long) (bits * log2(bits));
 
     return 0;
 }
@@ -51,7 +52,7 @@ std::vector<long> qtg_gatecount(knapsack_instance data) {
 
         gates_quantum_fourier_transform(&gates);
         gates_integer_addition(data.z[item], &gates); // subtraction of z[i]
-        gates_integer_addition(data.z[item], &gates); // addition of p[i]
+        gates_integer_addition(data.p[item], &gates); // addition of p[i]
         gates_quantum_fourier_transform(&gates);
     }
 
