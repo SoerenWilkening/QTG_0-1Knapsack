@@ -22,6 +22,7 @@ knapsack_instance read_instance(std::string filename) {
     for (int i = 0; i < instance.n; i++) fscanf(file, "%d %ld %ld", &a, &instance.p[i], &instance.z[i]);
     fscanf(file, "%ld", &instance.Z);
     fclose(file);
+
     for (int i = 0; i < instance.n; i++) {
         for (int j = 0; j < instance.n - 1; j++) {
             if (static_cast<double>(instance.p[j]) / static_cast<double>(instance.z[j]) <
@@ -85,5 +86,4 @@ knapsack_instance subinstance(knapsack_instance data, int first_item){
     new_data.name = data.name;
 
     return new_data;
-
 }

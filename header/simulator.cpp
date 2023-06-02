@@ -62,7 +62,24 @@ std::vector<state_node> QMaxSearch::QSearch(long threshold, int M) {
         sample.clear();
         sample.shrink_to_fit();
         sample = QMaxSearch::amplitude_amplification(threshold, j);
-        gates_amplitude_amplification(&data, &gates, &qtg, j, threshold);
+//        gates_amplitude_amplification(&data, &gates, &qtg, j, threshold);
+        // count cycles
+        gates[0] += (2 * j + 1) * cycle_count_qtg(k, FGREEDY, COPPERSMITH, DIRECT, TOFFOLI, 0); // without decomposing toffolies
+        gates[1] += (2 * j + 1) * cycle_count_qtg(k, FGREEDY, COPPERSMITH, DIRECT, TOFFOLI, 1); // with decomposing toffolies
+
+        // count gates
+        gates[2] += (2 * j + 1) * gate_count_qtg(k, FGREEDY, COPPERSMITH, DIRECT, TOFFOLI, 0); // without decomposing toffolies
+        gates[3] += (2 * j + 1) * gate_count_qtg(k, FGREEDY, COPPERSMITH, DIRECT, TOFFOLI, 1); // with decomposing toffolies
+
+        gates[0] += cycle_count_comp(profit_reg_size(k, FGREEDY),sample[0].P + 1, TOFFOLI, 1, 0); // without decomposing toffolies
+        gates[1] += cycle_count_comp(profit_reg_size(k, FGREEDY),sample[0].P + 1, TOFFOLI, 1, 1); // with decomposing toffolies
+        gates[0] += cycle_count_mc(data.n - 1, TOFFOLI, 0); // without decomposing toffolies
+        gates[1] += cycle_count_mc(data.n - 1, TOFFOLI, 1); // with decomposing toffolies
+
+        gates[2] += gate_count_comp(profit_reg_size(k, FGREEDY),sample[0].P + 1, TOFFOLI, 1, 0); // without decomposing toffolies
+        gates[3] += gate_count_comp(profit_reg_size(k, FGREEDY),sample[0].P + 1, TOFFOLI, 1, 1); // with decomposing toffolies
+        gates[2] += gate_count_mc(data.n - 1, TOFFOLI, 0); // without decomposing toffolies
+        gates[3] += gate_count_mc(data.n - 1, TOFFOLI, 1); // with decomposing toffolies
 
         if (sample[0].P > threshold){
             M_tot += m_tot;
@@ -77,7 +94,27 @@ std::vector<state_node> QMaxSearch::QSearch(long threshold, int M) {
 std::vector<state_node> QMaxSearch::execute(int M) {
     M_tot = 0;
     qtg = qtg_gatecount(data);
+    qtg2.resize(4);
     gates.resize(qtg.size());
+    gates2.resize(qtg2.size());
+
+//    int a = 0;
+//    long total;
+//    for (auto &i: qtg) {
+//        if(a > 2) {
+////            std::cout << i * 2 * (a - 1) << std::endl;
+//            total += i * 2 * (a - 1);
+//        }
+//        else {
+////            std::cout << i << std::endl;
+//            total += i;
+//        }
+//        a++;
+//    }
+//
+//    std::cout << std::endl;
+//    std::cout << "Total number of cycles (Sören) without decomposing Toffolis:\n" << total << std::endl;
+//    std::cout << std::endl;
 
     int break_item = 0;
     double upper_bound = 0;
@@ -85,6 +122,29 @@ std::vector<state_node> QMaxSearch::execute(int M) {
     std::vector<state_node> measured;
 
     mpz_set(presious_sol, sample[0].vector);
+
+
+    for (int i = 0; i < data.n; ++i) {
+        k->items[i].cost = data.z[i];
+        k->items[i].profit = data.p[i];
+    }
+
+
+    qtg2[0] = cycle_count_qtg(k, FGREEDY, COPPERSMITH, DIRECT, TOFFOLI, 0); // without decomposing toffolies
+    qtg2[1] = cycle_count_qtg(k, FGREEDY, COPPERSMITH, DIRECT, TOFFOLI, 1); // with decomposing toffolies
+
+    qtg2[2] = gate_count_qtg(k, FGREEDY, COPPERSMITH, DIRECT, TOFFOLI, 0); // without decomposing toffolies
+    qtg2[3] = gate_count_qtg(k, FGREEDY, COPPERSMITH, DIRECT, TOFFOLI, 1); // with decomposing toffolies
+//    std::cout << cycle_count_comp(profit_reg_size(k, FGREEDY),sample[0].P + 1, TOFFOLI, 1, 0) << std::endl;
+//    std::cout << cycle_count_mc(data.n - 1, TOFFOLI, 0) << std::endl;
+//
+//    std::cout << gate_count_comp(profit_reg_size(k, FGREEDY),sample[0].P + 1, TOFFOLI, 1, 1) << std::endl;
+//    std::cout << gate_count_mc(data.n - 1, TOFFOLI, 1) << std::endl;
+
+//    int x = 5;
+//    std::cout << (((x >> 0) & 1) == 0) << std::endl;
+//    std::cout << (((x >> 1) & 1) == 0) << std::endl;
+//    std::cout << (((x >> 2) & 1) == 0) << std::endl;
 
     while (true) {
         measured = QSearch(sample[0].P, M);
@@ -97,13 +157,13 @@ std::vector<state_node> QMaxSearch::execute(int M) {
             bnb.shrink_to_fit();
         }
         else {
-            fs::create_directories(data.name + "/benchmark/qtg/ub=" + ub + "/bias=" + std::to_string(bias) + "/M=" + std::to_string(M) + "/states=" + states + "/");
-            std::ofstream myfile(data.name + "/benchmark/qtg/ub=" + ub + "/bias=" + std::to_string(bias) + "/M=" + std::to_string(M) + "/states=" + states + "/runtime.txt", std::ios::app);
-            myfile << sample[0].P << " ";
-            for (auto &i:gates) myfile << i << " ";
-            myfile << std::endl;
-
-            myfile.close();
+//            fs::create_directories(data.name + "/benchmark/qtg/ub=" + ub + "/bias=" + std::to_string(bias) + "/M=" + std::to_string(M) + "/states=" + states + "/");
+//            std::ofstream myfile(data.name + "/benchmark/qtg/ub=" + ub + "/bias=" + std::to_string(bias) + "/M=" + std::to_string(M) + "/states=" + states + "/runtime.txt", std::ios::app);
+//            myfile << sample[0].P << " ";
+//            for (auto &i:gates) myfile << i << " ";
+//            myfile << std::endl;
+//
+//            myfile.close();
             return sample;
         }
         measured.clear();

@@ -9,7 +9,9 @@
 #include "RNG.h"
 #include "greedy.h"
 #include "gate_count.h"
+#include "KnapsackQTG/qtg.h"
 #include <cstdlib>
+
 
 
 class QMaxSearch{
@@ -23,9 +25,13 @@ public:
     std::string ub = "no";
 
 
-    std::vector<long> qtg, gates;
+    std::vector<long> qtg, gates, qtg2, gates2;
     int M_tot = 0;
     std::vector<state_node> bnb;
+
+    knapsack_t *k = create_empty_knapsack(data.n, data.Z);
+
+
     std::vector<state_node> amplitude_amplification(long threshold, int M);
     std::vector<state_node> QSearch(long threshold, int M);
     std::vector<state_node> execute(int M);

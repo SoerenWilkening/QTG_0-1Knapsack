@@ -8,7 +8,6 @@
 typedef long          stype;   /* sum of profit or weight  */
 #ifdef __cplusplus
 extern "C" {
-//typedef struct item item_;
 #endif
 
 typedef int boolean; /* logical variable         */

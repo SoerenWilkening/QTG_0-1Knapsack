@@ -27,7 +27,8 @@ int gates_quantum_fourier_transform(std::vector<long> *gates) {
 
     gates->at(0) += bits;
 //    gates->at(1) += (long) (pow(bits, 2) / 2) - bits / 2 + 1;
-    gates->at(1) += (long) (bits * log2(bits));
+//    gates->at(1) += (long) (bits * log2(bits));
+    gates->at(1) += (long) 2 * bits - 1; // optimal gate count for QFT
 
     return 0;
 }
