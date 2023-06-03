@@ -21,7 +21,7 @@ public:
 
     double bias = 0;
     std::string states = "single";
-    mpz_t presious_sol;
+    mpz_t previous_sol;
     std::string ub = "no";
 
 
@@ -30,7 +30,6 @@ public:
     std::vector<state_node> bnb;
 
     knapsack_t *k = create_empty_knapsack(data.n, data.Z);
-
 
     std::vector<state_node> amplitude_amplification(long threshold, int M);
     std::vector<state_node> QSearch(long threshold, int M);

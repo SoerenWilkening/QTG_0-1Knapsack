@@ -4,6 +4,8 @@
 #include <unistd.h>
 #include <string>
 #include <limits>
+#include <fstream>
+#include <sstream>
 
 #include "header/instance.h"
 #include "header/cpp_combo.h"
@@ -13,7 +15,7 @@
 
 namespace fs = std::filesystem;
 
-int benching(std::string filename, int reps) {
+int benching(std::string filename, int reps, int def_sol) {
     knapsack_instance data = read_instance(filename);
 
     for (int x = 0; x < reps; ++x) {
@@ -21,7 +23,8 @@ int benching(std::string filename, int reps) {
         for (int i = 0; i <= 1; ++i) {
 
             std::string command = "echo \"$(/usr/bin/time -l ./cmake-build-debug/bench " + filename +
-                                  " " + std::to_string(i) + " 2>&1)\" | grep \"maximum resident set size\"";
+                                  " " + std::to_string(i) + " " +
+                                  std::to_string(def_sol) + " 2>&1)\" | grep \"maximum resident set size\"";
 
             FILE *pipe = popen(command.c_str(), "r");
             if (!pipe) {
@@ -66,90 +69,68 @@ int main(int argc, char *argv[]) {
     int break_item = 0;
     long t = 0;
 
+    std::string filename;
+    int M;
+    double bias;
     knapsack_instance data;
-    std::string filename =
-            "/Users/sorenwilkening/Desktop/Algorithms/instances_01_KP/knapsackProblemInstances/problemInstances/n_1200_c_10000000000_g_2_f_" +
-            std::to_string(0.3).substr(0, 3) + "_eps_" +
-            "1e-05" + "_s_" + std::to_string(300) + "/test.in";
 
-    data = read_instance(filename);
-//
-    long timerecord = 0;
+    std::ifstream file("benchmark_parameters.txt");
+    std::string line;
+    while (std::getline(file, line)) {
+        std::istringstream iss(line);
+        std::string parameter;
 
-    long zzz = cpp_combo_wrap(data. n, data.p, data.z, data.Z, data.name, &timerecord, 0, false, false);
-//
-    std::cout << zzz << " " << (double) timerecord / (2.6 * pow(10, 9)) << std::endl;
+        iss >> parameter;
+        filename = parameter;
+        iss >> parameter;
+        M = std::stoi(parameter);
+        iss >> parameter;
+        bias = std::stod(parameter);
+        iss >> parameter;
 
-//    data.n = 7;
-//    data.Z = 9;
-//    data.p = {3, 7, 6, 9, 8, 5, 6};
-//    data.z = {4, 9, 5, 7, 6, 3, 2};
-//    std::reverse(data.p.begin(), data.p.end());
-//    std::reverse(data.z.begin(), data.z.end());
-//    data.name = "snador/";
+        std::cout << filename << " M = " << M << " bias = " << bias << " sim = " << parameter << std::endl;
+        std::cout << "benchmarking" << std::endl;
 
-    int count = 0;
-    for (int j = 0; j < 100; ++j) {
-        QMaxSearch search{data, zzz, 300, "comp"};
-        std::vector<state_node> gr = search.execute(200);
-        std::cout << zzz << " " << gr[0].P << std::endl;
-        if(zzz == gr[0].P) count++;
-        for (int i = 0; i < 4; ++i) std::cout << search.gates[i] << " ";
-        std::cout << std::endl;
+        data = read_instance(filename);
+
+        break_item = 0;
+        long zzz = cpp_combo_wrap(data.n, data.p, data.z, data.Z, data.name, &t, 0, false, false);
+        std::vector<state_node> gr = greedy(data.n, data.Z, data.p, data.z, 0, &break_item, &ub);
+
+        std::ofstream myfile(data.name + "/benchmark/fractional_greedy.txt");
+        myfile << (long) ceil(ub) << std::endl;
+        myfile.close();
+
+        std::ofstream myfile1(data.name + "/benchmark/greedy.txt");
+        myfile1 << gr[0].P << std::endl;
+        myfile1.close();
+
+        benching(filename, 1, 0); // benchmarking classical algorithm
+        benching(filename, 1, 1); // benchmarking classical algorithm
+
+        if (parameter == "yes") {
+            std::cout << "simulating" << std::endl;
+            int count = 0;
+
+            QMaxSearch search{data, zzz, bias, "comp"};
+            for (int i = 0; i < data.n; ++i) {
+                search.k->items[i].cost = data.z[i];
+                search.k->items[i].profit = data.p[i];
+            }
+
+            for (int i = 0; i < 3; ++i) {
+                std::cout << i << std::endl;
+                gr = search.execute(M);
+
+                if (gr[0].P == zzz) count++;
+            }
+
+            mpz_clear(search.previous_sol);
+            search.gates2.clear();
+            search.qtg2.clear();
+            std::cout << (double) count / 5 << "% " << std::endl;
+        }
     }
-    std::cout << (double) count << " %" << std::endl;
-
-
-
-
-//    for (double f = .1; f <= .31; f += .1) {
-//        for (int x = 100; x <= 300; x += 100) {
-//            for (int eps = 0; eps < 1; ++eps) {
-//
-//                std::string filename =
-//                        "/Users/sorenwilkening/Desktop/Algorithms/instances_01_KP/knapsackProblemInstances/problemInstances/n_1200_c_10000000000_g_2_f_" +
-//                        std::to_string(f).substr(0, 3) + "_eps_" +
-//                        "1e-05_s_" + std::to_string(x) + "/test.in";
-//
-//                std::cout << filename << std::endl;
-//                std::cout << "benchmarking" << std::endl;
-//                data = read_instance(filename);
-//
-//                benching(filename, 10);
-//
-////                auto *t = static_cast<long *>(calloc(1, sizeof(long)));
-////
-////                int break_item = 0;
-////                std::vector<state_node> gr = greedy(data.n, data.Z, data.p, data.z, 0, &break_item, &ub);
-////
-////                std::ofstream myfile(data.name + "/benchmark/fractional_greedy.txt");
-////                myfile << (long) ceil(ub) << std::endl;
-////                myfile.close();
-////
-////                std::ofstream myfile1(data.name + "/benchmark/greedy.txt");
-////                myfile1 << gr[0].P << std::endl;
-////                myfile1.close();
-////
-////                long zzz = cpp_combo_wrap(data.n, data.p, data.z, data.Z, data.name, t, 0, false, false);
-////
-////                std::cout << "simulating" << std::endl;
-////                int count = 0;
-////                for (int i = 0; i < 400; ++i) {
-////                    QMaxSearch search{data, zzz, 300, "comp"};
-////                    gr = search.execute(200);
-////
-////                    if (gr[0].P == zzz) count++;
-////                    search.bnb.clear();
-////                    search.bnb.shrink_to_fit();
-////                    search.gates.clear();
-////                    search.gates.shrink_to_fit();
-////                    search.qtg.clear();
-////                    search.qtg.shrink_to_fit();
-////                }
-////                std::cout << (double) count / 4 << "% " << std::endl;
-//            }
-//        }
-//    }
 
     return 0;
 }

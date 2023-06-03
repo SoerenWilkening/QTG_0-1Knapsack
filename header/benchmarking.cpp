@@ -8,6 +8,7 @@
 
 int main(int argc, char *argv[]){
 
+//    std::cout << argc << std::endl;
     boolean exec_combo = true;
     if ((std::string) argv[2] == "0") exec_combo = false;
 
@@ -15,8 +16,9 @@ int main(int argc, char *argv[]){
 
     long *t = (long*) calloc(0, sizeof(long));
 
-    bool define_sol = true;
-//    bool define_sol = false;
+    bool define_sol = false;
+    if (std::string(argv[3]) == "1") define_sol = true;
+    else define_sol = false;
 
     long zzz = cpp_combo_wrap(data.n, data.p, data.z, data.Z, data.name, t, 0, define_sol, false, exec_combo);
 

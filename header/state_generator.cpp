@@ -38,6 +38,7 @@ std::vector<state_node> breadth_first_search(knapsack_instance data,
     std::vector<state_node> parent = initialize_states(number_of_states, data.n);
     parent[0].ub = exact;
     parent[0].Z = data.Z;
+    mpz_setbit(parent[0].vector, 1);
     long zzz;
     double discarded = 0;
     long *t = static_cast<long *>(calloc(1, sizeof(long)));
@@ -138,7 +139,6 @@ std::vector<state_node> breadth_first_search(knapsack_instance data,
 //        printf("item = %d d = %d prob = %f, max_amp = %f, thr = %f\n", item, d, total, max_amp, thr);
 //        number_of_states = d;
 
-//        std::cout << item << " " << a << std::endl;
         std::swap(parent, children);
         children.clear();
         children.shrink_to_fit();
