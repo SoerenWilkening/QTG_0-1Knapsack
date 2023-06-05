@@ -2,6 +2,12 @@
 // Created by Sören Wilkening on 10.05.23.
 //
 
+/* 
+ * =============================================================================
+ *                                  includes
+ * =============================================================================
+ */
+
 #include "cpp_combo.h"
 
 bool fileExists(const std::string &filename) {
@@ -19,20 +25,21 @@ uint64_t rdtsc() {
 
 num_t cpp_combo_wrap(knapsack_t* k,
                     std::string name,
-                    uint64_t *timerecord,
+                    uint64_t* timerecord,
                     bit_t first_item,
-                    bool define_sol,
-                    bool read,
-                    bool exec_combo) {
+                    bool_t define_sol,
+                    bool_t read,
+                    bool_t exec_combo) {
 
     num_t opt_sol;
+    
     /* we fist check if the instance is trivial. If it is, combo runs into problems */
     if (is_trivial(k)) {
         return 0;
     }
 
     /* if it is not trivial, we check, if we have already caclulated and saved the combo output */
-    fs::path myFilePath = name + "/combo/n_new=" + std::to_string(k->size - first_item) + "_Z=" + std::to_string(k->capacity) + ".txt";
+    fs::path myFilePath = name + "/combo/size=" + std::to_string(k->size - first_item) + ".txt";
 
     if (fileExists(myFilePath) && read) {
         FILE *file = fopen(myFilePath.c_str(), "r");

@@ -2,11 +2,17 @@
 // Created by Sören Wilkening on 10.05.23.
 //
 
-#ifndef PPQA_CPP_CPP_COMBO_H
-#define PPQA_CPP_CPP_COMBO_H
+#ifndef CPP_COMBO_H
+#define CPP_COMBO_H
 
+/* 
+ * =============================================================================
+ *                                  includes
+ * =============================================================================
+ */
+
+#include "knapsack.h"
 #include "combo.h"
-#include "instance.h"
 #include <fstream>
 #include <filesystem>
 #include <cstdint>
@@ -21,4 +27,4 @@ long cpp_combo_wrap(int n, std::vector<long> p, std::vector<long> w, long c,
                     bool read = true,
                     bool exec_combo = true);
 
-#endif //PPQA_CPP_CPP_COMBO_H
+#endif

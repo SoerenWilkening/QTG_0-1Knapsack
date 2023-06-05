@@ -4,15 +4,15 @@
 
 #include "state_generator.h"
 
-std::vector<state_node> initialize_states(int number, int bits) {
+std::vector<state_node> initialize_states(size_t number, bit_t bits) {
     std::vector<state_node> result(number);
 
 //    result.states = calloc(number, sizeof(state_node));
 
-    for (int i = 0; i < number; i++) {
+    for (size_t i = 0; i < number; i++) {
         result[i].amplitude = 1.;
-        result[i].P = 0;
-        result[i].Z = 0;
+        result[i].tot_profit = 0;
+        result[i].capacity = 0;
         mpz_init2(result[i].vector, bits);
 //        result[i].vector = 0.;
         result[i].ub = 0;
@@ -38,7 +38,7 @@ std::vector<state_node> breadth_first_search(knapsack_t* k,
     parent[0].ub = exact;
     parent[0].capacity = k->capacity;
     mpz_setbit(parent[0].vector, 1);
-    num_t zzz;
+    num_t opt_sol;
     double discarded = 0;
     long* t = static_cast<long *>(calloc(1, sizeof(long)));
     for (bit_t i = 0; i < k->size; ++i) {
@@ -50,25 +50,22 @@ std::vector<state_node> breadth_first_search(knapsack_t* k,
             if (parent[j].capacity < k->items[i].cost) children[a++] = parent[j];
             else {
                 /* item can be included */
-                zzz = cpp_combo_wrap(k->size, k->items, k->items + (k->size - 1), parent[j].capacity, data.name, t, i + 1); //TODO: Change data.name
+                opt_sol = cpp_combo_wrap(k->size, k->items, k->items + (k->size - 1), parent[j].capacity, data.name, t, i + 1); //TODO: Change data.name
 
-                int statement = zzz + parent[j].tot_profit > threshold;
-                int statement2 = zzz == parent[j].ub;
-
-                if (statement) {
+                if (opt_sol + parent[j].tot_profit > threshold) {
                     children[a] = parent[j];
-                    children[a].ub = zzz;
+                    children[a].ub = opt_sol;
                     /* amplitudes have to be changed */
                     if (states == "comp") {
                         children[a++].amplitude = parent[j].amplitude * sqrt((1 + (1 - mpz_tstbit(previous_sol, k->size - i - 1)) * bias) / (bias + 2));
                     } // need to check how to work with the integer (right now double) representation
                     else if (states == "single") children[a++].amplitude = parent[k].amplitude * sqrt(1. / (bias + 2));
 
-                    if (statement2) {
+                    if (opt_sol == parent[j].ub) {
                         /* other state was upper bound of parent node, so this has also to be evaluated */
-                        zzz = cpp_combo_wrap(k->size, k->items, k->items + (k->size - 1), parent[j].capacity - k->items[i].cost, data.name, t, i + 1); //TODO: Change data.name
-                        if (zzz + parent[j].tot_profit + k->items[i].profit > threshold) {
-                            children[a].ub = zzz;
+                        opt_sol = cpp_combo_wrap(k->size, k->items, k->items + (k->size - 1), parent[j].capacity - k->items[i].cost, data.name, t, i + 1); //TODO: Change data.name
+                        if (opt_sol + parent[j].tot_profit + k->items[i].profit > threshold) {
+                            children[a].ub = opt_sol;
                             children[a].capacity = parent[j].capacity - k->items[i].cost;
                             children[a].tot_profit = parent[j].tot_profit + k->items[i].profit;
 
@@ -96,8 +93,8 @@ std::vector<state_node> breadth_first_search(knapsack_t* k,
                     }
                 } else {
                     children[a].ub = parent[j].ub - k->items[i].profit;
-                    children[a].Z = parent[j].capacity - k->items[i].cost;
-                    children[a].P = parent[j].tot_profit + k->items[i].profit;
+                    children[a].capacity = parent[j].capacity - k->items[i].cost;
+                    children[a].tot_profit = parent[j].tot_profit + k->items[i].profit;
 
                     mpz_set(children[a].vector, parent[j].vector);
                     mpz_setbit(children[a].vector, k->size - 1 - i);
@@ -122,7 +119,7 @@ std::vector<state_node> breadth_first_search(knapsack_t* k,
 //
 //        for(int i = 0; i < a; i++) {
 //            total += pow(children[i].amplitude, 2);
-//            if (children[i].amplitude < thr and children[i].ub + children[i].P != exact) {
+//            if (children[i].amplitude < thr and children[i].ub + children[i].tot_profit != exact) {
 //                discarded += pow(children[i].amplitude, 2);
 //                count++;
 //            }
@@ -132,7 +129,7 @@ std::vector<state_node> breadth_first_search(knapsack_t* k,
 //        parent.resize(a - count);
 //        int d = 0;
 //        for(int i = 0; i < a; i++) {
-//            if (children[i].amplitude >= thr or children[i].ub + children[i].P == exact) parent[d++] = children[i];
+//            if (children[i].amplitude >= thr or children[i].ub + children[i].tot_profit == exact) parent[d++] = children[i];
 //        }
 
 //        printf("item = %d d = %d prob = %f, max_amp = %f, thr = %f\n", i, d, total, max_amp, thr);

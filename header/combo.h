@@ -1,3 +1,14 @@
+#ifndef COMBO_H
+#define COMBO_H
+/* 
+ * =============================================================================
+ *                                  C++ check
+ * =============================================================================
+ */
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /* ======================================================================
       	     combo.h,    S.Martello, D.Pisinger, P.Toth     feb 1997
@@ -55,3 +66,8 @@ extern stype combo(item *f, item *l, stype c, stype lb, stype ub,
 /* relx: relaxed problem is solved (no more relaxations will be made)   */
 /* returns the objective value of the problem                           */
 
+#ifdef __cplusplus
+}
+#endif
+
+#endif

@@ -1,14 +1,11 @@
-main: main.o qtg_count.o simulate.o knapsack.o combo.o
-	clang -Wall -g -o main main.o qtg_count.o simulate.o knapsack.o combo.o
+gain: gain.o combo_wrap.o knapsack.o combo.o
+	clang++ -Wall -g -o gain gain.o combo_wrap.o knapsack.o combo.o
 
-main.o: main.c
-	clang -Wall -g -c main.c
+gain.o: gain.cpp
+	clang++ -Wall -g -c gain.cpp
 
-qtg_count.o: qtg_count.c
-	clang -Wall -g -c qtg_count.c
-
-simulate.o: simulate.c
-	clang -Wall -g -c simulate.c
+combo_wrap.o: combo_wrap.cpp
+	clang++ -Wall -g -c combo_wrap.cpp
 
 knapsack.o: knapsack.c
 	clang -Wall -g -c knapsack.c

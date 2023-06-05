@@ -13,6 +13,7 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <inttypes.h>
+#include <math.h>
 
 /* 
  * =============================================================================
@@ -32,7 +33,7 @@ extern "C" {
 
 typedef uint8_t     bool_t;             /* logical variable         */
 typedef uint32_t    bit_t;              /* bit/qubit counting       */
-typedef uint64_t    num_t;              /* large integers           */
+typedef long        num_t;              /* large integers           */
 typedef double      ratio_t;            /* ratios                   */
 typedef uint32_t    count_t;            /* gate, cycle counting     */
 
@@ -45,7 +46,7 @@ typedef uint32_t    count_t;            /* gate, cycle counting     */
  *      profit:     Integer profit of the item.
  *      included:   Marks whether item is included into knapsack.
  */
-typedef struct item {
+typedef struct k_item {
 	num_t cost;
 	num_t profit;
     bool_t included;
@@ -61,6 +62,7 @@ typedef struct item {
  *      remain_cost:    Integer remaining cost of the knapsack.
  *      tot_profit:     Integer total profit of the knapsack.
  *      items:          Array of assigned items.
+ *      name:           Instance name.
  */
 typedef struct knapsack {
 	bit_t size;
@@ -68,6 +70,7 @@ typedef struct knapsack {
 	num_t remain_cost;
 	num_t tot_profit;
 	item_t* items;
+    char* name; 
 } knapsack_t;
 
 typedef enum sort {

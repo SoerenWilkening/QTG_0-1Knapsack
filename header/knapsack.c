@@ -5,10 +5,6 @@
  */
 
 #include "knapsack.h"
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <math.h>
 
 /* 
  * =============================================================================
@@ -122,6 +118,7 @@ create_empty_knapsack(bit_t size, num_t capacity) {
     new_knapsack->remain_cost = capacity;
     new_knapsack->tot_profit = 0;
     new_knapsack->items = calloc(size, sizeof(item_t));
+    new_knapsack->name = malloc(256 * sizeof(char));
     return new_knapsack;
 }
 
@@ -175,13 +172,12 @@ create_pisinger_knapsack(category_t category, size_t num_file, bit_t size, \
           (num_instance - 1) * (7 + size) + 2) {
         ++num_line;
     }
-    printf("Current line after skip: %s", line);
 
     num_t capacity = atoi(fgets(line, sizeof(line), stream) + 2);
 
-    printf("Current line after capacity: %s", line);
-
     knapsack_t* new_knapsack = create_empty_knapsack(size, capacity);
+    filename[strlen(filename) - 4] = '\0';
+    sprintf(new_knapsack->name, "%s", filename);
 
     do {
         fgets(line, sizeof(line), stream);
@@ -190,7 +186,6 @@ create_pisinger_knapsack(category_t category, size_t num_file, bit_t size, \
     num_line = 0;
     while (fgets(line, sizeof(line), stream) != NULL && num_line < size) {
         line_pos = profit_pos = cost_pos = 0;
-        printf("Current line: %s", line);
         /* skip item number and first comma */
         while(line[line_pos++] != ',') {
             ;
@@ -201,7 +196,6 @@ create_pisinger_knapsack(category_t category, size_t num_file, bit_t size, \
             ;
         }
         profit[profit_pos - 1] = '\0';
-        printf("Current profit string: %s\n", profit);
 
         new_knapsack->items[num_line].profit = atoi(profit);
 
@@ -210,7 +204,6 @@ create_pisinger_knapsack(category_t category, size_t num_file, bit_t size, \
             ;
         }
         cost[cost_pos - 1] = '\0';
-        printf("Current cost string: %s\n", cost);
 
         new_knapsack->items[num_line].cost = atoi(cost);
 
@@ -234,6 +227,7 @@ assign_item_values(knapsack_t* k, num_t costs[], num_t profits[]) {
 void
 free_knapsack(knapsack_t* k) {
     free(k->items);
+    //free(k->name);
     free(k);
 }
 
@@ -455,7 +449,7 @@ cost_sum(const knapsack_t* k) {
 
 bool_t
 is_trivial(const knapsack_t* k) {
-    return (cost_sum(k) < k->capacity) || (min_cost(k) > capacity);
+    return (cost_sum(k) < k->capacity) || (min_cost(k) > k->capacity);
 }
 
 num_t
@@ -523,30 +517,30 @@ get_ub(const knapsack_t* k, ub_t method) {
 
 void
 print_knapsack(knapsack_t* k) {
-    bit_t item_column_size = MAX(4, num_digits(k->size));
-    bit_t cost_column_size = MAX(4, num_digits(max_cost(k)));
-    bit_t profit_column_size = MAX(6, num_digits(max_profit(k)));
-    printf("Knapsack information\n");
-    printf("--------------------\n");
-    printf(" - number of asssigned items: %"PRIu64"\n", (uint64_t)k->size);
+    bit_t item_col = MAX(4, num_digits(k->size));
+    bit_t cost_col = MAX(4, num_digits(max_cost(k)));
+    bit_t profit_col = MAX(6, num_digits(max_profit(k)));
+    printf("Instance: %s\n", k->name);
+    for(size_t i = 0; i < 10 + strlen(k->name); ++i) {
+        printf("-");
+    }
+    printf("\n - number of asssigned items: %"PRIu64"\n", (uint64_t)k->size);
     printf(" - capacity: %"PRIu64"\n", (uint64_t)k->capacity);
     printf(" - remaining cost: %"PRIu64"\n", (uint64_t)k->remain_cost);
     printf(" - total profit: %"PRIu64"\n\n", (uint64_t)k->tot_profit);
-    printf("|%*s|", item_column_size, "item");
-    printf("%*s|", cost_column_size, "cost");
-    printf("%*s|", profit_column_size, "profit");
+    printf("|%*s|", item_col, "item");
+    printf("%*s|", cost_col, "cost");
+    printf("%*s|", profit_col, "profit");
     printf("included|\n");
     for (size_t i = 0; i <= k->size; ++i) {
-        for (size_t j = 0; j < (item_column_size +
-                                cost_column_size +
-                                profit_column_size + 13); ++j) {
+        for (size_t j = 0; j < (item_col + cost_col + profit_col + 13); ++j) {
             printf("-");
         }
         printf("\n");
         if (i != k->size) {
-            printf("|%*zu|", item_column_size, i + 1);
-            printf("%*"PRIu64"|", cost_column_size, k->items[i].cost);
-            printf("%*"PRIu64"|", profit_column_size, k->items[i].profit);
+            printf("|%*zu|", item_col, i + 1);
+            printf("%*"PRIu64"|", cost_col, (uint64_t)k->items[i].cost);
+            printf("%*"PRIu64"|", profit_col, (uint64_t)k->items[i].profit);
             printf("%8s|\n", (k->items[i].included) ? "yes" : "no");
         }
     }

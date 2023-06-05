@@ -2,11 +2,15 @@
 // Created by Sören Wilkening on 10.05.23.
 //
 
-#ifndef PPQA_CPP_STATE_GENERATOR_H
-#define PPQA_CPP_STATE_GENERATOR_H
+#ifndef STATE_GENERATOR_H
+#define STATE_GENERATOR_H
 
 #include "cpp_combo.h"
+#include <vector>
+#include <iostream>
+#include <gmpxx.h>
 #include <string>
+
 
 typedef struct {
     num_t tot_profit;
@@ -24,4 +28,4 @@ std::vector<state_node> breadth_first_search(knapsack_instance data,
                                              mpz_t previous_sol = 0,
                                              std::string ub = "no");
 
-#endif //PPQA_CPP_STATE_GENERATOR_H
+#endif

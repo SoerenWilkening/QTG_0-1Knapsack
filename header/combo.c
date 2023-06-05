@@ -52,7 +52,7 @@
 #include <stdarg.h>
 #include <string.h>
 #include <math.h>
-#include <malloc.h>
+//#include <malloc.h>
 
 
 /* ======================================================================
