@@ -46,6 +46,7 @@
 
 #undef HASCHANCE             /* should strong upper bounds be used? */
 
+#include "combo.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include <time.h>
@@ -99,11 +100,11 @@ typedef double        prod;    /* product of state, item   */
 typedef int (*funcptr) (const void *, const void *);
 
 /* item record */
-typedef struct {
-  itype   p;              /* profit                  */
-  itype   w;              /* weight                  */
-  boolean x;              /* solution variable       */
-} item;
+//typedef struct {
+//  itype   p;              /* profit                  */
+//  itype   w;              /* weight                  */
+//  boolean x;              /* solution variable       */
+//} item;
 
 /* interval record */
 typedef struct {
