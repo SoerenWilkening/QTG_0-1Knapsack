@@ -4,6 +4,18 @@
 
 #include "simulator.h"
 
+int sampling(std::vector<double> *probabilities) {
+
+    double total = 0;
+    for (int i = 0; i < probabilities->size(); ++i) total = total + probabilities->at(i);
+    if (total != 1.) throw std::invalid_argument("\n\nProbabilities don't sum to 1");
+
+    std::discrete_distribution<int> dist(probabilities->begin(), probabilities->end());
+
+    std::mt19937 generator(std::random_device{}());  // initialize the Mersenne Twister generator
+    return dist(generator);
+}
+
 
 std::vector<state_node> QMaxSearch::amplitude_amplification(long threshold, int calls) {
 
