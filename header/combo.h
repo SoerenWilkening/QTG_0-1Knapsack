@@ -36,27 +36,10 @@ typedef struct {
 } item;
 
 /* ======================================================================
-	  		        debug variables 
-   ====================================================================== */
-
-extern long simpreduced;
-extern long iterates;
-extern long maxstates;
-extern long coresize;
-extern long optsur;
-extern long relaxations;
-extern long relfeasible;
-extern long reltime;
-extern long pitested;
-extern long pireduced;
-extern long dynheur;
-
-
-/* ======================================================================
 			      forward declarations
    ====================================================================== */
 
-extern stype combo(item *f, item *l, stype c, stype lb, stype ub,
+stype combo(item *f, item *l, stype c, stype lb, stype ub,
                    boolean def, boolean relx);
 /* f,l : first, last item                                               */
 /* c   : capacity of knapsack                                           */
