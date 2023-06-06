@@ -1213,7 +1213,7 @@ static void findbreak(allinfo *a)
 				combo
    ====================================================================== */
 
-extern stype combo(item *f, item *l, stype c, stype lb, stype ub,
+stype combo(item *f, item *l, stype c, stype lb, stype ub,
             boolean def, boolean relx)
 /* f,l : first, last item                                               */
 /* c   : capacity of knapsack                                           */

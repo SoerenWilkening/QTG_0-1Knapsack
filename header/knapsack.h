@@ -31,7 +31,7 @@ extern "C" {
  * =============================================================================
  */
 
-typedef uint8_t     bool_t;             /* logical variable         */
+typedef int     bool_t;                 /* logical variable         */
 typedef uint32_t    bit_t;              /* bit/qubit counting       */
 typedef long        num_t;              /* large integers           */
 typedef double      ratio_t;            /* ratios                   */
