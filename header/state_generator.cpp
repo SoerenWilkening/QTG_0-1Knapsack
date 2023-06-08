@@ -6,10 +6,8 @@
 
 std::vector<state_node> initialize_states(size_t number, bit_t bits) {
     std::vector<state_node> result(number);
-
 //    result.states = calloc(number, sizeof(state_node));
-
-    for (size_t i = 0; i < number; i++) {
+    for (size_t i = 0; i < number; ++i) {
         result[i].amplitude = 1.;
         result[i].tot_profit = 0;
         result[i].capacity = 0;
@@ -40,19 +38,21 @@ std::vector<state_node> breadth_first_search(knapsack_t* k,
     mpz_setbit(parent[0].vector, 1);
     num_t opt_sol;
     double discarded = 0;
-    long* t = static_cast<long *>(calloc(1, sizeof(long)));
+    long* t = static_cast<long*>(calloc(1, sizeof(long)));
     for (bit_t i = 0; i < k->size; ++i) {
         a = 0;
         std::vector<state_node> children = initialize_states(2 * num_states, k->size);
 
         for (size_t j = 0; j < num_states; ++j) {
-            /* checking if item cannot be included */
-            if (parent[j].capacity < k->items[i].cost) children[a++] = parent[j];
-            else {
-                /* item can be included */
-                opt_sol = cpp_combo_wrap(k->size, k->items, k->items + (k->size - 1), parent[j].capacity, data.name, t, i + 1); //TODO: Change data.name
+            if (parent[j].capacity < k->items[i].cost) {
+                /* item cannot be included, thus no branching */
+                children[a++] = parent[j];
+            } else {
+                /* item can be included, calculate objective value */
+                opt_sol = cpp_combo_wrap(k, k->items, k->items + (k->size - 1), parent[j].capacity, data.name, t, i + 1); //TODO: Change data.name
 
                 if (opt_sol + parent[j].tot_profit > threshold) {
+                    /* */
                     children[a] = parent[j];
                     children[a].ub = opt_sol;
                     /* amplitudes have to be changed */

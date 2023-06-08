@@ -10,34 +10,44 @@
 
 #include "combo_wrap.h"
 
+/* 
+ * =============================================================================
+ *                                   macros
+ * =============================================================================
+ */
+
 #define TRUE                    1
 #define FALSE                   0
 
 num_t cpp_combo_wrap(knapsack_t* k,
                     bit_t first_item,
                     bool_t define_sol,
+                    bool_t relx,
                     bool_t exec_combo) {
 
     num_t opt_sol;
-    
-    /* we fist check if the instance is trivial. If it is, combo runs into problems */
-    if (is_trivial(k)) {
-        return 0;
+    num_t trivial_profit;
+    /* check whether instance is trivial */
+    if (is_trivial(k, &trivial_profit)) {
+        return trivial_profit;
     }
 
-    //Can I simply define the initial lower bound as zero?
+    /* Set lower and upper bound */
     num_t lbi = int_greedy(k, RATIO);
-    bool_t def = define_sol;
-    bool_t relx = FALSE;
-    num_t ubi = frac_greedy(k, RATIO);
+    //num_t ubi = frac_greedy(k, RATIO);
 
-    /* type punning: item_t to item */
-    item* f = (item*)(k->items);
-    item* l = (item*)(k->items + k->size - 1);
+    /* conversation of item_t structure to combo's item structure */
+    item items[k->size];
+    for (size_t i = 0; i < k->size; ++i) {
+        items[i].p = k->items[i].profit;
+        items[i].w = k->items[i].cost;
+        items[i].x = k->items[i].included;
+    }
+    item* f = items;
+    item* l = items + k->size - 1 - first_item; 
 
     if(exec_combo) {
-        opt_sol = combo(f, l, k->capacity, lbi, ubi, def, relx); //opt_sol is the solution from the algorithm
-
+        opt_sol = combo(f, l, k->capacity, lbi, 0, define_sol, relx); //opt_sol is the solution from the algorithm
     }
     return opt_sol;
 }

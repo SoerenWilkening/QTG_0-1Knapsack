@@ -31,8 +31,8 @@ extern "C" {
  * =============================================================================
  */
 
-typedef int     bool_t;                 /* logical variable         */
-typedef uint32_t    bit_t;              /* bit/qubit counting       */
+typedef int         bool_t;             /* logical variable         */
+typedef int         bit_t;              /* bit/qubit counting       */
 typedef long        num_t;              /* large integers           */
 typedef double      ratio_t;            /* ratios                   */
 typedef uint32_t    count_t;            /* gate, cycle counting     */
@@ -47,8 +47,8 @@ typedef uint32_t    count_t;            /* gate, cycle counting     */
  *      included:   Marks whether item is included into knapsack.
  */
 typedef struct k_item {
-	num_t cost;
 	num_t profit;
+	num_t cost;
     bool_t included;
 } item_t;
 
@@ -433,13 +433,18 @@ num_t profit_sum(const knapsack_t*);
 num_t cost_sum(const knapsack_t*);
 
 /*
- * Function:    is_trivial
+ * Function:        is_trivial
  * -----------------------
- * Description: This function checks whether given knapsack instance is trivial.
- * Parameter:   Pointer to knapsack which should be checked.
- * Returns:     Whether knapsack is trivial or not.
+ * Description:     This function checks whether given knapsack instance is
+ *                  trivial and if so saves the optimal profit at the given
+ *                  address.
+ * Parameters:   
+ *      parameter1: Pointer to knapsack which should be checked.
+ *      parameter2: Pointer to the position where the optimal profit should be
+ *                  saved.
+ * Returns:         Whether knapsack is trivial or not.
  */
-bool_t is_trivial(const knapsack_t*);
+bool_t is_trivial(const knapsack_t*, num_t*);
 
 /*
  * Function:    int_greedy

@@ -169,7 +169,7 @@ create_pisinger_knapsack(category_t category, size_t num_file, bit_t size, \
     char line[256];
     size_t num_line = 0;
     while (fgets(line, sizeof(line), stream) != NULL && num_line < \
-          (num_instance - 1) * (7 + size) + 2) {
+          (num_instance - 1) * (7 + size) + 1) {
         ++num_line;
     }
 
@@ -178,6 +178,10 @@ create_pisinger_knapsack(category_t category, size_t num_file, bit_t size, \
     knapsack_t* new_knapsack = create_empty_knapsack(size, capacity);
     filename[strlen(filename) - 4] = '\0';
     sprintf(new_knapsack->name, "%s", filename);
+
+    do {
+        fgets(line, sizeof(line), stream);
+    } while(0);
 
     do {
         fgets(line, sizeof(line), stream);
@@ -448,8 +452,16 @@ cost_sum(const knapsack_t* k) {
 }
 
 bool_t
-is_trivial(const knapsack_t* k) {
-    return (cost_sum(k) < k->capacity) || (min_cost(k) > k->capacity);
+is_trivial(const knapsack_t* k, num_t* opt_profit) {
+    if (cost_sum(k) < k->capacity) {
+        *opt_profit = profit_sum(k);
+        return TRUE;
+    } else if (min_cost(k) > k->capacity) {
+        *opt_profit = 0;
+        return TRUE;
+    } else {
+        return FALSE;
+    }
 }
 
 num_t

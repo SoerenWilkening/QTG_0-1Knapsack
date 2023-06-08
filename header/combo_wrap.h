@@ -14,6 +14,12 @@
 #include "knapsack.h"
 #include "combo.h"
 
-num_t cpp_combo_wrap(knapsack_t*, bit_t, bool_t, bool_t);
+/* 
+ * =============================================================================
+ *                                  wrapper
+ * =============================================================================
+ */
+
+num_t cpp_combo_wrap(knapsack_t*, bit_t, bool_t, bool_t, bool_t);
 
 #endif
