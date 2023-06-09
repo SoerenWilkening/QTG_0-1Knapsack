@@ -1,10 +1,11 @@
 compile:
 	@echo "compile c files"
-	@gcc -c combo.c knapsack.c
+	@gcc -c stategen.c combowrp.c combo.c knapsack.c
 	@echo "create main executable"
-	@g++ -std=c++17 gain.cpp \
+	@gcc 			gain.c \
+					stategen.o \
+					combo_wrap.o \
 					combo.o \
-					combo_wrap.cpp \
-					knapsack.o -o gain
+					knapsack.o -o gain -lgmp
 	@echo "delete non used files"
-	@rm combo.o knapsack.o
+	@rm stategen.o combo_wrap.o combo.o knapsack.o

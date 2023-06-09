@@ -2,8 +2,8 @@
 // Created by Sören Wilkening on 10.05.23.
 //
 
-#ifndef COMBO_WRAP_H
-#define COMBO_WRAP_H
+#ifndef COMBOWRP_H
+#define COMBOWRP_H
 
 /* 
  * =============================================================================
@@ -16,10 +16,25 @@
 
 /* 
  * =============================================================================
+ *                                  C++ check
+ * =============================================================================
+ */
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+/* 
+ * =============================================================================
  *                                  wrapper
  * =============================================================================
  */
 
-num_t cpp_combo_wrap(knapsack_t*, bit_t, bool_t, bool_t, bool_t);
+num_t cpp_combo_wrap(knapsack_t*, bit_t, num_t, bool_t, bool_t, bool_t, \
+                     uint64_t* timerecord);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

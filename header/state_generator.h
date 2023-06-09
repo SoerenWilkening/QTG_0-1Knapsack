@@ -11,21 +11,20 @@
 #include <gmpxx.h>
 #include <string>
 
-
-typedef struct {
+typedef struct node {
     num_t tot_profit;
     num_t capacity;
     num_t ub;
     mpz_t vector;
     double amplitude;
-} state_node;
+} node_t;
 
-std::vector<state_node> breadth_first_search(knapsack_instance data,
-                                             long threshold,
-                                             long exact,
-                                             double bias = 0,
-                                             std::string states = "single",
-                                             mpz_t previous_sol = 0,
-                                             std::string ub = "no");
+typedef enum branch {
+    COMPARE,
+    SINGLE,
+} branch_t;
+
+std::vector<node> breadth_first_search(knapsack_instance data, num_t, num_t, \
+                                       double, branch_t, mpz_t);
 
 #endif

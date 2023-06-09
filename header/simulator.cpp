@@ -7,8 +7,12 @@
 int sampling(std::vector<double>* probabilities) {
 
     double total = 0;
-    for (size_t i = 0; i < probabilities->size(); ++i) total = total + probabilities->at(i);
-    if (total != 1.) throw std::invalid_argument("\n\nProbabilities don't sum to 1");
+    for (size_t i = 0; i < probabilities->size(); ++i) {
+        total = total + probabilities->at(i);
+    }
+    if (total != 1.) {
+        throw std::invalid_argument("\n\nProbabilities don't sum to 1");
+    }
 
     std::discrete_distribution<int> dist(probabilities->begin(), probabilities->end());
 
@@ -17,14 +21,14 @@ int sampling(std::vector<double>* probabilities) {
 }
 
 
-std::vector<state_node> QMaxSearch::amplitude_amplification(long threshold, int calls) {
+std::vector<node_t> QMaxSearch::amplitude_amplification(long threshold, int calls) {
 
     /* at this point bnb is always empty, but in a later stage maybe not */
     if (bnb.empty()) {
         bnb = breadth_first_search(data, threshold, exact, bias, states, previous_sol);
     }
 
-    std::vector<state_node> sample; // result will contain a single state -> the result of simulate
+    std::vector<node_t> sample; // result will contain a single state -> the result of simulate
 
     double total, factor;
 
@@ -59,11 +63,11 @@ std::vector<state_node> QMaxSearch::amplitude_amplification(long threshold, int 
     return sample;
 }
 
-std::vector<state_node> QMaxSearch::QSearch(long threshold, int M) {
+std::vector<node_t> QMaxSearch::QSearch(long threshold, int M) {
     int l = 0, m_tot = 0, m, j;
     double c = 6. / 5;
 
-    std::vector<state_node> sample;
+    std::vector<node_t> sample;
 
     while (m_tot < M) {
         m = ceil(pow(c, l));
@@ -106,18 +110,18 @@ std::vector<state_node> QMaxSearch::QSearch(long threshold, int M) {
         l++;
     }
     M_tot += m_tot;
-    return std::vector<state_node>(1, {0, 0});
+    return std::vector<node_t>(1, {0, 0});
 }
 
-std::vector<state_node> QMaxSearch::execute(int M) {
+std::vector<node_t> QMaxSearch::execute(int M) {
     M_tot = 0;
     qtg2.resize(4);
     gates2.resize(qtg2.size());
 
     int break_item = 0;
     double upper_bound = 0;
-    std::vector<state_node> sample = greedy(data.n, data.Z, data.p, data.z, 0, &break_item, &upper_bound);
-    std::vector<state_node> measured;
+    std::vector<node> sample = greedy(data.n, data.Z, data.p, data.z, 0, &break_item, &upper_bound);
+    std::vector<node> measured;
 
     mpz_set(previous_sol, sample[0].vector);
 

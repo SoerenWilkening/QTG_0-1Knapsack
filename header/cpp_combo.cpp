@@ -39,7 +39,7 @@ num_t cpp_combo_wrap(knapsack_t* k,
     }
 
     /* if it is not trivial, we check, if we have already caclulated and saved the combo output */
-    fs::path myFilePath = name + "/combo/size=" + std::to_string(k->size - first_item) + ".txt";
+    fs::path myFilePath = name + "/combo/size=" + std::to_string(k->size - first_item) + "_capacity=" + std::to_string(capacity) + ".txt";
 
     if (fileExists(myFilePath) && read) {
         FILE *file = fopen(myFilePath.c_str(), "r");

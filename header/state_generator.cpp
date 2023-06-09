@@ -4,9 +4,10 @@
 
 #include "state_generator.h"
 
-std::vector<state_node> initialize_states(size_t number, bit_t bits) {
-    std::vector<state_node> result(number);
-//    result.states = calloc(number, sizeof(state_node));
+std::vector<node_t>
+init_states(size_t number, bit_t bits) {
+    std::vector<node_t> result(number);
+//    result.states = calloc(number, sizeof(node_t));
     for (size_t i = 0; i < number; ++i) {
         result[i].amplitude = 1.;
         result[i].tot_profit = 0;
@@ -18,131 +19,210 @@ std::vector<state_node> initialize_states(size_t number, bit_t bits) {
     return result;
 }
 
-std::vector<state_node> breadth_first_search(knapsack_t* k,
-                                             num_t threshold,
-                                             num_t exact,
-                                             double bias,
-                                             std::string states,
-                                             mpz_t previous_sol) {
+std::vector<node_t>
+breadth_first_search(knapsack_t* k, num_t threshold, num_t exact, double bias, \
+                     branch_t method, mpz_t prev_sol) {
     /**
      * TODO:
      *  - include calculations of amplitudes
      *  - enable multiprocessing
      * */
-//    std::cout << "executing bnb" << std::endl;
 
-    size_t num_states = 1, a;
-    std::vector<state_node> parent = initialize_states(num_states, k->size);
+    size_t num_states = 1; /* start from the root */
+    size_t a = 0; /* start from leftmost node */
+    std::vector<node_t> parent = init_states(num_states, k->size);
     parent[0].ub = exact;
     parent[0].capacity = k->capacity;
-    mpz_setbit(parent[0].vector, 1);
     num_t opt_sol;
     double discarded = 0;
-    long* t = static_cast<long*>(calloc(1, sizeof(long)));
-    for (bit_t i = 0; i < k->size; ++i) {
-        a = 0;
-        std::vector<state_node> children = initialize_states(2 * num_states, k->size);
+    long* timer = static_cast<long*>(calloc(1, sizeof(long)));
+    for (bit_t i = 0; i < k->size; a = 0, ++i) { /* start from leftmost node */
+        std::vector<node_t> children = init_states(2 * num_states, k->size);
 
         for (size_t j = 0; j < num_states; ++j) {
             if (parent[j].capacity < k->items[i].cost) {
                 /* item cannot be included, thus no branching */
                 children[a++] = parent[j];
-            } else {
-                /* item can be included, calculate objective value */
-                opt_sol = cpp_combo_wrap(k, k->items, k->items + (k->size - 1), parent[j].capacity, data.name, t, i + 1); //TODO: Change data.name
+                continue;
+            }
+            /* 
+             * The item can be included. Calculate first the exact upper bound
+             * for the left subtree, i.e., where the current item is not
+             * included into the knapsack.
+             */
+            opt_sol = cpp_combo_wrap(k, i + 1, parent[j].capacity, FALSE, \
+                                     FALSE, TRUE, timer);
 
-                if (opt_sol + parent[j].tot_profit > threshold) {
-                    /* */
-                    children[a] = parent[j];
-                    children[a].ub = opt_sol;
-                    /* amplitudes have to be changed */
-                    if (states == "comp") {
-                        children[a++].amplitude = parent[j].amplitude * sqrt((1 + (1 - mpz_tstbit(previous_sol, k->size - i - 1)) * bias) / (bias + 2));
-                    } // need to check how to work with the integer (right now double) representation
-                    else if (states == "single") children[a++].amplitude = parent[k].amplitude * sqrt(1. / (bias + 2));
+            if (opt_sol + parent[j].tot_profit > threshold) {
+                /*
+                 * The left subtree has at least one state with objective value
+                 * higher than the threshold. Therefore it cannot be omitted.
+                 */
 
-                    if (opt_sol == parent[j].ub) {
-                        /* other state was upper bound of parent node, so this has also to be evaluated */
-                        opt_sol = cpp_combo_wrap(k->size, k->items, k->items + (k->size - 1), parent[j].capacity - k->items[i].cost, data.name, t, i + 1); //TODO: Change data.name
-                        if (opt_sol + parent[j].tot_profit + k->items[i].profit > threshold) {
-                            children[a].ub = opt_sol;
-                            children[a].capacity = parent[j].capacity - k->items[i].cost;
-                            children[a].tot_profit = parent[j].tot_profit + k->items[i].profit;
+                children[a] = parent[j]; /* transfer information from parent */
+                children[a].ub = opt_sol; /* set new upper bound */
 
-                            mpz_set(children[a].vector, parent[j].vector);
-                            mpz_setbit(children[a].vector, k->size - 1 - i);
+                /* update amplitudes, then increase children index */
+                switch (method) {
+                    case COMPARE: {
+                        children[a++].amplitude *= sqrt((1 + (1 \
+                         - mpz_tstbit(prev_sol, k->size - i - 1)) * bias) \ 
+                         / (bias + 2));
+                        break;
+                    }
 
-//                            if (states == "comp") children[a++].amplitude = 1; // need to check how to work with the integer (right now double) representation
-                            if (states == "comp") {
-                                children[a++].amplitude = parent[j].amplitude * sqrt((1 + mpz_tstbit(previous_sol, k->size - i - 1) * bias) / (bias + 2));
-                            } // need to check how to work with the integer (right now double) representation
-                            else if (states == "single") children[a++].amplitude = parent[j].amplitude * sqrt((1. + bias) / (bias + 2));
-                        }
-                    } else {
-                        children[a].ub = parent[j].ub - k->items[i].profit;
-                        children[a].capacity = parent[j].capacity - k->items[i].cost;
-                        children[a].tot_profit = parent[j].tot_profit + k->items[i].profit;
+                    case SINGLE: {
+                        children[a++].amplitude *= sqrt(1. / (bias + 2));
+                        break;
+                    }
 
+                    default: {
+                        return -1;
+                    }
+                }
+
+                if (opt_sol == parent[j].ub) {
+                    /* The upper bound of left subtree was already the upper
+                     * bound for the entire tree. The upper bound for the right
+                     * subtree has to be calculated, too. Here, the current item
+                     * is considered to be included into the knapsack.
+                     */
+
+                    opt_sol = cpp_combo_wrap(k, i + 1, parent[j].capacity \
+                                             - k->items[i].cost, FALSE, FALSE, \
+                                             TRUE, timer);
+
+                    if (opt_sol + parent[j].tot_profit \
+                        + k->items[i].profit > threshold) {
+                        /*
+                         * The right subtree has at least one state with
+                         * objective value higher than the threshold. Therefore
+                         * it cannot be omitted.
+                         */
+                        
+                        children[a].ub = opt_sol; /* set new upper bound */
+                        /* subtract current item cost from capacity */
+                        children[a].capacity = parent[j].capacity \
+                                               - k->items[i].cost;
+                        /* add current item profit to total profit */
+                        children[a].tot_profit = parent[j].tot_profit \
+                                                 + k->items[i].profit;
+
+                        /* 
+                         * copy binary vector from parent, but include current
+                         * item, i.e., set the corresponding bit to 1.
+                         */
                         mpz_set(children[a].vector, parent[j].vector);
                         mpz_setbit(children[a].vector, k->size - 1 - i);
 
-                        if (states == "comp") {
-                            children[a++].amplitude = parent[j].amplitude * sqrt((1 + mpz_tstbit(previous_sol, k->size - i - 1) * bias) / (bias + 2));
-                        } // need to check how to work with the integer (right now double) representation
-                        else if (states == "single") children[a++].amplitude = parent[j].amplitude * sqrt((1. + bias) / (bias + 2));
+                        /* update amplitudes, then increase children index */
+                        switch (method) {
+                            case COMPARE: {
+                                children[a++].amplitude *= sqrt((1 \
+                                + mpz_tstbit(prev_sol, k->size - i - 1) * bias) \ 
+                                / (bias + 2));
+                                break;
+                            }
+
+                            case SINGLE: {
+                                children[a++].amplitude = parent[j].amplitude \
+                                 * sqrt((1. + bias) / (bias + 2));
+                                break;
+                            }
+
+                            default: {
+                                return -1;
+                            }
+                        }
                     }
                 } else {
-                    children[a].ub = parent[j].ub - k->items[i].profit;
-                    children[a].capacity = parent[j].capacity - k->items[i].cost;
-                    children[a].tot_profit = parent[j].tot_profit + k->items[i].profit;
+                    /* The upper bound of right subtree is the upper bound for
+                     * the entire tree and thus does not have to be calculated
+                     * again. Especially, its upper bound is also above the
+                     * threshold and therefore has to be included.
+                     */
 
+                    /* set new upper bound */
+                    children[a].ub = parent[j].ub - k->items[i].profit;
+                    /* subtract current item cost from capacity */
+                    children[a].capacity = parent[j].capacity \
+                                           - k->items[i].cost;
+                    /* add current item profit to total profit */
+                    children[a].tot_profit = parent[j].tot_profit \
+                                             + k->items[i].profit;
+
+                    /* 
+                     * copy binary vector from parent, but include current
+                     * item, i.e., set the corresponding bit to 1.
+                     */
                     mpz_set(children[a].vector, parent[j].vector);
                     mpz_setbit(children[a].vector, k->size - 1 - i);
 
-                    if (states == "comp") {
-                        children[a++].amplitude = parent[j].amplitude * sqrt((1 + mpz_tstbit(previous_sol, k->size - i - 1) * bias) / (bias + 2));
-                    } // need to check how to work with the integer (right now double) representation
-                    else if (states == "single") children[a++].amplitude = parent[j].amplitude * sqrt((1. + bias) / (bias + 2));
+                    /* update amplitudes, then increase children index */
+                    switch (method) {
+                        case COMPARE: {
+                            children[a++].amplitude *= sqrt((1 \
+                            + mpz_tstbit(prev_sol, k->size - i - 1) * bias) \ 
+                            / (bias + 2));
+                            break;
+                        }
+
+                        case SINGLE: {
+                            children[a++].amplitude = parent[j].amplitude \
+                                * sqrt((1. + bias) / (bias + 2));
+                            break;
+                        }
+
+                        default: {
+                            return -1;
+                        }
+                    }
+                }
+            } else {
+                /* left subtree is omitted, but right subtree is not */
+
+                /* set new upper bound */
+                children[a].ub = parent[j].ub - k->items[i].profit;
+                /* subtract current item cost from capacity */
+                children[a].capacity = parent[j].capacity - k->items[i].cost;
+                /* add current item profit to total profit */
+                children[a].tot_profit = parent[j].tot_profit \
+                                         + k->items[i].profit;
+
+                /* 
+                 * copy binary vector from parent, but include current
+                 * item, i.e., set the corresponding bit to 1.
+                 */
+                mpz_set(children[a].vector, parent[j].vector);
+                mpz_setbit(children[a].vector, k->size - 1 - i);
+
+                switch (method) {
+                    case COMPARE: {
+                        children[a++].amplitude *= sqrt((1 \
+                        + mpz_tstbit(prev_sol, k->size - i - 1) * bias) \ 
+                        / (bias + 2));
+                        break;
+                    }
+
+                    case SINGLE: {
+                        children[a++].amplitude = parent[j].amplitude \
+                            * sqrt((1. + bias) / (bias + 2));
+                        break;
+                    }
+
+                    default: {
+                        return -1;
+                    }
                 }
             }
         }
-
-//        double max_amp = 0, factor = 0.000075;
-//        for(int i = 0; i < a; i++) {
-//            if (children[i].amplitude > max_amp) max_amp = children[i].amplitude;
-//        }
-//        double total = 0, thr = 0;
-////        if (max_amp / 500 < factor) thr = max_amp / 500;
-////        else thr = factor;
-//
-//        int count = 0;
-//
-//        for(int i = 0; i < a; i++) {
-//            total += pow(children[i].amplitude, 2);
-//            if (children[i].amplitude < thr and children[i].ub + children[i].tot_profit != exact) {
-//                discarded += pow(children[i].amplitude, 2);
-//                count++;
-//            }
-//        }
-////        std::cout << i << " " << a << " " << total << " " << count << " " << discarded << " " << discarded * pow(2, - (double) (k->size - i)) << std::endl;
-//        parent.clear();
-//        parent.resize(a - count);
-//        int d = 0;
-//        for(int i = 0; i < a; i++) {
-//            if (children[i].amplitude >= thr or children[i].ub + children[i].tot_profit == exact) parent[d++] = children[i];
-//        }
-
-//        printf("item = %d d = %d prob = %f, max_amp = %f, thr = %f\n", i, d, total, max_amp, thr);
-//        num_states = d;
-
+        /* declare current layer the parent layer and clear parent layer */
         std::swap(parent, children);
         children.clear();
         children.shrink_to_fit();
         num_states = a;
-
     }
+    /* final layer is comprised of all feasible paths above threshold */
     parent.resize(num_states);
-//    std::cout << "total discarded = " << discarded << std::endl;
-
     return parent;
 }
