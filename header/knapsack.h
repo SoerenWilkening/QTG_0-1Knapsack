@@ -14,6 +14,7 @@
 #include <stdint.h>
 #include <inttypes.h>
 #include <math.h>
+#include <gmp.h>
 
 /* 
  * =============================================================================
@@ -103,7 +104,7 @@ typedef enum category {
 /*
  * Function:    get_sort_name
  * --------------------------
- * Description: This function returns a sorting method's name as a string.
+ * Description: This function returns the name of a sorting mehtod.
  * Parameter:   Sorting method.
  * Returns:     Sorting method's name as a string.
  */
@@ -112,7 +113,7 @@ const char* get_sort_name(sort_t);
 /*
  * Function:    get_lb_name
  * ------------------------
- * Description: This function returns the of a lower bound method as a string.
+ * Description: This function returns the name of a lower bound method.
  * Parameter:   Lower bound method.
  * Returns:     Lower bound method's name as a string.
  */
@@ -121,11 +122,21 @@ const char* get_lb_name(lb_t);
 /*
  * Function:    get_ub_name
  * ------------------------
- * Description: This function returns the of an upper bound method as a string.
+ * Description: This function returns the name of an upper bound method.
  * Parameter:   Upper bound method.
  * Returns:     Upper bound method's name as a string.
  */
 const char* get_ub_name(ub_t);
+
+/*
+ * Function:    get_category_name
+ * ------------------------------
+ * Description: This function returns the name of a category for a Pisinger
+ *              knapsack.
+ * Parameter:   Category.
+ * Returns:     Category's name as a string.
+ */
+const char* get_category_name(category_t);
 
 /* 
  * =============================================================================
@@ -339,6 +350,18 @@ void apply_int_greedy(knapsack_t*);
  *                              knapsack information
  * =============================================================================
  */
+
+/*
+ * Function:    bit_rep
+ * --------------------
+ * Description:     This function returns writes the current assignment of items
+ *                  of a knapsack in a given bit string.
+ * Parameters:
+ *      parameter1: Pointer to knapsack for which the current item assignment
+ *                  should be translated into a bit string.
+ *      parameter2: Bit string which should carry the current item assignment.
+ */
+void bit_rep(const knapsack_t*, mpz_t);
 
 /*
  * Function:    tot_cost

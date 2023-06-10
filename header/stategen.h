@@ -27,11 +27,15 @@ extern "C" {
  * =============================================================================
  */
 
-typedef struct node {
+typedef struct state {
     num_t tot_profit;
+    mpz_t vector;
+} state_t;
+
+typedef struct node {
+    state_t state;
     num_t capacity;
     num_t ub;
-    mpz_t vector;
     double prob;
 } node_t;
 

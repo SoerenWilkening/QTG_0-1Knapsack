@@ -30,7 +30,7 @@ extern "C" {
  * =============================================================================
  */
 
-num_t cpp_combo_wrap(knapsack_t*, bit_t, num_t, bool_t, bool_t, bool_t, \
+num_t combo_wrap(knapsack_t*, bit_t, num_t, bool_t, bool_t, bool_t, \
                      uint64_t* timerecord);
 
 #ifdef __cplusplus

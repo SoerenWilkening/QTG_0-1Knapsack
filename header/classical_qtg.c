@@ -1,38 +1,29 @@
 #include "knapsack.h"
-#include <stdlib.h>
+#include "combowrp.h"
 #include <time.h>
-#include "dcmt-master/include/dc.h"
+#include <gsl/gsl_rng.h>
 
 #define TRUE                    1
 #define FALSE                   0
 
+gsl_rng * r;  /* global generator */
+
 int main() {
 
-	int i,j;
-    mt_struct *mts;
+	double bias = 0.5;
 
-    /* This trys to find a small Mersenne Twister with period 2^521-1. */
-    mts = get_mt_parameter_st(32,521,4172);
-    if (mts == NULL) {
-        printf ("error\n");
-    }
-    else {
-        sgenrand_mt(3241, mts);
-        for (i=0; i<100; i++) {
-            for (j=0; j<5; j++)
-                printf("%8"PRIx32" ", genrand_mt(mts));
-            printf("\n");
-        }
-        free_mt_struct(mts);
-    }
+	const gsl_rng_type * T;
+
+	gsl_rng_env_setup();
+
+	T = gsl_rng_default;
+	r = gsl_rng_alloc(T);
 
 	double random_num;
 
-	printf("Hi\n");
+	int i,j;
 
-	knapsack_t* k = create_pisinger_knapsack(SMALL, 1, 50, 1000, 1);
-
-	bool_t included[k->size];
+	knapsack_t* k = create_pisinger_knapsack(HARD, 14, 10000, 1000, 1);
 
 	sort_knapsack(k, RATIO);
 
@@ -40,24 +31,27 @@ int main() {
 
 	print_knapsack(k);
 
-	for (bit_t i = 0; i < k->size; ++i) {
-		included[i] = k->items[i].included;
-	}
-
 	num_t cur_opt = k->tot_profit;
 	printf("Starting objective value is: %"PRIu64"\n", (uint64_t)cur_opt);
+
+	mpz_t cur_sol;
+	mpz_init2(cur_sol, k->size);
+	bit_rep(k, cur_sol);
 
 	remove_all_items(k);
 
 	size_t iteration = 0;
 
-	while (iteration < 10) {
+	num_t exact_opt = combo_wrap(k, 0, k->capacity, TRUE, FALSE, TRUE, NULL);
+
+	printf("The optimal profit is given by %"PRIu64".\n", (uint64_t)exact_opt);
+
+	while (iteration < 10000000) {
 		for (bit_t i = 0; i < k->size; ++i) {
 			if (k->items[i].cost <= k->remain_cost) {
-				srand(time(NULL));
-				random_num = (double)rand() / RAND_MAX; // Generate a random number between 0 and 1
-				printf("%f", random_num);
-				if (random_num < 1. / 2) {
+				random_num = gsl_rng_uniform(r);
+				if (random_num > (1 + (1 - mpz_tstbit(cur_sol, k->size - i - 1)) \
+                          * bias) / (bias + 2)) {
 					put_item(k, i);
 				}
 			}
@@ -65,8 +59,13 @@ int main() {
 		if (k->tot_profit > cur_opt) {
 			cur_opt = k->tot_profit;
 			printf("Updated optimum: %"PRIu64".\n", (uint64_t)cur_opt);
-			for (bit_t i = 0; i < k->size; ++i) {
-				included[i] = k->items[i].included;
+			for (bit_t j = 0; j < k->size; ++j) {
+				bit_rep(k, cur_sol);
+			}
+			if (cur_opt == exact_opt) {
+				printf("Achieved optimum of %"PRIu64" after %zu iterations.\n", \
+					   (uint64_t)cur_opt, iteration);
+				break;
 			}
 		}
 		remove_all_items(k);
@@ -74,6 +73,7 @@ int main() {
 	}
 
 	free_knapsack(k);
+	gsl_rng_free(r);
 
 	return 0;
 }

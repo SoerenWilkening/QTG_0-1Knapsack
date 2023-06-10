@@ -77,6 +77,27 @@ get_ub_name(ub_t method) {
     }
 }
 
+const char*
+get_category_name(category_t category) {
+    switch (category) {
+        case SMALL: {
+            return "Small coefficients";
+        }
+
+        case LARGE: {
+            return "Large coefficients";
+        }
+
+        case HARD: {
+            return "Hard instances";
+        }
+
+        default: {
+            return "";
+        }
+    }
+}
+
 /* 
  * =============================================================================
  *                              number of digits
@@ -369,6 +390,17 @@ apply_int_greedy(knapsack_t* k) {
  *                              knapsack information
  * =============================================================================
  */
+
+void
+bit_rep(const knapsack_t* k, mpz_t bit_string) {
+    for(bit_t i = 0; i < k->size; ++i) {
+        if (k->items[i].included) {
+        mpz_setbit(bit_string, k->size - 1 - i);
+        } else {
+            mpz_clrbit(bit_string, k->size - 1 -i);
+        }
+    }
+}
 
 num_t
 tot_cost(const knapsack_t* k) {
