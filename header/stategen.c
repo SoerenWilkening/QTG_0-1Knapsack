@@ -1,6 +1,6 @@
 /* 
  * =============================================================================
- *                                  includes
+ *                            includes
  * =============================================================================
  */
 
@@ -8,7 +8,7 @@
 
 /* 
  * =============================================================================
- *                                   macros
+ *                            macros
  * =============================================================================
  */
 
@@ -20,7 +20,7 @@
 
 /* 
  * =============================================================================
- *                                 enum names
+ *                            enum names
  * =============================================================================
  */
 
@@ -43,67 +43,93 @@ get_branch_name(branch_t method) {
 
 /* 
  * =============================================================================
- *                              update probability
+ *                            branch probability
  * =============================================================================
  */
 
-void
-update_prob(knapsack_t* k, bit_t i, double bias, bool_t left, branch_t method, \
-            mpz_t cur_sol, double* prob) {
+double
+branch_prob(const knapsack_t* k, bit_t i, double bias, bool_t left, \
+            branch_t method, mpz_t cur_sol) {
     switch (method) {
         case COMPARE: {
             if (left) {
-                *prob *= (1 + (1 - mpz_tstbit(cur_sol, k->size - i - 1)) \
-                          * bias) / (bias + 2);
+                return (1 + (1 - mpz_tstbit(cur_sol, k->size - i - 1)) * bias) \
+                        / (bias + 2);
             } else {
-                *prob *= (1 + mpz_tstbit(cur_sol, k->size - i - 1) * bias) \
-                          / (bias + 2);
+                return (1 + mpz_tstbit(cur_sol, k->size - i - 1) * bias) \
+                        / (bias + 2);
             }
             break;
         }
 
         case SINGLE: {
             if (left) {
-                *prob *= sqrt(1. / (bias + 2));
+                return sqrt(1. / (bias + 2));
             } else {
-                *prob *= sqrt((1. + bias) / (bias + 2)); 
+                return sqrt((1. + bias) / (bias + 2)); 
             }
             
             break;
         }
 
         default: {
-            return;
+            printf("Unspecified branching method!\n");
+            return 0;
         }
     }
 }
 
 /* 
  * =============================================================================
- *                              breadth-first search
+ *                            Quantum Tree Generator
  * =============================================================================
  */
 
 node_t*
-breadth_first_search(knapsack_t* k, num_t threshold, num_t exact, double bias, \
-                     branch_t method, mpz_t cur_sol, size_t* num_states) {
+qtg(const knapsack_t* k, num_t threshold, num_t exact, \
+                     double bias, branch_t method, mpz_t cur_sol, \
+                     size_t* num_states) {
+    if (threshold == exact) {
+        /* return empty node array if optimal solution is already reached */
+        *num_states = 0;
+        return NULL;
+    }
 	*num_states = 1; /* start from the root */
     size_t a = 0; /* start from leftmost node */
+    /* initialize root node as single-element node_t array */
     node_t* parent = malloc(sizeof(node_t));
-    parent->state.tot_profit = 0;
-    mpz_init2(parent->state.vector, k->size);
+    parent->path.remain_cost = k->capacity;
+    parent->path.tot_profit = 0;
+    mpz_init(parent->path.vector);
     parent->prob = 1.;
-    parent->capacity = k->capacity;
     parent->ub = exact;
-    num_t opt_sol;
-    uint64_t* timer;
-    *timer = 0;
+    num_t left_ub, right_ub;
+    uint64_t timer;
+    timer = 0;
     for (bit_t i = 0; i < k->size; a = 0, ++i) { /* start from leftmost node */
-        node_t* children = malloc(2 * *num_states * sizeof(node_t));
-        for (size_t j = 0; j < *num_states; ++j) {
-            if (parent[j].capacity < k->items[i].cost) {
+        /*
+         * The size of the child layer is upper bounded by twice the parent
+         * layer's size which is given as the current number of states.
+         */
+        node_t* child = malloc(2 * (*num_states) * sizeof(node_t));
+        for (size_t j = 0; j < (*num_states); ++j) {
+            if (parent[j].path.remain_cost < k->items[i].cost) {
                 /* item cannot be included, thus no branching */
-                children[a++] = parent[j];
+                child[a].path.remain_cost = parent[j].path.remain_cost;
+                child[a].path.tot_profit = parent[j].path.tot_profit;
+                mpz_init(child[a].path.vector);
+                mpz_set(child[a].path.vector, parent[j].path.vector);
+                child[a].ub = parent[j].ub;
+                child[a].prob = parent[j].prob;
+                printf("----------------\n");
+                printf("Node info:\n");
+                printf("Remaining cost: %ld\n", child[a].path.remain_cost);
+                printf("Total profit: %ld\n", child[a].path.tot_profit);
+                gmp_printf("Vector: %Zd\n", child[a].path.vector);
+                printf("Upper bound: %ld\n", child[a].ub);
+                printf("Probability: %.16f\n", child[a].prob);
+                printf("----------------\n");
+                ++a;
                 continue;
             }
             /* 
@@ -111,56 +137,79 @@ breadth_first_search(knapsack_t* k, num_t threshold, num_t exact, double bias, \
              * for the left subtree, i.e., where the current item is not
              * included into the knapsack.
              */
-            opt_sol = combo_wrap(k, i + 1, parent[j].capacity, FALSE, FALSE, \
-                                 TRUE, timer);
-
-            if (opt_sol + parent[j].state.tot_profit > threshold) {
+            left_ub = combo_wrap(k, i + 1, parent[j].path.remain_cost, &timer, \
+                                 FALSE, FALSE, TRUE, TRUE) \
+                      + parent[j].path.tot_profit;
+            printf("Left subtree upper bound: %ld\n", left_ub);
+            if (left_ub > threshold) {
                 /*
-                 * The left subtree has at least one state with objective value
+                 * The left subtree has at least one path with objective value
                  * higher than the threshold. Therefore it cannot be omitted.
                  */
-
-                children[a] = parent[j]; /* transfer information from parent */
-                children[a].ub = opt_sol; /* set new upper bound */
-
-                /* update amplitudes, then increase children index */
-                update_prob(k, i, bias, TRUE, method, cur_sol, \
-                            &(children[a].prob));
+                printf("Left subtree included.\n");
+                /* remaining cost, total profit, and vector do not change */
+                child[a].path.remain_cost = parent[j].path.remain_cost;
+                child[a].path.tot_profit = parent[j].path.tot_profit;
+                mpz_init(child[a].path.vector);
+                mpz_set(child[a].path.vector, parent[j].path.vector);
+                /* set new upper bound */
+                child[a].ub = left_ub;
+                /* update probability, then increase child index */
+                child[a].prob = parent[j].prob * branch_prob(k, i, bias, \
+                                                    TRUE, method, cur_sol);
+                printf("----------------\n");
+                printf("Node info:\n");
+                printf("Remaining cost: %ld\n", child[a].path.remain_cost);
+                printf("Total profit: %ld\n", child[a].path.tot_profit);
+                gmp_printf("Vector: %Zd\n", child[a].path.vector);
+                printf("Upper bound: %ld\n", child[a].ub);
+                printf("Probability: %.16f\n", child[a].prob);
+                printf("----------------\n");
                 ++a;
 
-                if (opt_sol == parent[j].ub) {
+                if (left_ub == parent[j].ub) {
                     /* The upper bound of left subtree was already the upper
                      * bound for the entire tree. The upper bound for the right
                      * subtree has to be calculated, too. Here, the current item
                      * is considered to be included into the knapsack.
                      */
-
-                    opt_sol = combo_wrap(k, i + 1, parent[j].capacity \
-                                         - k->items[i].cost, FALSE, FALSE, \
-                                         TRUE, timer);
-
-                    if (opt_sol + parent[j].state.tot_profit \
-                        + k->items[i].profit > threshold) {
+                    right_ub = combo_wrap(k, i + 1, parent[j].path.remain_cost \
+                                          - k->items[i].cost, &timer, FALSE, \
+                                          FALSE, TRUE, TRUE) \
+                               + parent[j].path.tot_profit \
+                               + k->items[i].profit;
+                    printf("Right subtree upper bound: %ld\n", right_ub);
+                    if (right_ub > threshold) {
                         /*
-                         * The right subtree has at least one state with
+                         * The right subtree has at least one path with
                          * objective value higher than the threshold. Therefore
                          * it cannot be omitted.
                          */
 
-                        children[a] = parent[j];
-                        children[a].ub = opt_sol; /* set new upper bound */
-                        children[a].capacity -= k->items[i].cost;
-                        children[a].state.tot_profit += k->items[i].profit;
+                        /* update remaining cost */
+                        child[a].path.remain_cost = parent[j].path.remain_cost \
+                                                    - k->items[i].cost;
+                        /* update total profit */
+                        child[a].path.tot_profit = k->items[i].profit \
+                                                   + parent[j].path.tot_profit;
+                        /* include item: set the corresponding bit to 1 */
+                        mpz_init(child[a].path.vector);
+                        mpz_set(child[a].path.vector, parent[j].path.vector);
+                        mpz_setbit(child[a].path.vector, k->size - 1 - i);
+                        /* set new upper bound */
+                        child[a].ub = right_ub;
 
-                        /* 
-                         * include current item, i.e., set the corresponding bit
-                         * to 1.
-                         */
-                        mpz_setbit(children[a].state.vector, k->size - 1 - i);
-
-                        /* update amplitudes, then increase children index */
-                        update_prob(k, i, bias, FALSE, method, cur_sol, \
-                            &(children[a].prob));
+                        /* update probability, then increase child index */
+                        child[a].prob = parent[j].prob * branch_prob(k, i, \
+                                                  bias, FALSE, method, cur_sol);
+                        printf("----------------\n");
+                        printf("Node info:\n");
+                        printf("Remaining cost: %ld\n", child[a].path.remain_cost);
+                        printf("Total profit: %ld\n", child[a].path.tot_profit);
+                        gmp_printf("Vector: %Zd\n", child[a].path.vector);
+                        printf("Upper bound: %ld\n", child[a].ub);
+                        printf("Probability: %.16f\n", child[a].prob);
+                        printf("----------------\n");
                         ++a;
 
                     }
@@ -168,55 +217,78 @@ breadth_first_search(knapsack_t* k, num_t threshold, num_t exact, double bias, \
                     /* The upper bound of right subtree is the upper bound for
                      * the entire tree and thus does not have to be calculated
                      * again. Especially, its upper bound is also above the
-                     * threshold and therefore has to be included.
+                     * threshold and therefore it has to be included.
                      */
+                    printf("Right subtree upper bound: %ld\n", parent[j].ub);
+                    printf("Right tree included.\n");
 
-                    children[a] = parent[j];
+                    /* update remaining cost */
+                    child[a].path.remain_cost = parent[j].path.remain_cost \
+                                           - k->items[i].cost;
+                    /* update total profit */
+                    child[a].path.tot_profit = k->items[i].profit \
+                                             + parent[j].path.tot_profit;
+                    /* include item: set the corresponding bit to 1 */
+                    mpz_init(child[a].path.vector);
+                    mpz_set(child[a].path.vector, parent[j].path.vector);
+                    mpz_setbit(child[a].path.vector, k->size - 1 - i);
                     /* set new upper bound */
-                    children[a].ub -= k->items[i].profit;
-                    /* subtract current item cost from capacity */
-                    children[a].capacity -= k->items[i].cost;
-                    /* add current item profit to total profit */
-                    children[a].state.tot_profit += k->items[i].profit;
+                    child[a].ub = parent[j].ub;
 
-                    /* 
-                     * include current item, i.e., set the corresponding bit
-                     * to 1.
-                     */
-                    mpz_setbit(children[a].state.vector, k->size - 1 - i);
-
-                    update_prob(k, i, bias, FALSE, method, cur_sol, \
-                            &(children[a].prob));
+                    /* update probability, then increase child index */
+                    child[a].prob = parent[j].prob * branch_prob(k, i, \
+                                              bias, FALSE, method, cur_sol);
+                    printf("----------------\n");
+                    printf("Node info:\n");
+                    printf("Remaining cost: %ld\n", child[a].path.remain_cost);
+                    printf("Total profit: %ld\n", child[a].path.tot_profit);
+                    gmp_printf("Vector: %Zd\n", child[a].path.vector);
+                    printf("Upper bound: %ld\n", child[a].ub);
+                    printf("Probability: %.16f\n", child[a].prob);
+                    printf("----------------\n");
                     ++a;
                 }
             } else {
                 /* left subtree is omitted, but right subtree is not */
+                printf("Right subtree upper bound: %ld\n", parent[j].ub);
+                printf("Right tree included.\n");
 
-                children[a] = parent[j];
+                /* update remaining cost */
+                child[a].path.remain_cost = parent[j].path.remain_cost \
+                                       - k->items[i].cost;
+                /* update total profit */
+                child[a].path.tot_profit = k->items[i].profit \
+                                         + parent[j].path.tot_profit;
+                /* include item: set the corresponding bit to 1 */
+                mpz_init(child[a].path.vector);
+                mpz_set(child[a].path.vector, parent[j].path.vector);
+                mpz_setbit(child[a].path.vector, k->size - 1 - i);
                 /* set new upper bound */
-                children[a].ub -= k->items[i].profit;
-                /* subtract current item cost from capacity */
-                children[a].capacity -= k->items[i].cost;
-                /* add current item profit to total profit */
-                children[a].state.tot_profit += k->items[i].profit;
+                child[a].ub = parent[j].ub;
 
-                /* 
-                 * include current item, i.e., set the corresponding bit
-                 * to 1.
-                 */
-                mpz_setbit(children[a].state.vector, k->size - 1 - i);
-
-                update_prob(k, i, bias, FALSE, method, cur_sol, \
-                            &(children[a].prob));
+                /* update probability, then increase child index */
+                child[a].prob = parent[j].prob * branch_prob(k, i, bias, \
+                                                    FALSE, method, cur_sol);
+                printf("----------------\n");
+                printf("Node info:\n");
+                printf("Remaining cost: %ld\n", child[a].path.remain_cost);
+                printf("Total profit: %ld\n", child[a].path.tot_profit);
+                gmp_printf("Vector: %Zd\n", child[a].path.vector);
+                printf("Upper bound: %ld\n", child[a].ub);
+                printf("Probability: %.16f\n", child[a].prob);
+                printf("----------------\n");
                 ++a;
             }
         }
-        /* swap pointer to parent and children layer */
-        SWAP(&parent, &children, node_t*);
+        /* swap pointer to parent and child layer */
+        SWAP(&parent, &child, node_t*);
         *num_states = a;
         /* resize new parent layer and delete former parent layer */
         parent = realloc(parent, *num_states * sizeof(node_t));
-        free(children);
+        free(child);
+        printf("---------------------------------\n");
+        printf("DONE WITH LAYER\n");
+        printf("---------------------------------\n");
     }
     /* final layer is comprised of all feasible paths above threshold */
     return parent;

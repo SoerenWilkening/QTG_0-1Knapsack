@@ -1,11 +1,13 @@
 compile:
 	@echo "compile c files"
-	@clang -c stategen.c combowrp.c combo.c knapsack.c
+	@clang -c sysinfo.c knapsack.c simulate.c stategen.c combowrp.c combo.c
 	@echo "create main executable"
 	@clang 			gain.c \
+					sysinfo.c \
+					knapsack.o \
+					simulate.o \
 					stategen.o \
 					combowrp.o \
-					combo.o \
-					knapsack.o -o gain -lgmp
+					combo.o -o gain -lgsl -lgslcblas -lgmp
 	@echo "delete non used files"
-	@rm stategen.o combowrp.o combo.o knapsack.o
+	@rm simulate.o stategen.o combowrp.o combo.o knapsack.o sysinfo.o

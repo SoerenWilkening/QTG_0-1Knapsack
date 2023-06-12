@@ -3,7 +3,7 @@
 
 /* 
  * =============================================================================
- *                                  includes
+ *                            includes
  * =============================================================================
  */
 
@@ -15,10 +15,12 @@
 #include <inttypes.h>
 #include <math.h>
 #include <gmp.h>
+#include <gsl/gsl_rng.h>
+#include "sysinfo.h"
 
 /* 
  * =============================================================================
- *                                  C++ check
+ *                            C++ check
  * =============================================================================
  */
 
@@ -28,7 +30,7 @@ extern "C" {
 
 /* 
  * =============================================================================
- *                              type definitions
+ *                            type definitions
  * =============================================================================
  */
 
@@ -39,23 +41,23 @@ typedef double      ratio_t;            /* ratios                   */
 typedef uint32_t    count_t;            /* gate, cycle counting     */
 
 /*
- * Struct:          item
- * ---------------------
+ * Struct:          item_t
+ * -----------------------
  * Description:     This struct represents an item assignable to a knapsack.
  * Contents:
  *      cost:       Integer cost of the item.
  *      profit:     Integer profit of the item.
  *      included:   Marks whether item is included into knapsack.
  */
-typedef struct k_item {
+typedef struct item {
 	num_t profit;
 	num_t cost;
     bool_t included;
 } item_t;
 
 /*
- * Struct:              knapsack
- * -----------------------------
+ * Struct:              knapsack_t
+ * -------------------------------
  * Description:         This struct represents a knapsack.
  * Contents:
  *      size:           Integer size of the knapsack.
@@ -73,6 +75,22 @@ typedef struct knapsack {
 	item_t* items;
     char* name; 
 } knapsack_t;
+
+/*
+ * Struct:              path_t
+ * ---------------------------
+ * Description:         This struct represents a path with its remaining cost
+ *                      and total profit.
+ * Contents:
+ *      remain_cost:    Remaining cost of the path.
+ *      tot_profit:     Total profit of the path.
+ *      state:          Bit string representation of the path.
+ */
+typedef struct path {
+    num_t remain_cost;
+    num_t tot_profit;
+    mpz_t vector;
+} path_t;
 
 typedef enum sort {
     COST,
@@ -97,7 +115,7 @@ typedef enum category {
 
 /* 
  * =============================================================================
- *                                 enum names
+ *                            enum names
  * =============================================================================
  */
 
@@ -140,7 +158,7 @@ const char* get_category_name(category_t);
 
 /* 
  * =============================================================================
- *                              number of digits
+ *                            number of digits
  * =============================================================================
  */
 
@@ -155,7 +173,7 @@ bit_t num_digits(num_t);
 
 /* 
  * =============================================================================
- *                                 create/free
+ *                            create/free
  * =============================================================================
  */
 
@@ -231,7 +249,7 @@ void free_knapsack(knapsack_t*);
 
 /* 
  * =============================================================================
- *                              item manipulation
+ *                            item manipulation
  * =============================================================================
  */
 
@@ -347,21 +365,32 @@ void apply_int_greedy(knapsack_t*);
 
 /* 
  * =============================================================================
- *                              knapsack information
+ *                            knapsack information
  * =============================================================================
  */
 
 /*
  * Function:    bit_rep
  * --------------------
- * Description:     This function returns writes the current assignment of items
- *                  of a knapsack in a given bit string.
+ * Description:     This function writes the current assignment of items of a
+ *                  knapsack in a given bit string.
  * Parameters:
  *      parameter1: Pointer to knapsack for which the current item assignment
  *                  should be translated into a bit string.
  *      parameter2: Bit string which should carry the current item assignment.
  */
 void bit_rep(const knapsack_t*, mpz_t);
+
+/*
+ * Function:    path_rep
+ * ---------------------
+ * Description: This function writes the current assignment of items of a
+ *              knapsack in a path and returns a pointer to it.
+ * Parameter:   Pointer to knapsack which should be represented as a path.
+ * Returns:     Pointer to path representing the knapsack.
+ * Side Effect: Allocates dynamically; pointer should eventually be freed.
+ */
+path_t* path_rep(const knapsack_t*);
 
 /*
  * Function:    tot_cost

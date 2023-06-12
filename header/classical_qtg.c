@@ -6,13 +6,13 @@
 #define TRUE                    1
 #define FALSE                   0
 
-gsl_rng * r;  /* global generator */
+gsl_rng* r;  /* global generator */
 
 int main() {
 
 	double bias = 0.5;
 
-	const gsl_rng_type * T;
+	const gsl_rng_type* T;
 
 	gsl_rng_env_setup();
 
@@ -23,7 +23,7 @@ int main() {
 
 	int i,j;
 
-	knapsack_t* k = create_pisinger_knapsack(HARD, 14, 10000, 1000, 1);
+	knapsack_t* k = create_pisinger_knapsack(SMALL, 1, 50, 1000, 1);
 
 	sort_knapsack(k, RATIO);
 

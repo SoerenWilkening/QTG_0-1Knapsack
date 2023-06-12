@@ -1,6 +1,6 @@
 /* 
  * =============================================================================
- *                                  includes
+ *                            includes
  * =============================================================================
  */
 
@@ -8,7 +8,7 @@
 
 /* 
  * =============================================================================
- *                                   macros
+ *                            macros
  * =============================================================================
  */
 
@@ -22,7 +22,7 @@
 
 /* 
  * =============================================================================
- *                                 enum names
+ *                            enum names
  * =============================================================================
  */
 
@@ -100,7 +100,7 @@ get_category_name(category_t category) {
 
 /* 
  * =============================================================================
- *                              number of digits
+ *                            number of digits
  * =============================================================================
  */
 
@@ -109,8 +109,8 @@ num_digits(num_t number) {
     bit_t result = 0;
     num_t remainder = number;
     do {
-        remainder /= 10; // removes last digit
-        ++result; // increases counter 
+        remainder /= 10; /* removes last digit */
+        ++result; /* increases counter */
     } while (0 != remainder);
 
     return result;
@@ -118,7 +118,7 @@ num_digits(num_t number) {
 
 /* 
  * =============================================================================
- *                                 create/free
+ *                            create/free
  * =============================================================================
  */
 
@@ -145,7 +145,7 @@ create_empty_knapsack(bit_t size, num_t capacity) {
 
 knapsack_t*
 create_pisinger_knapsack(category_t category, size_t num_file, bit_t size, \
-                          num_t coeff_range, size_t num_instance) {
+                         num_t coeff_range, size_t num_instance) {
     char filename[256];
     char profit[32];
     char cost[32];
@@ -155,37 +155,36 @@ create_pisinger_knapsack(category_t category, size_t num_file, bit_t size, \
 
     switch (category) {
         case SMALL: {
-            sprintf(filename, "smallcoeff_pisinger/knapPI_%zu_%"PRIu64"_%"
-                    PRIu64".csv", num_file, (uint64_t)size,
-                    (uint64_t)coeff_range);
+            snprintf(filename, sizeof(filename), "smallcoeff_pisinger%c" \
+                     "knapPI_%zu_%"PRIu64"_%"PRIu64".csv", path_sep(), \
+                     num_file, (uint64_t)size, (uint64_t)coeff_range);
             break;
         }
 
         case LARGE: {
-            sprintf(filename, "largecoeff_pisinger/knapPI_%zu_%"PRIu64"_%"
-                    PRIu64".csv", num_file, (uint64_t)size,
-                    (uint64_t)coeff_range);
+            snprintf(filename, sizeof(filename), "largecoeff_pisinger_" \
+                     "knapPI_%zu_%"PRIu64"_%"PRIu64".csv", num_file, \
+                     (uint64_t)size, (uint64_t)coeff_range);
             break;
         }
 
         case HARD: {
-            sprintf(filename, "hardinstances_pisinger/knapPI_%zu_%"PRIu64"_%"
-                    PRIu64".csv", num_file, (uint64_t)size,
-                    (uint64_t)coeff_range);
+            snprintf(filename, sizeof(filename), "hardinstances_pisinger_" \
+                     "knapPI_%zu_%"PRIu64"_%"PRIu64".csv", num_file, \
+                     (uint64_t)size, (uint64_t)coeff_range);
             break;
         }
 
         default: {
-            printf("Unspecified category!");
+            printf("Unspecified category!\n");
             return 0;
         }
     }
-
-    FILE* stream = fopen(filename, "r");
-    if (stream == NULL) {
-        printf("File does not exist!");
-        return 0;
+    if(!file_exists(filename)) {
+        printf("File does not exist. Could not create knapsack.\n");
+        return NULL;
     }
+    FILE* stream = fopen(filename, "r");
 
     char line[256];
     size_t num_line = 0;
@@ -252,13 +251,13 @@ assign_item_values(knapsack_t* k, num_t costs[], num_t profits[]) {
 void
 free_knapsack(knapsack_t* k) {
     free(k->items);
-    //free(k->name);
+    free(k->name);
     free(k);
 }
 
 /* 
  * =============================================================================
- *                              item manipulation
+ *                            item manipulation
  * =============================================================================
  */
 
@@ -387,7 +386,7 @@ apply_int_greedy(knapsack_t* k) {
 
 /* 
  * =============================================================================
- *                              knapsack information
+ *                            knapsack information
  * =============================================================================
  */
 
@@ -400,6 +399,16 @@ bit_rep(const knapsack_t* k, mpz_t bit_string) {
             mpz_clrbit(bit_string, k->size - 1 -i);
         }
     }
+}
+
+path_t*
+path_rep(const knapsack_t* k) {
+    path_t* path = malloc(sizeof(path_t));
+    path->remain_cost = k->remain_cost;
+    path->tot_profit = k->tot_profit;
+    mpz_init(path->vector);
+    bit_rep(k, path->vector);
+    return path;
 }
 
 num_t
