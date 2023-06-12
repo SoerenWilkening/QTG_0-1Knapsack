@@ -394,9 +394,9 @@ void
 bit_rep(const knapsack_t* k, mpz_t bit_string) {
     for(bit_t i = 0; i < k->size; ++i) {
         if (k->items[i].included) {
-        mpz_setbit(bit_string, k->size - 1 - i);
+        mpz_setbit(bit_string, i);
         } else {
-            mpz_clrbit(bit_string, k->size - 1 -i);
+            mpz_clrbit(bit_string, i);
         }
     }
 }

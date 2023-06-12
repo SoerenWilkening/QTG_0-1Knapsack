@@ -27,7 +27,7 @@
 
 num_t
 combo_wrap(const knapsack_t* k, bit_t first_item, num_t capacity, \
-           uint64_t* time_rec, bool_t def, bool_t relx, bool_t read, \
+           uint64_t* timer, bool_t def, bool_t relx, bool_t read, \
            bool_t exec_combo) {
 
     num_t opt_sol;
@@ -39,7 +39,7 @@ combo_wrap(const knapsack_t* k, bit_t first_item, num_t capacity, \
     if (is_trivial(&k_new, &opt_sol)) {
         return opt_sol;
     }
-
+    printf("Trivial check passed!\n");
     /* Check whether instance's solution was already calculated by combo */
     char pathname[256];
     char filename[256];
@@ -47,10 +47,14 @@ combo_wrap(const knapsack_t* k, bit_t first_item, num_t capacity, \
     snprintf(filename, sizeof(filename), "%s%csize=%"PRIu64"_capacity=" \
              "%"PRIu64".txt", pathname, path_sep(), \
              (uint64_t)(k->size - first_item), (uint64_t)capacity);
+    printf("%s\n", filename);
     if (file_exists(filename) && read) {
+        printf("File exists!\n");
         FILE* stream = fopen(filename, "r");
+        printf("Open file worked!\n");
         char line[128];
         opt_sol = atoi(fgets(line, sizeof(line), stream));
+        printf("Read file worked!\n");
         fclose(stream);
         return opt_sol;
     }
@@ -79,11 +83,11 @@ combo_wrap(const knapsack_t* k, bit_t first_item, num_t capacity, \
         /* stop the count */
         uint64_t end = rdtsc();
         printf("Passed setting end!\n");
-        /* safe elapsed cycles in time_rec */
-        *time_rec = end - start;
+        /* safe elapsed cycles in timer */
+        *timer = end - start;
         printf("Passed executing and measuring Combo!\n");
         /* if combo is slower than ca. 0.0003 seconds, the result is saved */
-        if (((double) *timerecord / (2.6 * pow(10, 9)) > .0003) \
+        if (((double) *timer / (2.6 * pow(10, 9)) > .0003) \
             && !file_exists(filename)) {
             printf("Passed timing check!\n");
             create_dir(k->name);
@@ -94,9 +98,9 @@ combo_wrap(const knapsack_t* k, bit_t first_item, num_t capacity, \
             }
             FILE* file = fopen(filename, "w");
             printf("Passed opening file for writing!\n");
-            fclose(file);
             fprintf(file, "%"PRIu64"\n", (uint64_t)opt_sol);
             printf("Passed writing in file!\n");
+            fclose(file);
             printf("Passed closing file!\n");
         }
     }

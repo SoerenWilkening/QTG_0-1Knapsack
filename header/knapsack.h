@@ -16,7 +16,7 @@
 #include <math.h>
 #include <gmp.h>
 #include <gsl/gsl_rng.h>
-#include "sysinfo.h"
+#include "syslinks.h"
 
 /* 
  * =============================================================================

@@ -53,10 +53,10 @@ branch_prob(const knapsack_t* k, bit_t i, double bias, bool_t left, \
     switch (method) {
         case COMPARE: {
             if (left) {
-                return (1 + (1 - mpz_tstbit(cur_sol, k->size - i - 1)) * bias) \
+                return (1 + (1 - mpz_tstbit(cur_sol, i)) * bias) \
                         / (bias + 2);
             } else {
-                return (1 + mpz_tstbit(cur_sol, k->size - i - 1) * bias) \
+                return (1 + mpz_tstbit(cur_sol, i) * bias) \
                         / (bias + 2);
             }
             break;
@@ -195,7 +195,7 @@ qtg(const knapsack_t* k, num_t threshold, num_t exact, \
                         /* include item: set the corresponding bit to 1 */
                         mpz_init(child[a].path.vector);
                         mpz_set(child[a].path.vector, parent[j].path.vector);
-                        mpz_setbit(child[a].path.vector, k->size - 1 - i);
+                        mpz_setbit(child[a].path.vector, i);
                         /* set new upper bound */
                         child[a].ub = right_ub;
 
@@ -231,7 +231,7 @@ qtg(const knapsack_t* k, num_t threshold, num_t exact, \
                     /* include item: set the corresponding bit to 1 */
                     mpz_init(child[a].path.vector);
                     mpz_set(child[a].path.vector, parent[j].path.vector);
-                    mpz_setbit(child[a].path.vector, k->size - 1 - i);
+                    mpz_setbit(child[a].path.vector, i);
                     /* set new upper bound */
                     child[a].ub = parent[j].ub;
 
@@ -262,7 +262,7 @@ qtg(const knapsack_t* k, num_t threshold, num_t exact, \
                 /* include item: set the corresponding bit to 1 */
                 mpz_init(child[a].path.vector);
                 mpz_set(child[a].path.vector, parent[j].path.vector);
-                mpz_setbit(child[a].path.vector, k->size - 1 - i);
+                mpz_setbit(child[a].path.vector, i);
                 /* set new upper bound */
                 child[a].ub = parent[j].ub;
 

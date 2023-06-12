@@ -94,7 +94,7 @@ path_sep() {
 
 uint8_t
 file_exists(const char* filename) {
-	return access(filename, F_OK) == 0;
+	return !access(filename, F_OK);
 }
 
 /* 

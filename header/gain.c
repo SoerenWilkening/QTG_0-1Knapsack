@@ -43,7 +43,7 @@ int main() {
 
 	printf("Integer greedy lb: %ld, exact solution: %ld.\n", threshold, exact);
 
-	node_t* states = breadth_first_search(k, threshold, exact, bias, COMPARE, int_sol, &num_states);
+	node_t* states = qtg(k, threshold, exact, bias, COMPARE, int_sol, &num_states);
 
 	for (size_t i = 0; i < num_states; ++i) {
 		gmp_printf("%zu-th state: %Zd ", i + 1, states[i].path.vector);
