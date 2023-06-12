@@ -146,32 +146,40 @@ create_empty_knapsack(bit_t size, num_t capacity) {
 knapsack_t*
 create_pisinger_knapsack(category_t category, size_t num_file, bit_t size, \
                          num_t coeff_range, size_t num_instance) {
+    knapsack_t* new_knapsack;
+    FILE* stream;
     char filename[256];
+    char line[256];
     char profit[32];
     char cost[32];
+    num_t capacity;
     size_t line_pos;
     size_t profit_pos;
     size_t cost_pos;
+    size_t num_line = 0;
 
     switch (category) {
         case SMALL: {
-            snprintf(filename, sizeof(filename), "smallcoeff_pisinger%c" \
-                     "knapPI_%zu_%"PRIu64"_%"PRIu64".csv", path_sep(), \
-                     num_file, (uint64_t)size, (uint64_t)coeff_range);
+            snprintf(filename, sizeof(filename), "instances%csmallcoeff_" \
+                     "pisinger%cknapPI_%zu_%"PRIu64"_%"PRIu64".csv", \
+                     path_sep(), path_sep(), num_file, (uint64_t)size, \
+                     (uint64_t)coeff_range);
             break;
         }
 
         case LARGE: {
-            snprintf(filename, sizeof(filename), "largecoeff_pisinger_" \
-                     "knapPI_%zu_%"PRIu64"_%"PRIu64".csv", num_file, \
-                     (uint64_t)size, (uint64_t)coeff_range);
+            snprintf(filename, sizeof(filename), "instances%clargecoeff_" \
+                     "pisinger%cknapPI_%zu_%"PRIu64"_%"PRIu64".csv", \
+                     path_sep(), path_sep(), num_file, (uint64_t)size, \
+                     (uint64_t)coeff_range);
             break;
         }
 
         case HARD: {
-            snprintf(filename, sizeof(filename), "hardinstances_pisinger_" \
-                     "knapPI_%zu_%"PRIu64"_%"PRIu64".csv", num_file, \
-                     (uint64_t)size, (uint64_t)coeff_range);
+            snprintf(filename, sizeof(filename), "instances%chardinstances" \
+                     "_pisinger%cknapPI_%zu_%"PRIu64"_%"PRIu64".csv", \
+                     path_sep(), path_sep(), num_file, (uint64_t)size, \
+                     (uint64_t)coeff_range);
             break;
         }
 
@@ -184,28 +192,22 @@ create_pisinger_knapsack(category_t category, size_t num_file, bit_t size, \
         printf("File does not exist. Could not create knapsack.\n");
         return NULL;
     }
-    FILE* stream = fopen(filename, "r");
+    stream = fopen(filename, "r");
 
-    char line[256];
-    size_t num_line = 0;
     while (fgets(line, sizeof(line), stream) != NULL && num_line < \
           (num_instance - 1) * (7 + size) + 1) {
         ++num_line;
     }
 
-    num_t capacity = atoi(fgets(line, sizeof(line), stream) + 2);
+    capacity = atoi(fgets(line, sizeof(line), stream) + 2);
 
-    knapsack_t* new_knapsack = create_empty_knapsack(size, capacity);
+    new_knapsack = create_empty_knapsack(size, capacity);
     filename[strlen(filename) - 4] = '\0';
-    sprintf(new_knapsack->name, "%s", filename);
+    sprintf(new_knapsack->name, "%s", filename + 10);
 
-    do {
-        fgets(line, sizeof(line), stream);
-    } while(0);
+    fgets(line, sizeof(line), stream);
 
-    do {
-        fgets(line, sizeof(line), stream);
-    } while(0);
+    fgets(line, sizeof(line), stream);
 
     num_line = 0;
     while (fgets(line, sizeof(line), stream) != NULL && num_line < size) {
@@ -225,6 +227,69 @@ create_pisinger_knapsack(category_t category, size_t num_file, bit_t size, \
 
         /* save cost*/
         while((cost[cost_pos++] = line[line_pos++]) != ',') {
+            ;
+        }
+        cost[cost_pos - 1] = '\0';
+
+        new_knapsack->items[num_line].cost = atoi(cost);
+
+        ++num_line;
+    }
+
+    fclose(stream);
+
+    return new_knapsack;
+}
+
+knapsack_t*
+create_jooken_knapsack(bit_t size, num_t capacity, bit_t num_groups, \
+                       double group_frac, double pert, num_t range) {
+    knapsack_t* new_knapsack;
+    FILE* stream;
+    char filename[256];
+    char line[256];
+    char profit[32];
+    char cost[32];
+    size_t line_pos;
+    size_t profit_pos;
+    size_t cost_pos;
+    size_t num_line = 0;
+
+    snprintf(filename, sizeof(filename), "problemInstances%cn_%"PRIu64"_" \
+             "c_%"PRIu64"_g_%"PRIu64"_f_%f_eps_%f_s_%"PRIu64"%ctest.in", \
+             path_sep(), (uint64_t)size, (uint64_t)capacity, \
+             (uint64_t)num_groups, group_frac, pert, (uint64_t)range, \
+             path_sep());
+
+    if(!file_exists(filename)) {
+        printf("File does not exist. Could not create knapsack.\n");
+        return NULL;
+    }
+
+    new_knapsack = create_empty_knapsack(size, capacity);
+    filename[strlen(filename) - 7] = '\0';
+    sprintf(new_knapsack->name, "%s", filename);
+
+    stream = fopen(filename, "r");
+
+    fgets(line, sizeof(line), stream);
+
+    while (fgets(line, sizeof(line), stream) != NULL && num_line < size) {
+        line_pos = profit_pos = cost_pos = 0;
+        /* skip item number and first space */
+        while(line[line_pos++] != ' ') {
+            ;
+        }
+        /* save profit and skip second space */
+        while((profit[profit_pos++] = line[line_pos++]) != ' ') {
+            ;
+        }
+        profit[profit_pos - 1] = '\0';
+
+        new_knapsack->items[num_line].profit = atoi(profit);
+
+        /* save cost*/
+        while((cost[cost_pos++] = line[line_pos++]) != '\n') {
             ;
         }
         cost[cost_pos - 1] = '\0';
@@ -379,8 +444,8 @@ sort_knapsack(knapsack_t* k, sort_t method) {
 
 void
 apply_int_greedy(knapsack_t* k) {
-    for (bit_t i = 0; put_item(k, i); ++i) {
-        ;
+    for (bit_t i = 0; i < k->size; ++i) {
+        put_item(k, i);
     }
 }
 

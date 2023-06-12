@@ -227,6 +227,9 @@ knapsack_t* create_empty_knapsack(bit_t, num_t);
  */
 knapsack_t* create_pisinger_knapsack(category_t, size_t, bit_t, num_t, size_t);
 
+knapsack_t*
+create_jooken_knapsack(bit_t size, num_t capacity, bit_t num_groups, double group_frac, double pert, num_t range);
+
 /*
  * Function: 		assign_item_values
  * -----------------------------------

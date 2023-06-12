@@ -24,11 +24,11 @@
 size_t
 sampling(const double prob[], size_t num_states, const gsl_rng* rng) {
     double random_num = gsl_rng_uniform(rng);
-    printf("Random number: %f\n", random_num);
+    // printf("Random number: %f\n", random_num);
     double cummulative_prob = 0;
     for (size_t i = 0; i < num_states; ++i) {
         cummulative_prob += prob[i];
-        printf("Current cummulative prob: %.16f\n", cummulative_prob);
+        // printf("Current cummulative prob: %.16f\n", cummulative_prob);
         if (random_num <= cummulative_prob) {
             return i;
         }
@@ -46,7 +46,7 @@ path_t*
 ampl_amp(const node_t nodes[], size_t num_states, size_t calls, \
          const gsl_rng* rng) {
     if (nodes == NULL) {
-        printf("Reached optimum!\n");
+        // printf("Reached optimum!\n");
         return NULL;
     }
     double amp_factor;
@@ -70,13 +70,13 @@ ampl_amp(const node_t nodes[], size_t num_states, size_t calls, \
     size_t measurement = sampling(prob, num_states + 1, rng);
     if (measurement == num_states) {
         /* a junkyard state was measured */
-        printf("Junkyard state was measured!\n");
+        // printf("Junkyard state was measured!\n");
         return NULL;
     } else {
         /* a state (path) with improved profit was measured */
         path_t* result = malloc(sizeof(path_t));
         *result = nodes[measurement].path;
-        printf("Total profit of state (path) returned by AA: %ld\n", result->tot_profit);
+        // printf("Total profit of state (path) returned by AA: %ld\n", result->tot_profit);
         return result;
     }
 }
@@ -106,7 +106,7 @@ q_search(const node_t nodes[], size_t num_states, size_t* rounds, \
             return sample;
         }
     }
-    printf("QSearch returns Null!\n");
+    // printf("QSearch returns Null!\n");
     return NULL;
 }
 
@@ -131,7 +131,7 @@ q_max_search(knapsack_t* k, double bias, branch_t method, size_t max_iter, \
     apply_int_greedy(k);
     path_t* cur_sol = path_rep(k);
     num_t threshold = k->tot_profit;
-    printf("Initial threshold: %zu.\n", cur_sol->tot_profit);
+    // printf("Initial threshold: %zu.\n", cur_sol->tot_profit);
     remove_all_items(k);
 
     /* obtain optimal solution via combo */
@@ -145,14 +145,14 @@ q_max_search(knapsack_t* k, double bias, branch_t method, size_t max_iter, \
          * The application of the QTG is simulated. Only states (paths) with 
          * total profit above the threshold are stored in cur_nodes.
          */
-        printf("BFS is performed with threshold %ld\n", cur_sol->tot_profit);
+        // printf("BFS is performed with threshold %ld\n", cur_sol->tot_profit);
         cur_nodes = qtg(k, cur_sol->tot_profit, exact, bias, method, \
                         cur_sol->vector, &num_states);
-        printf("%zu states after BFS.\n", num_states);
-        for (size_t i = 0; i < num_states; ++i) {
-            printf("%zu-th state has total profit of %ld.\n", i + 1, cur_nodes[i].path.tot_profit);
-        }
-        printf("-----------------\n");
+        // printf("%zu states after BFS.\n", num_states);
+        // for (size_t i = 0; i < num_states; ++i) {
+        //     printf("%zu-th state has total profit of %ld.\n", i + 1, cur_nodes[i].path.tot_profit);
+        // }
+        // printf("-----------------\n");
         /*
          * QSearch is executed on the nodes created by the QTG. If this yields a
          * better solution, both the threshold and cur_sol are updated.
@@ -163,7 +163,7 @@ q_max_search(knapsack_t* k, double bias, branch_t method, size_t max_iter, \
         if (cur_path != NULL) {
             free(cur_sol);
             cur_sol = cur_path;
-            printf("New threshold: %ld\n", cur_sol->tot_profit);
+            //printf("New threshold: %ld\n", cur_sol->tot_profit);
         } else {
             return cur_sol;
         }

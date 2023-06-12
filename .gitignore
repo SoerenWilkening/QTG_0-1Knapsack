@@ -1,0 +1,5 @@
+instances/
+*.DS_Store
+*.o
+main
+*.pdf

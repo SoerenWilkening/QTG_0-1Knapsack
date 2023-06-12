@@ -41,9 +41,12 @@ combo_wrap(const knapsack_t* k, bit_t first_item, num_t capacity, \
     }
     printf("Trivial check passed!\n");
     /* Check whether instance's solution was already calculated by combo */
+    char instancename[256];
     char pathname[256];
     char filename[256];
-    snprintf(pathname, sizeof(pathname), "%s%ccombo", k->name, path_sep());
+    snprintf(instancename, sizeof(instancename), "instances%c%s", path_sep(), \
+             k->name);
+    snprintf(pathname, sizeof(pathname), "%s%ccombo", instancename, path_sep());
     snprintf(filename, sizeof(filename), "%s%csize=%"PRIu64"_capacity=" \
              "%"PRIu64".txt", pathname, path_sep(), \
              (uint64_t)(k->size - first_item), (uint64_t)capacity);
@@ -90,7 +93,7 @@ combo_wrap(const knapsack_t* k, bit_t first_item, num_t capacity, \
         if (((double) *timer / (2.6 * pow(10, 9)) > .0003) \
             && !file_exists(filename)) {
             printf("Passed timing check!\n");
-            create_dir(k->name);
+            create_dir(instancename);
             if (create_dir(pathname)) {
                 printf("Passed creating directory!\n");
             } else {
