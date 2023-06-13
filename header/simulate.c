@@ -15,6 +15,9 @@
 #define TRUE                    1
 #define FALSE                   0
 
+#define MIN(a,b)                ((a) < (b) ? (a) : (b))
+#define MAX(a,b)                ((a) > (b) ? (a) : (b))
+
 /* 
  * =============================================================================
  *                            sampling
@@ -24,11 +27,9 @@
 size_t
 sampling(const double prob[], size_t num_states, const gsl_rng* rng) {
     double random_num = gsl_rng_uniform(rng);
-    // printf("Random number: %f\n", random_num);
     double cummulative_prob = 0;
     for (size_t i = 0; i < num_states; ++i) {
         cummulative_prob += prob[i];
-        // printf("Current cummulative prob: %.16f\n", cummulative_prob);
         if (random_num <= cummulative_prob) {
             return i;
         }
@@ -46,7 +47,6 @@ path_t*
 ampl_amp(const node_t nodes[], size_t num_states, size_t calls, \
          const gsl_rng* rng) {
     if (nodes == NULL) {
-        // printf("Reached optimum!\n");
         return NULL;
     }
     double amp_factor;
@@ -70,13 +70,14 @@ ampl_amp(const node_t nodes[], size_t num_states, size_t calls, \
     size_t measurement = sampling(prob, num_states + 1, rng);
     if (measurement == num_states) {
         /* a junkyard state was measured */
-        // printf("Junkyard state was measured!\n");
         return NULL;
     } else {
         /* a state (path) with improved profit was measured */
         path_t* result = malloc(sizeof(path_t));
-        *result = nodes[measurement].path;
-        // printf("Total profit of state (path) returned by AA: %ld\n", result->tot_profit);
+        result->tot_profit = nodes[measurement].path.tot_profit;
+        result->remain_cost = nodes[measurement].path.remain_cost;
+        mpz_init(result->vector);
+        mpz_set(result->vector, nodes[measurement].path.vector);
         return result;
     }
 }
@@ -89,24 +90,26 @@ ampl_amp(const node_t nodes[], size_t num_states, size_t calls, \
 
 path_t*
 q_search(const node_t nodes[], size_t num_states, size_t* rounds, \
-         size_t max_iter, const gsl_rng* rng) {
+         size_t* iter, size_t max_iter, const gsl_rng* rng) {
     size_t m, j, l, m_tot;
     l = m_tot = 0;
     double c = 6. / 5;
+    *rounds = 0; /* reset rounds counter */
+    *iter = 0; /* reset iteration counter */
 
     path_t* sample;
     while(m_tot < max_iter) {
+        ++(*rounds);
         ++l;
         m = ceil(pow(c, l));
         j = gsl_rng_uniform_int(rng, m);
-        *rounds += j;
+        *iter += j;
         m_tot += 2 * j + 1;
         path_t* sample = ampl_amp(nodes, num_states, j, rng);
         if (sample != NULL) {
             return sample;
         }
     }
-    // printf("QSearch returns Null!\n");
     return NULL;
 }
 
@@ -119,9 +122,23 @@ q_search(const node_t nodes[], size_t num_states, size_t* rounds, \
 path_t*
 q_max_search(knapsack_t* k, double bias, branch_t method, size_t max_iter, \
              const gsl_rng* rng) {
-    size_t rounds; /* counter of AA calls within QSearch; will be updated */
+    size_t rounds; /* counter of AA rounds within QSearch; will be updated */
+    size_t iter; /* counter of AA calls within QSearch; will be updated */
     size_t num_states; /* number of states; will be updated */
-    uint64_t timer; /* timer for combo execution, will be updated */
+
+    path_t* cur_sol; /* current solution; will be updated */
+    bit_t profit_qubits; /* size of the profit register */
+    count_t qtg_cycles; /* number of necessary QTG cycles */
+    count_t qtg_gates; /* number of necessary QTG gates */
+    num_t exact; /* exact optimal profit for the knapsack instance */
+
+    node_t* cur_nodes; /* set of states after applying QTG and filtering */
+    path_t* cur_path; /* current result of applying QSearch */
+
+    FILE* stream;
+    char instancename[256];
+    char filename[256];
+    char line[128];
 
     /* 
      * The knapsack is sorted by ration. Then the integer greedy method is
@@ -129,43 +146,74 @@ q_max_search(knapsack_t* k, double bias, branch_t method, size_t max_iter, \
      */
     sort_knapsack(k, RATIO);
     apply_int_greedy(k);
-    path_t* cur_sol = path_rep(k);
-    num_t threshold = k->tot_profit;
-    // printf("Initial threshold: %zu.\n", cur_sol->tot_profit);
+    cur_sol = path_rep(k);
     remove_all_items(k);
 
-    /* obtain optimal solution via combo */
-    num_t exact = combo_wrap(k, 0, k->capacity, &timer, FALSE, FALSE, TRUE, TRUE);
+    /*
+     * A resource counter is initialized. The number of required qubits is given
+     * by the total number of qubits on all three registers of the QTG plus one
+     * for saving the AA phase flip, plus the number of ancilla qubits required
+     * to decompose the AA flip operator. The cycle and gate counts are
+     * initialized to zero and will be updated after every call to QSearch.
+     */
+    profit_qubits = profit_reg_size(k, FGREEDY);
+    resource_t res = { .qubit_count = qubit_count_qtg(k, FGREEDY, COPPERSMITH, \
+                                                 DIRECT, TOFFOLI) + 1 \
+                                 + anc_count_mc(profit_qubits, TOFFOLI),
+                       .cycle_count = 0, .gate_count = 0};
+    qtg_cycles = cycle_count_qtg(k, FGREEDY, COPPERSMITH, DIRECT, \
+                                         TOFFOLI, TRUE);
+    qtg_gates = gate_count_qtg(k, FGREEDY, COPPERSMITH, DIRECT, \
+                                         TOFFOLI, TRUE);
 
-    node_t* cur_nodes;
-    path_t* cur_path;
-
-    while (TRUE) {
+    /* obtain optimal solution via Combo */
+    exact = combo_wrap(k, 0, k->capacity, FALSE, FALSE, TRUE);
+    do {
         /*
          * The application of the QTG is simulated. Only states (paths) with 
          * total profit above the threshold are stored in cur_nodes.
          */
-        // printf("BFS is performed with threshold %ld\n", cur_sol->tot_profit);
         cur_nodes = qtg(k, cur_sol->tot_profit, exact, bias, method, \
                         cur_sol->vector, &num_states);
-        // printf("%zu states after BFS.\n", num_states);
-        // for (size_t i = 0; i < num_states; ++i) {
-        //     printf("%zu-th state has total profit of %ld.\n", i + 1, cur_nodes[i].path.tot_profit);
-        // }
-        // printf("-----------------\n");
         /*
          * QSearch is executed on the nodes created by the QTG. If this yields a
-         * better solution, both the threshold and cur_sol are updated.
+         * better solution, cur_sol (carrying the current threshold) is updated.
          * Otherwise, the routine is interrupted and prior cur_sol is returned.
          */
-        cur_path = q_search(cur_nodes, num_states, &rounds, max_iter, rng);
-        free(cur_nodes);
+        cur_path = q_search(cur_nodes, num_states, &rounds, &iter, max_iter, \
+                            rng);
+        if (cur_nodes != NULL) {
+            free_nodes(cur_nodes, num_states);
+        }
+        /* update cycle and gate count after application of QSearch */
+        res.cycle_count += (rounds + 2 * iter) * qtg_cycles;
+        res.cycle_count += cycle_count_mc(profit_qubits, TOFFOLI, TRUE);
+        res.cycle_count += MIN(cycle_count_comp(profit_qubits, \
+                               cur_sol->tot_profit, TOFFOLI, TRUE, TRUE),
+                               cycle_count_comp(profit_qubits, \
+                               cur_sol->tot_profit, TOFFOLI, FALSE, TRUE));
+        res.gate_count += (rounds + 2 * iter) * qtg_gates;
+        res.gate_count += gate_count_mc(profit_qubits, TOFFOLI, TRUE);
+        res.gate_count += MIN(gate_count_comp(profit_qubits, \
+                              cur_sol->tot_profit, TOFFOLI, TRUE, TRUE),
+                              gate_count_comp(profit_qubits, \
+                              cur_sol->tot_profit, TOFFOLI, FALSE, TRUE));
         if (cur_path != NULL) {
-            free(cur_sol);
+            free_path(cur_sol);
             cur_sol = cur_path;
-            //printf("New threshold: %ld\n", cur_sol->tot_profit);
         } else {
+            snprintf(instancename, sizeof(instancename), "instances%c%s", \
+                path_sep(), k->name);
+            snprintf(filename, sizeof(filename), "%s%cqtg_counts.txt", \
+                     instancename, path_sep());
+            create_dir(instancename);
+            stream = fopen(filename, "a");
+            fprintf(stream, "%"PRIu64" %"PRIu64" %"PRIu64" %d\n", \
+                    (uint64_t)res.qubit_count, (uint64_t)res.cycle_count, \
+                    (uint64_t)res.gate_count,
+                    (cur_sol->tot_profit == exact) ? 1 : 0);
+            fclose(stream);
             return cur_sol;
         }
-    }
+    } while (TRUE);
 }

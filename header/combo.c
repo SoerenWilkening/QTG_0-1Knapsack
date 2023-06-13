@@ -46,14 +46,14 @@
 
 #undef HASCHANCE             /* should strong upper bounds be used? */
 
-#include "combo.h"
+#include "combo.h" /* header file included */
 #include <stdlib.h>
 #include <stdio.h>
 #include <time.h>
 #include <stdarg.h>
 #include <string.h>
 #include <math.h>
-//#include <malloc.h>
+//#include <malloc.h> /* now depreciated */
 
 
 /* ======================================================================

@@ -37,9 +37,7 @@ int main() {
 
 	// print_knapsack(k);
 
-	// uint64_t timer = 0;
-
-	// num_t exact = combo_wrap(k, 0, k->capacity, &timer, FALSE, FALSE, TRUE, TRUE);
+	// num_t exact = combo_wrap(k, 0, k->capacity, FALSE, FALSE, TRUE);
 
 	// printf("Integer greedy lb: %ld, exact solution: %ld.\n", threshold, exact);
 
@@ -50,13 +48,15 @@ int main() {
 	//  	printf("with total profit %ld\n", states[i].path.tot_profit);
 	// }
 
-	// size_t rounds = 0;
+	path_t* sol;
 
-	path_t* sol = q_max_search(k, bias, COMPARE, 500, r);
-
-	//printf("Optimal solution of %ld found after %zu rounds.\n", sol->tot_profit, rounds);
-
-	free(sol);
+	for(size_t i = 0; i < 200; ++i) {
+		time_combo(k);
+		sol = q_max_search(k, bias, COMPARE, 100, r);
+		free_path(sol);
+		printf("%zu-th iteration done.\n", i + 1);
+		printf("--------------------------------\n");
+	}
 
 	free_knapsack(k);
 

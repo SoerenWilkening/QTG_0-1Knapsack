@@ -118,7 +118,7 @@ num_digits(num_t number) {
 
 /* 
  * =============================================================================
- *                            create/free
+ *                            create/copy/free
  * =============================================================================
  */
 
@@ -129,6 +129,12 @@ create_item(num_t cost, num_t profit) {
     new_item->profit = profit;
     new_item->included = FALSE;
     return new_item;
+}
+
+void
+free_path(path_t* path) {
+    mpz_clear(path->vector);
+    free(path);
 }
 
 knapsack_t*
@@ -302,6 +308,14 @@ create_jooken_knapsack(bit_t size, num_t capacity, bit_t num_groups, \
     fclose(stream);
 
     return new_knapsack;
+}
+
+knapsack_t*
+copy_knapsack(const knapsack_t* k) {
+    knapsack_t* k_copy = create_empty_knapsack(k->size, k->capacity);
+    memcpy(k_copy->items, k->items, k->size * sizeof(item_t));
+    memcpy(k_copy->name, k->name, 256 * sizeof(char));
+    return k_copy;
 }
 
 void
@@ -572,31 +586,36 @@ is_trivial(const knapsack_t* k, num_t* opt_profit) {
 
 num_t
 int_greedy(const knapsack_t* k, sort_t method) {
-    knapsack_t k_copy = *k;
-    remove_all_items(&k_copy);
-    sort_knapsack(&k_copy, method);
-    apply_int_greedy(&k_copy);
-    return k_copy.tot_profit;
+    num_t tot_profit;
+    knapsack_t* k_copy = copy_knapsack(k);
+    remove_all_items(k_copy);
+    sort_knapsack(k_copy, method);
+    apply_int_greedy(k_copy);
+    tot_profit = k_copy->tot_profit;
+    free_knapsack(k_copy);
+    return tot_profit;
 }
 
 num_t
 frac_greedy(const knapsack_t* k, sort_t method) {
     bit_t i;
-    knapsack_t k_copy = *k;
-    remove_all_items(&k_copy);
-    sort_knapsack(&k_copy, method);
+    num_t tot_profit;
+    knapsack_t* k_copy = copy_knapsack(k);
+    remove_all_items(k_copy);
+    sort_knapsack(k_copy, method);
 
-    for (i = 0; put_item(&k_copy, i); ++i) {
+    for (i = 0; put_item(k_copy, i); ++i) {
+    }
+    tot_profit = k_copy->tot_profit;
+    if (i == k_copy->size) {
+        free_knapsack(k_copy);
+        return tot_profit;
     }
 
-    if (i == k_copy.size) {
-        return k_copy.tot_profit;
-    }
-
-    ratio_t frac_item = k_copy.remain_cost / ((ratio_t)k_copy.items[i].cost);
-    frac_item *= k_copy.items[i].profit;
-
-    return k_copy.tot_profit + ((num_t)floor(frac_item));
+    ratio_t frac_item = k_copy->remain_cost / ((ratio_t)k_copy->items[i].cost);
+    frac_item *= k_copy->items[i].profit;
+    free_knapsack(k_copy);
+    return tot_profit + ((num_t)floor(frac_item));
 }
 
 num_t
@@ -634,7 +653,7 @@ get_ub(const knapsack_t* k, ub_t method) {
 }
 
 void
-print_knapsack(knapsack_t* k) {
+print_knapsack(const knapsack_t* k) {
     bit_t item_col = MAX(4, num_digits(k->size));
     bit_t cost_col = MAX(4, num_digits(max_cost(k)));
     bit_t profit_col = MAX(6, num_digits(max_profit(k)));

@@ -43,6 +43,20 @@ get_branch_name(branch_t method) {
 
 /* 
  * =============================================================================
+ *                            free nodes
+ * =============================================================================
+ */
+
+ void
+ free_nodes(node_t nodes[], size_t num_nodes) {
+    for (size_t i = 0; i < num_nodes; ++i) {
+        mpz_clear(nodes[i].path.vector);
+    }
+    free(nodes);
+ }
+
+/* 
+ * =============================================================================
  *                            branch probability
  * =============================================================================
  */
@@ -104,8 +118,6 @@ qtg(const knapsack_t* k, num_t threshold, num_t exact, \
     parent->prob = 1.;
     parent->ub = exact;
     num_t left_ub, right_ub;
-    uint64_t timer;
-    timer = 0;
     for (bit_t i = 0; i < k->size; a = 0, ++i) { /* start from leftmost node */
         /*
          * The size of the child layer is upper bounded by twice the parent
@@ -137,8 +149,8 @@ qtg(const knapsack_t* k, num_t threshold, num_t exact, \
              * for the left subtree, i.e., where the current item is not
              * included into the knapsack.
              */
-            left_ub = combo_wrap(k, i + 1, parent[j].path.remain_cost, &timer, \
-                                 FALSE, FALSE, TRUE, TRUE) \
+            left_ub = combo_wrap(k, i + 1, parent[j].path.remain_cost, FALSE, \
+                                 FALSE, TRUE) \
                       + parent[j].path.tot_profit;
             // printf("Left subtree upper bound: %ld\n", left_ub);
             if (left_ub > threshold) {
@@ -174,8 +186,8 @@ qtg(const knapsack_t* k, num_t threshold, num_t exact, \
                      * is considered to be included into the knapsack.
                      */
                     right_ub = combo_wrap(k, i + 1, parent[j].path.remain_cost \
-                                          - k->items[i].cost, &timer, FALSE, \
-                                          FALSE, TRUE, TRUE) \
+                                          - k->items[i].cost, FALSE, FALSE, \
+                                          TRUE) \
                                + parent[j].path.tot_profit \
                                + k->items[i].profit;
                     // printf("Right subtree upper bound: %ld\n", right_ub);
@@ -282,10 +294,10 @@ qtg(const knapsack_t* k, num_t threshold, num_t exact, \
         }
         /* swap pointer to parent and child layer */
         SWAP(&parent, &child, node_t*);
+        /* resize new parent layer and free former parent layer */
+        parent = realloc(parent, a * sizeof(node_t));
+        free_nodes(child, *num_states);
         *num_states = a;
-        /* resize new parent layer and delete former parent layer */
-        parent = realloc(parent, *num_states * sizeof(node_t));
-        free(child);
         // printf("---------------------------------\n");
         // printf("DONE WITH LAYER\n");
         // printf("---------------------------------\n");

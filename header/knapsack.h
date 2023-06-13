@@ -73,7 +73,7 @@ typedef struct knapsack {
 	num_t remain_cost;
 	num_t tot_profit;
 	item_t* items;
-    char* name; 
+    char* name;
 } knapsack_t;
 
 /*
@@ -191,6 +191,15 @@ bit_t num_digits(num_t);
 item_t* create_item(num_t, num_t);
 
 /*
+ * Function:    free_path
+ * ----------------------
+ * Description: This function frees a dynamically allocated path together with
+ *              its vector.
+ * Parameter:   Pointer to the path that should be freed.
+ */
+void free_path(path_t*);
+
+/*
  * Function: 		create_empty_knapsack
  * --------------------------------------
  * Description:		This function dynamically allocates a new knapsack with
@@ -227,8 +236,23 @@ knapsack_t* create_empty_knapsack(bit_t, num_t);
  */
 knapsack_t* create_pisinger_knapsack(category_t, size_t, bit_t, num_t, size_t);
 
-knapsack_t*
-create_jooken_knapsack(bit_t size, num_t capacity, bit_t num_groups, double group_frac, double pert, num_t range);
+knapsack_t* create_jooken_knapsack(bit_t size, num_t capacity, \
+                                   bit_t num_groups, double group_frac, \
+                                   double pert, num_t range);
+
+/*
+ * Function:    copy_knapsack
+ * --------------------------
+ * Description: This function dynamically allocates a deep copy of a given
+ *              knapsack instance.
+ * Parameters:  Pointer to the knapsack that should be copied.
+ * Returns:     Pointer to the allocated knapsack.
+ * Side Effects:
+ *      - Allocates dynamically; pointer should eventually be freed.
+ *      - Also allocates items and include statements dynamically; their
+ *        pointers should also eventually be freed.
+ */
+knapsack_t* copy_knapsack(const knapsack_t*);
 
 /*
  * Function: 		assign_item_values
@@ -575,7 +599,7 @@ num_t get_ub(const knapsack_t*, ub_t);
  *              shown.
  * Parameter:   Pointer to knapsack whose state should be printed.
  */
-void print_knapsack(knapsack_t*);
+void print_knapsack(const knapsack_t*);
 
 #ifdef __cplusplus
 }

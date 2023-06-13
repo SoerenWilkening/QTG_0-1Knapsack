@@ -64,6 +64,14 @@ const char* get_branch_name(branch_t);
 
 /* 
  * =============================================================================
+ *                            free nodes
+ * =============================================================================
+ */
+
+void free_nodes(node_t*, size_t);
+
+/* 
+ * =============================================================================
  *                            branch probability
  * =============================================================================
  */
@@ -106,7 +114,7 @@ double branch_prob(const knapsack_t*, bit_t, double, bool_t, branch_t, mpz_t);
  *                  by the specified branching rule. This rule directly
  *                  corresponds to the way the Hadamard gates are biased in the
  *                  proposed design. For simulation purposes, at each node, the
- *                  local optimum of its subtree is calculated by applying combo
+ *                  local optimum of its subtree is calculated by applying Combo
  *                  to the corresponding knapsack subinstance. If the local 
  *                  optimum falls below a specified threshold, the branch is
  *                  cut. However, the probability of the remaining branch is

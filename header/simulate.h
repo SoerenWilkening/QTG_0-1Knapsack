@@ -8,6 +8,7 @@
  */
 
 #include "stategen.h"
+#include "qtgcount.h"
 
 /* 
  * =============================================================================
@@ -91,13 +92,15 @@ path_t* ampl_amp(const node_t[], size_t, size_t, const gsl_rng*);
  *      parameter1: Array of relevant states together with their probabilities.
  *      parameter2: Number of states, i.e. length of the array.
  *      parameter3: Pointer to round counter.
- *      parameter4: 
- *      parameter5: Pointer to GSL's random number generator.
+ *      parameter4: Pointer to iteration counter.
+ *      parameter5: Maximum number of iterations.
+ *      parameter6: Pointer to GSL's random number generator.
  * Returns:         If successul, pointer to improved state (path) measured.
  *                  Otherwise, a null pointer.
-* Side Effect:      Allocates dynamically; pointer should eventually be freed.
+ * Side Effect:     Allocates dynamically; pointer should eventually be freed.
  */
-path_t* q_search(const node_t[], size_t, size_t*, size_t, const gsl_rng*);
+path_t* q_search(const node_t[], size_t, size_t*, size_t*, size_t, \
+                 const gsl_rng*);
 
 /* 
  * =============================================================================
@@ -112,7 +115,7 @@ path_t* q_search(const node_t[], size_t, size_t*, size_t, const gsl_rng*);
  *                  algorithm to a given knapsack instance. The routine starts
  *                  with sorting the input knapsack in-place and then calculates
  *                  its integer greedy solution, obtaining the first threshold.
- *                  It also calculates its optimal total profit via combo.
+ *                  It also calculates its optimal total profit via Combo.
  *                  Then, the application of the QTG, and subsequently of the
  *                  QSearch is simulated as long as an improved state (path) is
  *                  found. After each application of QSearch, the found state's

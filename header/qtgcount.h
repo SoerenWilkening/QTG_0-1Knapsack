@@ -25,6 +25,22 @@ extern "C" {
  * =============================================================================
  */
 
+/*
+ * Struct:      resource_t
+ * -----------------------
+ * Description: This struct represents a resource counter for a complete run of
+ *              the QMaxSearch algorithm.
+ * Contents:    
+ *      qubits: Total number of qubits.
+ *      cycles: Totel number of quantum cycles.
+ *      gates:  Total number of quantum gates.
+ */
+typedef struct resource {
+    bit_t qubit_count;
+    count_t cycle_count;
+    count_t gate_count;
+} resource_t;
+
 typedef enum qft {
     COPPERSMITH,
 } qft_t;
