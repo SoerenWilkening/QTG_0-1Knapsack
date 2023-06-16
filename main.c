@@ -20,7 +20,8 @@ int main() {
 	// knapsack_t* k = create_empty_knapsack(7, 9);
 	// assign_item_values(k, costs, profits);
 
-	knapsack_t* k = create_pisinger_knapsack(SMALL, 1, 50, 1000, 1);
+//	knapsack_t* k = create_pisinger_knapsack(SMALL, 1, 50, 1000, 1);
+	knapsack_t* k = create_jooken_knapsack(400, 1000000, 2, 0.1, 0, 100);
 
 	// sort_knapsack(k, RATIO);
 
@@ -50,9 +51,11 @@ int main() {
 
 	path_t* sol;
 
-	for(size_t i = 0; i < 1000; ++i) {
+    printf("%lu %lu\n", k->items[0].profit, k->items[0].cost);
+
+	for(size_t i = 0; i < 10; ++i) {
 		measure_combo(k);
-		sol = q_max_search(k, bias, COMPARE, 100, r);
+		sol = q_max_search(k, bias, COMPARE, 200, r);
 		free_path(sol);
 		printf("%zu-th iteration done.\n", i + 1);
 		printf("--------------------------------\n");
