@@ -100,9 +100,8 @@ branch_prob(const knapsack_t* k, bit_t i, double bias, bool_t left, \
  */
 
 node_t*
-qtg(const knapsack_t* k, num_t threshold, num_t exact, \
-                     double bias, branch_t method, mpz_t cur_sol, \
-                     size_t* num_states) {
+qtg(const knapsack_t* k, num_t threshold, num_t exact, double bias, \
+    branch_t method, mpz_t cur_sol, size_t* num_states) {
     if (threshold == exact) {
         /* return empty node array if optimal solution is already reached */
         *num_states = 0;
@@ -133,14 +132,14 @@ qtg(const knapsack_t* k, num_t threshold, num_t exact, \
                 mpz_set(child[a].path.vector, parent[j].path.vector);
                 child[a].ub = parent[j].ub;
                 child[a].prob = parent[j].prob;
-                // printf("----------------\n");
-                // printf("Node info:\n");
-                // printf("Remaining cost: %ld\n", child[a].path.remain_cost);
-                // printf("Total profit: %ld\n", child[a].path.tot_profit);
-                // gmp_printf("Vector: %Zd\n", child[a].path.vector);
-                // printf("Upper bound: %ld\n", child[a].ub);
-                // printf("Probability: %.16f\n", child[a].prob);
-                // printf("----------------\n");
+                printf("----------------\n");
+                printf("Node info:\n");
+                printf("Remaining cost: %ld\n", child[a].path.remain_cost);
+                printf("Total profit: %ld\n", child[a].path.tot_profit);
+                gmp_printf("Vector: %Zd\n", child[a].path.vector);
+                printf("Upper bound: %ld\n", child[a].ub);
+                printf("Probability: %.16f\n", child[a].prob);
+                printf("----------------\n");
                 ++a;
                 continue;
             }
@@ -152,13 +151,11 @@ qtg(const knapsack_t* k, num_t threshold, num_t exact, \
             left_ub = combo_wrap(k, i + 1, parent[j].path.remain_cost, FALSE, \
                                  FALSE, TRUE) \
                       + parent[j].path.tot_profit;
-            // printf("Left subtree upper bound: %ld\n", left_ub);
             if (left_ub > threshold) {
                 /*
                  * The left subtree has at least one path with objective value
                  * higher than the threshold. Therefore it cannot be omitted.
                  */
-                // printf("Left subtree included.\n");
                 /* remaining cost, total profit, and vector do not change */
                 child[a].path.remain_cost = parent[j].path.remain_cost;
                 child[a].path.tot_profit = parent[j].path.tot_profit;
@@ -169,14 +166,14 @@ qtg(const knapsack_t* k, num_t threshold, num_t exact, \
                 /* update probability, then increase child index */
                 child[a].prob = parent[j].prob * branch_prob(k, i, bias, \
                                                     TRUE, method, cur_sol);
-                // printf("----------------\n");
-                // printf("Node info:\n");
-                // printf("Remaining cost: %ld\n", child[a].path.remain_cost);
-                // printf("Total profit: %ld\n", child[a].path.tot_profit);
-                // gmp_printf("Vector: %Zd\n", child[a].path.vector);
-                // printf("Upper bound: %ld\n", child[a].ub);
-                // printf("Probability: %.16f\n", child[a].prob);
-                // printf("----------------\n");
+                printf("----------------\n");
+                printf("Node info:\n");
+                printf("Remaining cost: %ld\n", child[a].path.remain_cost);
+                printf("Total profit: %ld\n", child[a].path.tot_profit);
+                gmp_printf("Vector: %Zd\n", child[a].path.vector);
+                printf("Upper bound: %ld\n", child[a].ub);
+                printf("Probability: %.16f\n", child[a].prob);
+                printf("----------------\n");
                 ++a;
 
                 if (left_ub == parent[j].ub) {
@@ -190,7 +187,6 @@ qtg(const knapsack_t* k, num_t threshold, num_t exact, \
                                           TRUE) \
                                + parent[j].path.tot_profit \
                                + k->items[i].profit;
-                    // printf("Right subtree upper bound: %ld\n", right_ub);
                     if (right_ub > threshold) {
                         /*
                          * The right subtree has at least one path with
@@ -214,14 +210,14 @@ qtg(const knapsack_t* k, num_t threshold, num_t exact, \
                         /* update probability, then increase child index */
                         child[a].prob = parent[j].prob * branch_prob(k, i, \
                                                   bias, FALSE, method, cur_sol);
-                        // printf("----------------\n");
-                        // printf("Node info:\n");
-                        // printf("Remaining cost: %ld\n", child[a].path.remain_cost);
-                        // printf("Total profit: %ld\n", child[a].path.tot_profit);
-                        // gmp_printf("Vector: %Zd\n", child[a].path.vector);
-                        // printf("Upper bound: %ld\n", child[a].ub);
-                        // printf("Probability: %.16f\n", child[a].prob);
-                        // printf("----------------\n");
+                        printf("----------------\n");
+                        printf("Node info:\n");
+                        printf("Remaining cost: %ld\n", child[a].path.remain_cost);
+                        printf("Total profit: %ld\n", child[a].path.tot_profit);
+                        gmp_printf("Vector: %Zd\n", child[a].path.vector);
+                        printf("Upper bound: %ld\n", child[a].ub);
+                        printf("Probability: %.16f\n", child[a].prob);
+                        printf("----------------\n");
                         ++a;
 
                     }
@@ -231,8 +227,6 @@ qtg(const knapsack_t* k, num_t threshold, num_t exact, \
                      * again. Especially, its upper bound is also above the
                      * threshold and therefore it has to be included.
                      */
-                    // printf("Right subtree upper bound: %ld\n", parent[j].ub);
-                    // printf("Right tree included.\n");
 
                     /* update remaining cost */
                     child[a].path.remain_cost = parent[j].path.remain_cost \
@@ -250,20 +244,18 @@ qtg(const knapsack_t* k, num_t threshold, num_t exact, \
                     /* update probability, then increase child index */
                     child[a].prob = parent[j].prob * branch_prob(k, i, \
                                               bias, FALSE, method, cur_sol);
-                    // printf("----------------\n");
-                    // printf("Node info:\n");
-                    // printf("Remaining cost: %ld\n", child[a].path.remain_cost);
-                    // printf("Total profit: %ld\n", child[a].path.tot_profit);
-                    // gmp_printf("Vector: %Zd\n", child[a].path.vector);
-                    // printf("Upper bound: %ld\n", child[a].ub);
-                    // printf("Probability: %.16f\n", child[a].prob);
-                    // printf("----------------\n");
+                    printf("----------------\n");
+                    printf("Node info:\n");
+                    printf("Remaining cost: %ld\n", child[a].path.remain_cost);
+                    printf("Total profit: %ld\n", child[a].path.tot_profit);
+                    gmp_printf("Vector: %Zd\n", child[a].path.vector);
+                    printf("Upper bound: %ld\n", child[a].ub);
+                    printf("Probability: %.16f\n", child[a].prob);
+                    printf("----------------\n");
                     ++a;
                 }
             } else {
                 /* left subtree is omitted, but right subtree is not */
-                // printf("Right subtree upper bound: %ld\n", parent[j].ub);
-                // printf("Right tree included.\n");
 
                 /* update remaining cost */
                 child[a].path.remain_cost = parent[j].path.remain_cost \
@@ -281,14 +273,14 @@ qtg(const knapsack_t* k, num_t threshold, num_t exact, \
                 /* update probability, then increase child index */
                 child[a].prob = parent[j].prob * branch_prob(k, i, bias, \
                                                     FALSE, method, cur_sol);
-                // printf("----------------\n");
-                // printf("Node info:\n");
-                // printf("Remaining cost: %ld\n", child[a].path.remain_cost);
-                // printf("Total profit: %ld\n", child[a].path.tot_profit);
-                // gmp_printf("Vector: %Zd\n", child[a].path.vector);
-                // printf("Upper bound: %ld\n", child[a].ub);
-                // printf("Probability: %.16f\n", child[a].prob);
-                // printf("----------------\n");
+                printf("----------------\n");
+                printf("Node info:\n");
+                printf("Remaining cost: %ld\n", child[a].path.remain_cost);
+                printf("Total profit: %ld\n", child[a].path.tot_profit);
+                gmp_printf("Vector: %Zd\n", child[a].path.vector);
+                printf("Upper bound: %ld\n", child[a].ub);
+                printf("Probability: %.16f\n", child[a].prob);
+                printf("----------------\n");
                 ++a;
             }
         }
@@ -298,9 +290,9 @@ qtg(const knapsack_t* k, num_t threshold, num_t exact, \
         parent = realloc(parent, a * sizeof(node_t));
         free_nodes(child, *num_states);
         *num_states = a;
-        // printf("---------------------------------\n");
-        // printf("DONE WITH LAYER\n");
-        // printf("---------------------------------\n");
+        printf("---------------------------------\n");
+        printf("DONE WITH LAYER\n");
+        printf("---------------------------------\n");
     }
     /* final layer is comprised of all feasible paths above threshold */
     return parent;

@@ -26,6 +26,30 @@ extern "C" {
 
 /* 
  * =============================================================================
+ *                            type definitions
+ * =============================================================================
+ */
+
+ typedef struct combo_args {
+    item* f;
+    item* l;
+    num_t c;
+    num_t lb;
+    num_t ub;
+    bool_t def;
+    bool_t relx;
+ } combo_args_t;
+
+/* 
+ * =============================================================================
+ *                            Combo void mask
+ * =============================================================================
+ */
+
+void combo_void_mask(void*, void*, void*, void*, void*, void*, void*);
+
+/* 
+ * =============================================================================
  *                            Combo wrapper
  * =============================================================================
  */
@@ -49,23 +73,23 @@ num_t combo_wrap(const knapsack_t*, bit_t, num_t, bool_t, bool_t, bool_t);
 
 /* 
  * =============================================================================
- *                            Combo timer
+ *                            measure Combo
  * =============================================================================
  */
 
 /*
- * Function:        time_combo
- * ---------------------------
+ * Function:        measure_combo
+ * ------------------------------
  * Description:     This function times the execution of Combo on a given
- *                  knapsack instance via elapsed cycles. The instance is solved
- *                  two times: In the first run, Combo only calculates the
- *                  optimal profit. In the second run, Combo also calculates a
- *                  optimal solution. Both counters are saved in corresponding
- *                  files.
+ *                  knapsack instance via elapsed cycles and also measure its
+ *                  peak memory usage. The instance is solved two times: In the
+ *                  first run, Combo only calculates the optimal profit. In the
+ *                  second run, Combo also calculates a optimal solution. All
+ *                  counters (cycles, memory) are saved in corresponding files.
  * Parameters:
  *      parameter1: Pointer to the knapsack that should be considered.
  */
-void time_combo(const knapsack_t*);
+void measure_combo(const knapsack_t*);
 
 #ifdef __cplusplus
 }

@@ -314,7 +314,7 @@ knapsack_t*
 copy_knapsack(const knapsack_t* k) {
     knapsack_t* k_copy = create_empty_knapsack(k->size, k->capacity);
     memcpy(k_copy->items, k->items, k->size * sizeof(item_t));
-    memcpy(k_copy->name, k->name, 256 * sizeof(char));
+    strcpy(k_copy->name, k->name);
     return k_copy;
 }
 
@@ -573,7 +573,7 @@ cost_sum(const knapsack_t* k) {
 
 bool_t
 is_trivial(const knapsack_t* k, num_t* opt_profit) {
-    if (cost_sum(k) < k->capacity) {
+    if (cost_sum(k) <= k->capacity) {
         *opt_profit = profit_sum(k);
         return TRUE;
     } else if (min_cost(k) > k->capacity) {

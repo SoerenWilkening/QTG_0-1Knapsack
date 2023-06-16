@@ -50,8 +50,8 @@ int main() {
 
 	path_t* sol;
 
-	for(size_t i = 0; i < 200; ++i) {
-		time_combo(k);
+	for(size_t i = 0; i < 1000; ++i) {
+		measure_combo(k);
 		sol = q_max_search(k, bias, COMPARE, 100, r);
 		free_path(sol);
 		printf("%zu-th iteration done.\n", i + 1);

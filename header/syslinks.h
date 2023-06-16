@@ -11,6 +11,14 @@
 
 /* 
  * =============================================================================
+ *                            type definitions
+ * =============================================================================
+ */
+
+typedef void (*funptr)(void*);
+
+/* 
+ * =============================================================================
  *                            C++ check
  * =============================================================================
  */
@@ -72,11 +80,29 @@ uint8_t create_dir(const char*);
 /*
  * Function:    rdtsc
  * ------------------
- * Description: This function returns reads the system's current time-stamp
- *				counter.
+ * Description: This function returns the system's current time-stamp counter.
  * Returns:     The system's current time-stamp counter.
  */
 uint64_t rdtsc();
+
+/* 
+ * =============================================================================
+ *                            read peak memory usage
+ * =============================================================================
+ */
+
+/*
+ * Function:    rpmu
+ * -----------------
+ * Description:     This function calculates the peak memory usage of a given
+ *                  function that accepts a given void pointer as argument.
+ * Parameters:
+ *      parameter1: Pointer to function whose peak memory usage should be
+ *                  estimated.
+ *      parameter2: Void pointer to arguments the measured function takes.
+ * Returns:         Peak memory usage of the given function.
+ */
+uint64_t rpmu(funptr, void*);
 
 #ifdef __cplusplus
 }

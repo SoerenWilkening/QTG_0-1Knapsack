@@ -96,7 +96,7 @@ q_search(const node_t nodes[], size_t num_states, size_t* rounds, \
     double c = 6. / 5;
     *rounds = 0; /* reset rounds counter */
     *iter = 0; /* reset iteration counter */
-
+    
     path_t* sample;
     while(m_tot < max_iter) {
         ++(*rounds);
@@ -203,7 +203,7 @@ q_max_search(knapsack_t* k, double bias, branch_t method, size_t max_iter, \
             cur_sol = cur_path;
         } else {
             snprintf(instancename, sizeof(instancename), "instances%c%s", \
-                path_sep(), k->name);
+                     path_sep(), k->name);
             snprintf(filename, sizeof(filename), "%s%cqtg_counts.txt", \
                      instancename, path_sep());
             create_dir(instancename);
