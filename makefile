@@ -24,8 +24,6 @@ compile:
 					-framework IOKit \
 					-O1 \
 					-g \
-					-fsanitize=address \
-					-fno-omit-frame-pointer
 
 	@echo "delete non used files"
 	@rm qtgcount.o simulate.o stategen.o combowrp.o combo.o knapsack.o syslinks.o

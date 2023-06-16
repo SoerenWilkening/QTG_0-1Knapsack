@@ -216,8 +216,8 @@ void free_path(path_t*);
 knapsack_t* create_empty_knapsack(bit_t, num_t);
 
 /*
- * Function:        create_knapsack_from_file
- * ------------------------------------------
+ * Function:        create_pisinger_knapsack
+ * -----------------------------------------
  * Description:     This function dynamically allocates a new knapsack with
  *                  parameters specified in the given file. The format is
  *                  adapted to Pisinger's benchmarks for the 0-1-Knapsack
@@ -236,6 +236,25 @@ knapsack_t* create_empty_knapsack(bit_t, num_t);
  */
 knapsack_t* create_pisinger_knapsack(category_t, size_t, bit_t, num_t, size_t);
 
+/*
+ * Function:        create_jooken_knapsack
+ * ---------------------------------------
+ * Description:     This function dynamically allocates a new knapsack with
+ *                  parameters specified in the given file. The format is
+ *                  adapted to Pisinger's benchmarks for the 0-1-Knapsack
+ *                  problem.
+ * Parameters:
+ *      parameter1: Category of knapsack instances.
+ *      parameter2: File number within the specified category.
+ *      parameter3: Number of items assigned to the knapsack.
+ *      parameter4: Range of coefficients.
+ *      parameter5: Instance number within specified file.
+ * Returns:         Pointer to the allocated knapsack.
+ * Side Effects:
+ *      - Allocates dynamically; pointer should eventually be freed.
+ *      - Also allocates items and include statements dynamically; their
+ *        pointers should also eventually be freed.
+ */
 knapsack_t* create_jooken_knapsack(bit_t size, num_t capacity, \
                                    bit_t num_groups, double group_frac, \
                                    double pert, num_t range);

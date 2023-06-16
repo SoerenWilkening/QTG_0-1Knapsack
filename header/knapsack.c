@@ -273,12 +273,13 @@ create_jooken_knapsack(bit_t size, num_t capacity, bit_t num_groups, \
     }
 
     new_knapsack = create_empty_knapsack(size, capacity);
-    filename[strlen(filename) - 7] = '\0';
-    sprintf(new_knapsack->name, "%s", filename);
 
     stream = fopen(filename, "r");
 
     fgets(line, sizeof(line), stream);
+
+    filename[strlen(filename) - 7] = '\0';
+    sprintf(new_knapsack->name, "%s", filename + 10);
 
     while (fgets(line, sizeof(line), stream) != NULL && num_line < size) {
         line_pos = profit_pos = cost_pos = 0;

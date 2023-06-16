@@ -3,3 +3,5 @@ instances/
 *.o
 main
 *.pdf
+example
+*.dSYM/
