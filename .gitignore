@@ -3,5 +3,12 @@ instances/
 *.o
 main
 *.pdf
+*.txt
+*.tex
 example
 *.dSYM/
+bench
+venv
+cmake-build-debug
+.calculations
+.idea

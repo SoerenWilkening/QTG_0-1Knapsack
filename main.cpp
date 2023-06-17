@@ -22,7 +22,7 @@ int benching(std::string filename, int reps, int def_sol) {
         long peak_ram = 0;
         for (int i = 0; i <= 1; ++i) {
 
-            std::string command = "echo \"$(/usr/bin/time -l ./cmake-build-debug/bench " + filename +
+            std::string command = "echo \"$(/usr/bin/time -l ./bench " + filename +
                                   " " + std::to_string(i) + " " +
                                   std::to_string(def_sol) + " 2>&1)\" | grep \"maximum resident set size\"";
 

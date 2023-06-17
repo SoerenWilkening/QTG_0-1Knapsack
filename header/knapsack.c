@@ -261,8 +261,8 @@ create_jooken_knapsack(bit_t size, num_t capacity, bit_t num_groups, \
     size_t cost_pos;
     size_t num_line = 0;
 
-    snprintf(filename, sizeof(filename), "problemInstances%cn_%"PRIu64"_" \
-             "c_%"PRIu64"_g_%"PRIu64"_f_%f_eps_%f_s_%"PRIu64"%ctest.in", \
+    snprintf(filename, sizeof(filename), "instances%cproblemInstances%cn_%"PRIu64"_" \
+             "c_%"PRIu64"_g_%"PRIu64"_f_%.1f_eps_%.0f_s_%"PRIu64"%ctest.in", path_sep(), \
              path_sep(), (uint64_t)size, (uint64_t)capacity, \
              (uint64_t)num_groups, group_frac, pert, (uint64_t)range, \
              path_sep());
@@ -307,6 +307,8 @@ create_jooken_knapsack(bit_t size, num_t capacity, bit_t num_groups, \
     }
 
     fclose(stream);
+    filename[strlen(filename) - 7] = '\0';
+    sprintf(new_knapsack->name, "%s", filename + 10);
 
     return new_knapsack;
 }
