@@ -8,6 +8,8 @@
  */
 
 #include <stdint.h>
+#include <stdlib.h>
+#include <stdio.h>
 
 /* 
  * =============================================================================
@@ -87,12 +89,12 @@ uint64_t rdtsc();
 
 /* 
  * =============================================================================
- *                            read peak memory usage
+ *                            read meta data
  * =============================================================================
  */
 
 /*
- * Function:    rpmu
+ * Function:    rdmd
  * -----------------
  * Description:     This function calculates the peak memory usage of a given
  *                  function that accepts a given void pointer as argument.
@@ -102,7 +104,7 @@ uint64_t rdtsc();
  *      parameter2: Void pointer to arguments the measured function takes.
  * Returns:         Peak memory usage of the given function.
  */
-uint64_t rpmu(funptr, void*);
+void rdmd(const char*, size_t, char*[], uint64_t*, uint64_t*);
 
 #ifdef __cplusplus
 }

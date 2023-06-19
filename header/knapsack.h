@@ -216,48 +216,69 @@ void free_path(path_t*);
 knapsack_t* create_empty_knapsack(bit_t, num_t);
 
 /*
+ * Function:        pisinger_filename
+ * ----------------------------------
+ * Description:     This function formats instance identifier from Pisinger's
+ *                  benchmarks to the correct file name.
+ * Parameters:
+ *      parameter1: Category of knapsack instances.
+ *      parameter2: File number within the specified category.
+ *      parameter3: Number of items assigned to the knapsack.
+ *      parameter4: Range of coefficients.
+ *      parameter5: Buffer for filename.
+ *      parameter6: Buffer size.
+ */
+void pisinger_filename(category_t, size_t, bit_t, num_t, char[], size_t);
+
+/*
+ * Function:        jooken_filename
+ * --------------------------------
+ * Description:     This function formats instance identifier from Jooken's
+ *                  benchmarks to the correct file name.
+ * Parameters:
+ *      parameter1: Number of items assigned to the knapsack.
+ *      parameter2: Capacity of knapsack.
+ *      parameter3: Number of item groups.
+ *      parameter4: Ratio of items in the last group.
+ *      parameter5: Pertubation for costs and profits.
+ *      parameter6: Value range.
+ *      parameter7: Buffer for the filename.
+ *      parameter8: Buffer size.
+ */
+void jooken_filename(bit_t, num_t, bit_t, double, double, num_t, char[], \
+                     size_t);
+
+/*
  * Function:        create_pisinger_knapsack
  * -----------------------------------------
  * Description:     This function dynamically allocates a new knapsack with
  *                  parameters specified in the given file. The format is
  *                  adapted to Pisinger's benchmarks for the 0-1-Knapsack
  *                  problem.
- * Parameters:
- *      parameter1: Category of knapsack instances.
- *      parameter2: File number within the specified category.
- *      parameter3: Number of items assigned to the knapsack.
- *      parameter4: Range of coefficients.
- *      parameter5: Instance number within specified file.
+ * Parameter:       File name. 
  * Returns:         Pointer to the allocated knapsack.
- * Side Effects:
+ * Side Effects:   
  *      - Allocates dynamically; pointer should eventually be freed.
  *      - Also allocates items and include statements dynamically; their
  *        pointers should also eventually be freed.
  */
-knapsack_t* create_pisinger_knapsack(category_t, size_t, bit_t, num_t, size_t);
+knapsack_t* create_pisinger_knapsack(char*);
 
 /*
  * Function:        create_jooken_knapsack
  * ---------------------------------------
  * Description:     This function dynamically allocates a new knapsack with
  *                  parameters specified in the given file. The format is
- *                  adapted to Pisinger's benchmarks for the 0-1-Knapsack
+ *                  adapted to Jooken's benchmarks for the 0-1-Knapsack
  *                  problem.
- * Parameters:
- *      parameter1: Category of knapsack instances.
- *      parameter2: File number within the specified category.
- *      parameter3: Number of items assigned to the knapsack.
- *      parameter4: Range of coefficients.
- *      parameter5: Instance number within specified file.
+ * Parameter:       File name.
  * Returns:         Pointer to the allocated knapsack.
  * Side Effects:
  *      - Allocates dynamically; pointer should eventually be freed.
  *      - Also allocates items and include statements dynamically; their
  *        pointers should also eventually be freed.
  */
-knapsack_t* create_jooken_knapsack(bit_t size, num_t capacity, \
-                                   bit_t num_groups, double group_frac, \
-                                   double pert, num_t range);
+knapsack_t* create_jooken_knapsack(char*);
 
 /*
  * Function:    copy_knapsack

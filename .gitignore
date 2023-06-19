@@ -1,11 +1,12 @@
 instances/
 *.DS_Store
 *.o
-main
 *.pdf
 *.txt
 *.tex
+main
 example
+cmbcount
 *.dSYM/
 bench
 venv

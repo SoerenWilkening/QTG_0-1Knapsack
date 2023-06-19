@@ -148,7 +148,7 @@ qtg(const knapsack_t* k, num_t threshold, num_t exact, double bias, \
              * for the left subtree, i.e., where the current item is not
              * included into the knapsack.
              */
-            left_ub = combo_wrap(k, i + 1, parent[j].path.remain_cost, FALSE, \
+            left_ub = combo_data(k, i + 1, parent[j].path.remain_cost, FALSE, \
                                  FALSE, TRUE) \
                       + parent[j].path.tot_profit;
             if (left_ub > threshold) {
@@ -182,7 +182,7 @@ qtg(const knapsack_t* k, num_t threshold, num_t exact, double bias, \
                      * subtree has to be calculated, too. Here, the current item
                      * is considered to be included into the knapsack.
                      */
-                    right_ub = combo_wrap(k, i + 1, parent[j].path.remain_cost \
+                    right_ub = combo_data(k, i + 1, parent[j].path.remain_cost \
                                           - k->items[i].cost, FALSE, FALSE, \
                                           TRUE) \
                                + parent[j].path.tot_profit \

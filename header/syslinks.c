@@ -187,42 +187,43 @@ rdtsc() {
 
 /* 
  * =============================================================================
- *                            Apple: read peak memory usage
+ *                            Apple: read meta data
  * =============================================================================
  */
 
-uint64_t
-rpmu(funptr fun, void* args) {
-    task_vm_info_data_t vm_info;
-    mach_msg_type_number_t count = TASK_VM_INFO_COUNT;
-
-    // Get initial memory usage
-    kern_return_t result = task_info(mach_task_self(),
-                                     TASK_VM_INFO,
-                                     (task_info_t)&vm_info,
-                                     &count);
-    if (result != KERN_SUCCESS) {
-        return 0;
+void
+rdmd(const char* executable, size_t argc, char* argv[], uint64_t* mem_count, \
+     uint64_t* cycle_count) {
+    char arg_str[256];
+    size_t offset = 0;
+    for (size_t i = 0; i < argc; ++i) {
+        offset += snprintf(arg_str + offset, sizeof(arg_str) - offset, "%s ", \
+                           argv[i]);
     }
 
-    // Call the given function
-    fun(args);
+    char command[512];
+    snprintf(command, sizeof(command), "echo \"$(/usr/bin/time -l ./%s %s" \
+             "2>&1)\" | grep \"maximum resident set size\\|cycles elapsed\"", \
+             executable, arg_str);
 
-    // Allow some time for the memory usage to stabilize
-    //usleep(1000);
-
-    // Get final memory usage
-    result = task_info(mach_task_self(),
-                       TASK_VM_INFO,
-                       (task_info_t)&vm_info,
-                       &count);
-    if (result != KERN_SUCCESS) {
-        return 0;
+    FILE* pipe = popen(command, "r");
+    if (!pipe) {
+        printf("Error opening pipe!\n");
+        return;
     }
 
-    // Calculate peak memory usage
-    vm_size_t peak_memory = vm_info.phys_footprint;
-    return peak_memory;
+    /* get peak memory usage */
+    char mem_buffer[256];
+    fgets(mem_buffer, sizeof(mem_buffer), pipe);
+    *mem_count = strtoull(mem_buffer, NULL, 10);
+
+    /* get cycle count */
+    char cycle_buffer[256];
+    fgets(cycle_buffer, sizeof(cycle_buffer), pipe);
+    *cycle_count = strtoull(cycle_buffer, NULL, 10);
+
+
+    pclose(pipe);
 }
 
 #endif
