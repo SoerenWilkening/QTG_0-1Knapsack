@@ -321,6 +321,7 @@ create_jooken_knapsack(char* filename) {
 
     /* determine capacity */
     new_knapsack->capacity = atoi(fgets(line, sizeof(line), stream));
+    new_knapsack->remain_cost = new_knapsack->capacity;
 
     fclose(stream);
 

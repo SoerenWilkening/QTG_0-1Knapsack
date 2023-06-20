@@ -132,14 +132,14 @@ qtg(const knapsack_t* k, num_t threshold, num_t exact, double bias, \
                 mpz_set(child[a].path.vector, parent[j].path.vector);
                 child[a].ub = parent[j].ub;
                 child[a].prob = parent[j].prob;
-                printf("----------------\n");
-                printf("Node info:\n");
-                printf("Remaining cost: %ld\n", child[a].path.remain_cost);
-                printf("Total profit: %ld\n", child[a].path.tot_profit);
-                gmp_printf("Vector: %Zd\n", child[a].path.vector);
-                printf("Upper bound: %ld\n", child[a].ub);
-                printf("Probability: %.16f\n", child[a].prob);
-                printf("----------------\n");
+                // printf("----------------\n");
+                // printf("Node info:\n");
+                // printf("Remaining cost: %ld\n", child[a].path.remain_cost);
+                // printf("Total profit: %ld\n", child[a].path.tot_profit);
+                // gmp_printf("Vector: %Zd\n", child[a].path.vector);
+                // printf("Upper bound: %ld\n", child[a].ub);
+                // printf("Probability: %.16f\n", child[a].prob);
+                // printf("----------------\n");
                 ++a;
                 continue;
             }
@@ -166,14 +166,14 @@ qtg(const knapsack_t* k, num_t threshold, num_t exact, double bias, \
                 /* update probability, then increase child index */
                 child[a].prob = parent[j].prob * branch_prob(k, i, bias, \
                                                     TRUE, method, cur_sol);
-                printf("----------------\n");
-                printf("Node info:\n");
-                printf("Remaining cost: %ld\n", child[a].path.remain_cost);
-                printf("Total profit: %ld\n", child[a].path.tot_profit);
-                gmp_printf("Vector: %Zd\n", child[a].path.vector);
-                printf("Upper bound: %ld\n", child[a].ub);
-                printf("Probability: %.16f\n", child[a].prob);
-                printf("----------------\n");
+                // printf("----------------\n");
+                // printf("Node info:\n");
+                // printf("Remaining cost: %ld\n", child[a].path.remain_cost);
+                // printf("Total profit: %ld\n", child[a].path.tot_profit);
+                // gmp_printf("Vector: %Zd\n", child[a].path.vector);
+                // printf("Upper bound: %ld\n", child[a].ub);
+                // printf("Probability: %.16f\n", child[a].prob);
+                // printf("----------------\n");
                 ++a;
 
                 if (left_ub == parent[j].ub) {
@@ -210,14 +210,14 @@ qtg(const knapsack_t* k, num_t threshold, num_t exact, double bias, \
                         /* update probability, then increase child index */
                         child[a].prob = parent[j].prob * branch_prob(k, i, \
                                                   bias, FALSE, method, cur_sol);
-                        printf("----------------\n");
-                        printf("Node info:\n");
-                        printf("Remaining cost: %ld\n", child[a].path.remain_cost);
-                        printf("Total profit: %ld\n", child[a].path.tot_profit);
-                        gmp_printf("Vector: %Zd\n", child[a].path.vector);
-                        printf("Upper bound: %ld\n", child[a].ub);
-                        printf("Probability: %.16f\n", child[a].prob);
-                        printf("----------------\n");
+                        // printf("----------------\n");
+                        // printf("Node info:\n");
+                        // printf("Remaining cost: %ld\n", child[a].path.remain_cost);
+                        // printf("Total profit: %ld\n", child[a].path.tot_profit);
+                        // gmp_printf("Vector: %Zd\n", child[a].path.vector);
+                        // printf("Upper bound: %ld\n", child[a].ub);
+                        // printf("Probability: %.16f\n", child[a].prob);
+                        // printf("----------------\n");
                         ++a;
 
                     }
@@ -244,14 +244,14 @@ qtg(const knapsack_t* k, num_t threshold, num_t exact, double bias, \
                     /* update probability, then increase child index */
                     child[a].prob = parent[j].prob * branch_prob(k, i, \
                                               bias, FALSE, method, cur_sol);
-                    printf("----------------\n");
-                    printf("Node info:\n");
-                    printf("Remaining cost: %ld\n", child[a].path.remain_cost);
-                    printf("Total profit: %ld\n", child[a].path.tot_profit);
-                    gmp_printf("Vector: %Zd\n", child[a].path.vector);
-                    printf("Upper bound: %ld\n", child[a].ub);
-                    printf("Probability: %.16f\n", child[a].prob);
-                    printf("----------------\n");
+                    // printf("----------------\n");
+                    // printf("Node info:\n");
+                    // printf("Remaining cost: %ld\n", child[a].path.remain_cost);
+                    // printf("Total profit: %ld\n", child[a].path.tot_profit);
+                    // gmp_printf("Vector: %Zd\n", child[a].path.vector);
+                    // printf("Upper bound: %ld\n", child[a].ub);
+                    // printf("Probability: %.16f\n", child[a].prob);
+                    // printf("----------------\n");
                     ++a;
                 }
             } else {
@@ -273,14 +273,14 @@ qtg(const knapsack_t* k, num_t threshold, num_t exact, double bias, \
                 /* update probability, then increase child index */
                 child[a].prob = parent[j].prob * branch_prob(k, i, bias, \
                                                     FALSE, method, cur_sol);
-                printf("----------------\n");
-                printf("Node info:\n");
-                printf("Remaining cost: %ld\n", child[a].path.remain_cost);
-                printf("Total profit: %ld\n", child[a].path.tot_profit);
-                gmp_printf("Vector: %Zd\n", child[a].path.vector);
-                printf("Upper bound: %ld\n", child[a].ub);
-                printf("Probability: %.16f\n", child[a].prob);
-                printf("----------------\n");
+                // printf("----------------\n");
+                // printf("Node info:\n");
+                // printf("Remaining cost: %ld\n", child[a].path.remain_cost);
+                // printf("Total profit: %ld\n", child[a].path.tot_profit);
+                // gmp_printf("Vector: %Zd\n", child[a].path.vector);
+                // printf("Upper bound: %ld\n", child[a].ub);
+                // printf("Probability: %.16f\n", child[a].prob);
+                // printf("----------------\n");
                 ++a;
             }
         }
@@ -290,9 +290,9 @@ qtg(const knapsack_t* k, num_t threshold, num_t exact, double bias, \
         parent = realloc(parent, a * sizeof(node_t));
         free_nodes(child, *num_states);
         *num_states = a;
-        printf("---------------------------------\n");
-        printf("DONE WITH LAYER\n");
-        printf("---------------------------------\n");
+        // printf("---------------------------------\n");
+        // printf("DONE WITH LAYER\n");
+        // printf("---------------------------------\n");
     }
     /* final layer is comprised of all feasible paths above threshold */
     return parent;
