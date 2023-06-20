@@ -135,17 +135,18 @@ measure_combo(const knapsack_t* k) {
     char pathname[256];
     char filename_def[256];
     char filename_ndef[256];
-    snprintf(pathname, sizeof(pathname), "instances%c%s%c", path_sep(), \
-             k->name, path_sep());
+    snprintf(pathname, sizeof(pathname), "instances%c%s%ccombo%c", path_sep(), \
+             k->name, path_sep(), path_sep());
+    create_dir(pathname);
     snprintf(filename_ndef, sizeof(filename_ndef), \
-             "%scombo_counts_def=false.txt", pathname);
+             "%scombo_counts_def=false.csv", pathname);
     FILE* file_ndef = fopen(filename_ndef, "a");
     fprintf(file_ndef, "%"PRIu64" %"PRIu64"\n", *(mem_count + 1) - *mem_count, \
             *(cycle_count + 1) - *cycle_count);
     fclose(file_ndef);
 
     snprintf(filename_def, sizeof(filename_def), \
-             "%scombo_counts_def=true.txt", pathname);
+             "%scombo_counts_def=true.csv", pathname);
     FILE* file_def = fopen(filename_def, "a");
     fprintf(file_def, "%"PRIu64" %"PRIu64"\n", *(mem_count + 3) - \
             *(mem_count + 2), *(cycle_count + 3) - *(cycle_count + 2));

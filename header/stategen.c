@@ -62,15 +62,15 @@ get_branch_name(branch_t method) {
  */
 
 double
-branch_prob(const knapsack_t* k, bit_t i, double bias, bool_t left, \
+branch_prob(const knapsack_t* k, bit_t i, size_t bias, bool_t left, \
             branch_t method, mpz_t cur_sol) {
     switch (method) {
         case COMPARE: {
             if (left) {
-                return (1 + (1 - mpz_tstbit(cur_sol, i)) * bias) \
+                return (1. + (1 - mpz_tstbit(cur_sol, i)) * bias) \
                         / (bias + 2);
             } else {
-                return (1 + mpz_tstbit(cur_sol, i) * bias) \
+                return (1. + mpz_tstbit(cur_sol, i) * bias) \
                         / (bias + 2);
             }
             break;
@@ -100,7 +100,7 @@ branch_prob(const knapsack_t* k, bit_t i, double bias, bool_t left, \
  */
 
 node_t*
-qtg(const knapsack_t* k, num_t threshold, num_t exact, double bias, \
+qtg(const knapsack_t* k, num_t threshold, num_t exact, size_t bias, \
     branch_t method, mpz_t cur_sol, size_t* num_states) {
     if (threshold == exact) {
         /* return empty node array if optimal solution is already reached */

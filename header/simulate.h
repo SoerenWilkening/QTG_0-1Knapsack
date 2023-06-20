@@ -133,7 +133,7 @@ path_t* q_search(const node_t[], size_t, size_t*, size_t*, size_t, \
  * Returns:         Index of the state obtained by the simulated measurement.
  * Side Effect:     Allocates dynamically; pointer should eventually be freed.
  */
-path_t* q_max_search(knapsack_t*, double, branch_t, size_t, const gsl_rng*);
+path_t* q_max_search(knapsack_t*, size_t, branch_t, size_t, const gsl_rng*);
 
 #ifdef __cplusplus
 }

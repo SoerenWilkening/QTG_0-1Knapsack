@@ -91,7 +91,7 @@ void free_nodes(node_t*, size_t);
  *      parameter6: Bit string representation of current optimal path.
  * Returns:         Branching method's name as a string.
  */
-double branch_prob(const knapsack_t*, bit_t, double, bool_t, branch_t, mpz_t);
+double branch_prob(const knapsack_t*, bit_t, size_t, bool_t, branch_t, mpz_t);
 
 /* 
  * =============================================================================
@@ -133,7 +133,7 @@ double branch_prob(const knapsack_t*, bit_t, double, bool_t, branch_t, mpz_t);
  *                  whose total profit lie above the specified threshold.  
  * Side Effect:     Allocates dynamically; pointer should eventually be freed. 
  */
-node_t* qtg(const knapsack_t*, num_t, num_t, double, branch_t, mpz_t, size_t*);
+node_t* qtg(const knapsack_t*, num_t, num_t, size_t, branch_t, mpz_t, size_t*);
 
 #ifdef __cplusplus
 }

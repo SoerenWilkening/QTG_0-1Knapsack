@@ -31,14 +31,18 @@ extern "C" {
  * Description: This struct represents a resource counter for a complete run of
  *              the QMaxSearch algorithm.
  * Contents:    
- *      qubits: Total number of qubits.
- *      cycles: Totel number of quantum cycles.
- *      gates:  Total number of quantum gates.
+ *      qubit_count:        Number of qubits.
+ *      cycle_count:        Number of quantum cycles.
+ *      gate_count:         Number of quantum gates.
+ *      cycle_count_decomp: Number of quantum cycles (decomposed Toffolis).
+ *      gate_count_decomp:  Number of quantum gates (decomposed Toffolis).
  */
 typedef struct resource {
     bit_t qubit_count;
     count_t cycle_count;
     count_t gate_count;
+    count_t cycle_count_decomp;
+    count_t gate_count_decomp;
 } resource_t;
 
 typedef enum qft {

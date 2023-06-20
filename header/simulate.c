@@ -90,7 +90,7 @@ ampl_amp(const node_t nodes[], size_t num_states, size_t calls, \
 
 path_t*
 q_search(const node_t nodes[], size_t num_states, size_t* rounds, \
-         size_t* iter, size_t max_iter, const gsl_rng* rng) {
+         size_t* iter, size_t maxiter, const gsl_rng* rng) {
     size_t m, j, l, m_tot;
     l = m_tot = 0;
     double c = 6. / 5;
@@ -98,7 +98,7 @@ q_search(const node_t nodes[], size_t num_states, size_t* rounds, \
     *iter = 0; /* reset iteration counter */
     
     path_t* sample;
-    while(m_tot < max_iter) {
+    while(m_tot < maxiter) {
         ++(*rounds);
         ++l;
         m = ceil(pow(c, l));
@@ -120,7 +120,7 @@ q_search(const node_t nodes[], size_t num_states, size_t* rounds, \
  */
 
 path_t*
-q_max_search(knapsack_t* k, double bias, branch_t method, size_t max_iter, \
+q_max_search(knapsack_t* k, size_t bias, branch_t method, size_t maxiter, \
              const gsl_rng* rng) {
     size_t rounds; /* counter of AA rounds within QSearch; will be updated */
     size_t iter; /* counter of AA calls within QSearch; will be updated */
@@ -128,8 +128,11 @@ q_max_search(knapsack_t* k, double bias, branch_t method, size_t max_iter, \
 
     path_t* cur_sol; /* current solution; will be updated */
     bit_t profit_qubits; /* size of the profit register */
-    count_t qtg_cycles; /* number of necessary QTG cycles */
-    count_t qtg_gates; /* number of necessary QTG gates */
+    /*
+     * declare cycle and gate counter for the QTG with and without decomposing
+     * arising Toffoli gates
+     */
+    count_t qtg_cycles, qtg_gates, qtg_cycles_decomp, qtg_gates_decomp;
     num_t exact; /* exact optimal profit for the knapsack instance */
 
     node_t* cur_nodes; /* set of states after applying QTG and filtering */
@@ -160,10 +163,15 @@ q_max_search(knapsack_t* k, double bias, branch_t method, size_t max_iter, \
     resource_t res = { .qubit_count = qubit_count_qtg(k, FGREEDY, COPPERSMITH, \
                                                  DIRECT, TOFFOLI) + 1 \
                                  + anc_count_mc(profit_qubits, TOFFOLI),
-                       .cycle_count = 0, .gate_count = 0};
+                       .cycle_count = 0, .gate_count = 0, \
+                       .cycle_count_decomp = 0, .gate_count_decomp = 0};
     qtg_cycles = cycle_count_qtg(k, FGREEDY, COPPERSMITH, DIRECT, \
-                                         TOFFOLI, TRUE);
+                                         TOFFOLI, FALSE);
     qtg_gates = gate_count_qtg(k, FGREEDY, COPPERSMITH, DIRECT, \
+                                         TOFFOLI, FALSE);
+    qtg_cycles_decomp = cycle_count_qtg(k, FGREEDY, COPPERSMITH, DIRECT, \
+                                         TOFFOLI, TRUE);
+    qtg_gates_decomp = gate_count_qtg(k, FGREEDY, COPPERSMITH, DIRECT, \
                                          TOFFOLI, TRUE);
 
     /* obtain optimal solution via Combo */
@@ -180,37 +188,54 @@ q_max_search(knapsack_t* k, double bias, branch_t method, size_t max_iter, \
          * better solution, cur_sol (carrying the current threshold) is updated.
          * Otherwise, the routine is interrupted and prior cur_sol is returned.
          */
-        cur_path = q_search(cur_nodes, num_states, &rounds, &iter, max_iter, \
+        cur_path = q_search(cur_nodes, num_states, &rounds, &iter, maxiter, \
                             rng);
         if (cur_nodes != NULL) {
             free_nodes(cur_nodes, num_states);
         }
         /* update cycle and gate count after application of QSearch */
         res.cycle_count += (rounds + 2 * iter) * qtg_cycles;
-        res.cycle_count += cycle_count_mc(profit_qubits, TOFFOLI, TRUE);
+        res.cycle_count_decomp += (rounds + 2 * iter) * qtg_cycles_decomp;
+        res.cycle_count += cycle_count_mc(profit_qubits, TOFFOLI, FALSE);
+        res.cycle_count_decomp += cycle_count_mc(profit_qubits, TOFFOLI, TRUE);
         res.cycle_count += MIN(cycle_count_comp(profit_qubits, \
-                               cur_sol->tot_profit, TOFFOLI, TRUE, TRUE),
+                               cur_sol->tot_profit, TOFFOLI, TRUE, FALSE), \
                                cycle_count_comp(profit_qubits, \
-                               cur_sol->tot_profit, TOFFOLI, FALSE, TRUE));
+                               cur_sol->tot_profit, TOFFOLI, FALSE, FALSE));
+        res.cycle_count_decomp += MIN(cycle_count_comp(profit_qubits, \
+                                      cur_sol->tot_profit, TOFFOLI, TRUE, \
+                                      TRUE), cycle_count_comp(profit_qubits, \
+                                      cur_sol->tot_profit, TOFFOLI, FALSE, \
+                                      TRUE));
         res.gate_count += (rounds + 2 * iter) * qtg_gates;
-        res.gate_count += gate_count_mc(profit_qubits, TOFFOLI, TRUE);
+        res.gate_count_decomp += (rounds + 2 * iter) * qtg_gates_decomp;
+        res.gate_count += gate_count_mc(profit_qubits, TOFFOLI, FALSE);
+        res.gate_count_decomp += gate_count_mc(profit_qubits, TOFFOLI, TRUE);
         res.gate_count += MIN(gate_count_comp(profit_qubits, \
                               cur_sol->tot_profit, TOFFOLI, TRUE, TRUE),
                               gate_count_comp(profit_qubits, \
                               cur_sol->tot_profit, TOFFOLI, FALSE, TRUE));
+        res.gate_count_decomp += MIN(gate_count_comp(profit_qubits, \
+                                     cur_sol->tot_profit, TOFFOLI, TRUE, \
+                                     TRUE), gate_count_comp(profit_qubits, \
+                                     cur_sol->tot_profit, TOFFOLI, FALSE, \
+                                     TRUE));
         if (cur_path != NULL) {
             free_path(cur_sol);
             cur_sol = cur_path;
         } else {
-            snprintf(instancename, sizeof(instancename), "instances%c%s", \
-                     path_sep(), k->name);
-            snprintf(filename, sizeof(filename), "%s%cqtg_counts.txt", \
-                     instancename, path_sep());
+            snprintf(instancename, sizeof(instancename), "instances%c%s%cQTG", \
+                     path_sep(), k->name, path_sep());
+            snprintf(filename, sizeof(filename), "%s%cqtg_statistics_bias=%zu" \
+                     "_maxiter=%zu.csv", instancename, path_sep(), bias, \
+                     maxiter);
             create_dir(instancename);
             stream = fopen(filename, "a");
-            fprintf(stream, "%"PRIu64" %"PRIu64" %"PRIu64" %d\n", \
-                    (uint64_t)res.qubit_count, (uint64_t)res.cycle_count, \
-                    (uint64_t)res.gate_count,
+            fprintf(stream, "%"PRIu64" %"PRIu64" %"PRIu64" %"PRIu64" %"PRIu64 \
+                    " %d\n", (uint64_t)res.qubit_count, \
+                    (uint64_t)res.cycle_count, (uint64_t)res.gate_count, \
+                    (uint64_t)res.cycle_count_decomp, \
+                    (uint64_t)res.gate_count_decomp, \
                     (cur_sol->tot_profit == exact) ? 1 : 0);
             fclose(stream);
             return cur_sol;
