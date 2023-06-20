@@ -64,11 +64,47 @@ rdtsc() {
     return _rdtsc();
 }
 
-#elif defined(__unix__)
+/* 
+ * =============================================================================
+ *                            Windows: read meta data
+ * =============================================================================
+ */
+
+void
+rdmd(const char* executable, size_t argc, char* argv[], uint64_t* mem_count, \
+     uint64_t* cycle_count) {
+    char arg_str[256];
+    size_t offset = 0;
+    for (size_t i = 0; i < argc; ++i) {
+        offset += snprintf(arg_str + offset, sizeof(arg_str) - offset, "%s ", \
+                           argv[i]);
+    }
+
+    char command[512];
+    snprintf(command, sizeof(command), "%s %s", executable, arg_str);
+
+    uint64_t start_count, end_count;
+    uint64_t peak_memory_usage;
+
+    QueryPerformanceCounter((LARGE_INTEGER*)&start_count);
+
+    FILE* pipe = popen(command, "r");
+    pclose(pipe);
+
+    QueryPerformanceCounter((LARGE_INTEGER*)&end_count);
+    *cycle_count = end_count - start_count;
+
+    PROCESS_MEMORY_COUNTERS_EX pmc;
+    GetProcessMemoryInfo(GetCurrentProcess(), (PROCESS_MEMORY_COUNTERS*)&pmc, \
+                         sizeof(pmc));
+    *mem_count = pmc.PeakWorkingSetSize;
+}
+
+#elif defined(__unix__) || defined(__APPLE__)
 
 /* 
  * =============================================================================
- *                            Unix: includes
+ *                            Unix/Apple: includes
  * =============================================================================
  */
 
@@ -77,7 +113,7 @@ rdtsc() {
 
 /* 
  * =============================================================================
- *                            Unix: path separator
+ *                            Unix/Apple: path separator
  * =============================================================================
  */
 
@@ -88,7 +124,7 @@ path_sep() {
 
 /* 
  * =============================================================================
- *                            Unix: file exists
+ *                            Unix/Apple: file exists
  * =============================================================================
  */
 
@@ -99,7 +135,7 @@ file_exists(const char* filename) {
 
 /* 
  * =============================================================================
- *                            Unix: create directory
+ *                            Unix/Apple: create directory
  * =============================================================================
  */
 
@@ -110,7 +146,7 @@ create_dir(const char* dirname) {
 
 /* 
  * =============================================================================
- *                            Unix: read time-stamp counter
+ *                            Unix/Apple: read time-stamp counter
  * =============================================================================
  */
 
@@ -123,71 +159,9 @@ rdtsc() {
     return ((uint64_t)hi << 32) | lo;
 }
 
-#elif defined(__APPLE__)
-
 /* 
  * =============================================================================
- *                            Apple: includes
- * =============================================================================
- */
-
-#include <unistd.h>
-#include <sys/stat.h>
-#include <mach/task.h>
-#include <mach/mach_init.h>
-#include <mach/vm_map.h> 
-
-/* 
- * =============================================================================
- *                            Apple: path separator
- * =============================================================================
- */
-
-uint8_t
-path_sep() {
-    return '/';
-}
-
-/* 
- * =============================================================================
- *                            Apple: file exists
- * =============================================================================
- */
-
-uint8_t
-file_exists(const char* filename) {
-    return !access(filename, F_OK);
-}
-
-/* 
- * =============================================================================
- *                            Apple: create directory
- * =============================================================================
- */
-
-uint8_t
-create_dir(const char* dirname) {
-    return !mkdir(dirname, 0777);
-}
-
-/* 
- * =============================================================================
- *                            Apple: read time-stamp counter
- * =============================================================================
- */
-
-uint64_t
-rdtsc() {
-    uint32_t lo, hi;
-    __asm__ __volatile__ (
-        "rdtsc" : "=a" (lo), "=d" (hi)
-    );
-    return ((uint64_t)hi << 32) | lo;
-}
-
-/* 
- * =============================================================================
- *                            Apple: read meta data
+ *                            Unix/Apple: read meta data
  * =============================================================================
  */
 
@@ -221,7 +195,6 @@ rdmd(const char* executable, size_t argc, char* argv[], uint64_t* mem_count, \
     char cycle_buffer[256];
     fgets(cycle_buffer, sizeof(cycle_buffer), pipe);
     *cycle_count = strtoull(cycle_buffer, NULL, 10);
-
 
     pclose(pipe);
 }
