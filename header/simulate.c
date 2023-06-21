@@ -27,10 +27,10 @@
 size_t
 sampling(const double prob[], size_t num_states, const gsl_rng* rng) {
     double random_num = gsl_rng_uniform(rng);
-    double cummulative_prob = 0;
+    double cumulative_prob = 0;
     for (size_t i = 0; i < num_states; ++i) {
-        cummulative_prob += prob[i];
-        if (random_num <= cummulative_prob) {
+        cumulative_prob += prob[i];
+        if (random_num <= cumulative_prob) {
             return i;
         }
     }
@@ -50,22 +50,22 @@ ampl_amp(const node_t nodes[], size_t num_states, size_t calls, \
         return NULL;
     }
     double amp_factor;
-    double cummulative_prob = 0;
+    double cumulative_prob = 0;
     double prob[num_states + 1];
 
     for (size_t i = 0; i < num_states; ++i) {
-        cummulative_prob += nodes[i].prob;
+        cumulative_prob += nodes[i].prob;
     }
 
-    amp_factor = pow(sin((2 * calls + 1) * asin(sqrt(cummulative_prob))), 2) \
-                 / cummulative_prob;
+    amp_factor = pow(sin((2 * calls + 1) * asin(sqrt(cumulative_prob))), 2) \
+                 / cumulative_prob;
 
-    cummulative_prob = 0;
+    cumulative_prob = 0;
     for (size_t i = 0; i < num_states; ++i) {
-        cummulative_prob += (prob[i] = nodes[i].prob * amp_factor);
+        cumulative_prob += (prob[i] = nodes[i].prob * amp_factor);
     }
 
-    prob[num_states] = 1. - cummulative_prob;
+    prob[num_states] = 1. - cumulative_prob;
     /* executing a quantum measurement */
     size_t measurement = sampling(prob, num_states + 1, rng);
     if (measurement == num_states) {
@@ -102,7 +102,7 @@ q_search(const node_t nodes[], size_t num_states, size_t* rounds, \
         ++(*rounds);
         ++l;
         m = ceil(pow(c, l));
-        j = gsl_rng_uniform_int(rng, m);
+        j = gsl_rng_uniform_int(rng, m) + 1;
         *iter += j;
         m_tot += 2 * j + 1;
         path_t* sample = ampl_amp(nodes, num_states, j, rng);
