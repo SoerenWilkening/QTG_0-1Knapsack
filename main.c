@@ -30,6 +30,7 @@ int main(int argc, char* argv[]) {
 	while (fgets(line, sizeof(line), file_instances) != NULL) {
 		line[strcspn(line, "\n")] = '\0';
 		k = create_jooken_knapsack(line);
+		// printf("test: %"PRIu64"\n", (uint64_t)combo_wrap(k, 0, k->capacity, 0, 0, 1));
 		for (i = 0; i < runs_per_instance; ++i) {
 			measure_combo(k);
 			sol = q_max_search(k, bias, COMPARE, max_iter, r);
