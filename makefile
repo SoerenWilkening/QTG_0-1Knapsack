@@ -43,7 +43,6 @@ compile:
 	@rm qtgcount.o simulate.o stategen.o combowrp.o combo.o knapsack.o syslinks.o
 
 generate:
-
 	$(eval n := $(shell cat generator_input.txt | head -n 1))
 	$(eval Z := $(shell cat generator_input.txt | sed -n '2p'))
 	$(eval g := $(shell cat generator_input.txt | sed -n '3p'))
@@ -64,7 +63,6 @@ generate:
 	$(eval file := $(addprefix $(file), $(eps)))
 	$(eval file := $(addprefix $(file), _s_))
 	$(eval file := $(addprefix $(file), $(s)))
-#	$(eval file := $(addprefix $(file), /test.in))
 
 	@if [ -f $(addprefix $(file), /test.in) ]; then \
 		echo "instance already exists"; \
