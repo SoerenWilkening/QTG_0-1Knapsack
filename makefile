@@ -41,3 +41,33 @@ compile:
 
 	@echo "delete non used files"
 	@rm qtgcount.o simulate.o stategen.o combowrp.o combo.o knapsack.o syslinks.o
+
+generate:
+
+	$(eval n := $(shell cat generator_input.txt | head -n 1))
+	$(eval Z := $(shell cat generator_input.txt | sed -n '2p'))
+	$(eval g := $(shell cat generator_input.txt | sed -n '3p'))
+	$(eval f := $(shell cat generator_input.txt | sed -n '4p'))
+	$(eval eps := $(shell cat generator_input.txt | sed -n '5p'))
+	$(eval s := $(shell cat generator_input.txt | tail -n 1))
+	@echo "Check if instance already exists"
+
+	$(eval file := instances/problemInstances/n_)
+	$(eval file := $(addprefix $(file), $(n)))
+	$(eval file := $(addprefix $(file), _c_))
+	$(eval file := $(addprefix $(file), $(Z)))
+	$(eval file := $(addprefix $(file), _g_))
+	$(eval file := $(addprefix $(file), $(g)))
+	$(eval file := $(addprefix $(file), _f_))
+	$(eval file := $(addprefix $(file), $(f)))
+	$(eval file := $(addprefix $(file), _eps_))
+	$(eval file := $(addprefix $(file), $(eps)))
+	$(eval file := $(addprefix $(file), _s_))
+	$(eval file := $(addprefix $(file), $(s)))
+	$(eval file := $(addprefix $(file), /test.in))
+
+	@if [ -f $(file) ]; then \
+		echo "instance already exists"; \
+    else \
+    	echo "instance will be generated"; \
+    fi
