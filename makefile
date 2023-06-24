@@ -64,10 +64,14 @@ generate:
 	$(eval file := $(addprefix $(file), $(eps)))
 	$(eval file := $(addprefix $(file), _s_))
 	$(eval file := $(addprefix $(file), $(s)))
-	$(eval file := $(addprefix $(file), /test.in))
+#	$(eval file := $(addprefix $(file), /test.in))
 
-	@if [ -f $(file) ]; then \
+	@if [ -f $(addprefix $(file), /test.in) ]; then \
 		echo "instance already exists"; \
     else \
     	echo "instance will be generated"; \
+		g++ -g -std=c++11 -O2 instance_generator/generator.cpp -o generatorExecutable; \
+		mkdir -p $(file); \
+		touch $(addprefix $(file), /test.in); \
+		./generatorExecutable < generator_input.txt > $(addprefix $(file), /test.in); \
     fi
