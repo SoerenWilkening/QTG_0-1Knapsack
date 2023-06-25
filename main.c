@@ -67,7 +67,13 @@ int main(int argc, char* argv[]) {
 	char line[256];
 	while (fgets(line, sizeof(line), file_instances) != NULL) {
 		line[strcspn(line, "\n")] = '\0';
-		k = create_jooken_knapsack(line);
+		if (line[10] == 'p') {
+			k = create_jooken_knapsack(line);
+		} else {
+			k = create_pisinger_knapsack(line);
+			line[strlen(line) - 4] = '\0';
+			create_dir(line);
+		}
 		for (i = 0; i < runs_per_instance; ++i) {
 			measure_combo(k);
 			sol = q_max_search(k, bias, COMPARE, max_iter, r);
