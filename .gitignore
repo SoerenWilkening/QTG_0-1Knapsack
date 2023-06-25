@@ -1,11 +1,11 @@
 instances/
+.to_be_considered
 *.DS_Store
 *.o
 *.pdf
 *.txt
 *.tex
 main
-example
 cmbcount
 *.dSYM/
 bench
