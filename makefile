@@ -19,45 +19,45 @@ endif
 
 compile:
 	@echo "creating .o files"
-	@$(CC) 		-c							\
-				src$(PATH_SEP)syslinks.c 	\
-				src$(PATH_SEP)knapsack.c 	\
-				src$(PATH_SEP)simulate.c 	\
-				src$(PATH_SEP)stategen.c 	\
-				src$(PATH_SEP)combowrp.c 	\
-				src$(PATH_SEP)combo.c 		\
+	@$(CC)		-c							\
+				src$(PATH_SEP)syslinks.c	\
+				src$(PATH_SEP)knapsack.c	\
+				src$(PATH_SEP)simulate.c	\
+				src$(PATH_SEP)stategen.c	\
+				src$(PATH_SEP)combowrp.c	\
+				src$(PATH_SEP)combo.c		\
 				src$(PATH_SEP)qtgcount.c
 	@echo "creating cmbcount executable"
-	@$(CC)  	cmbcount.c 	\
-				syslinks.o 	\
-				knapsack.o 	\
-				combowrp.o 	\
-				combo.o    	\
+	@$(CC)		cmbcount.c	\
+				syslinks.o	\
+				knapsack.o	\
+				combowrp.o	\
+				combo.o		\
 				$(GSLFLAG)	\
 				$(GMPFLAG)	\
-				-lgsl      	\
-				-lgslcblas 	\
-				-lgmp      	\
-				-O1 		\
+				-lgsl		\
+				-lgslcblas	\
+				-lgmp		\
+				-O1			\
 				-g			\
-				-o cmbcount	
+				-o cmbcount
 	@echo "creating main executable"
-	@$(CC)  	main.c 		\
-				syslinks.o 	\
-				knapsack.o 	\
-				simulate.o 	\
-				stategen.o 	\
-				combowrp.o 	\
-				combo.o    	\
-				qtgcount.o 	\
+	@$(CC)		main.c		\
+				syslinks.o	\
+				knapsack.o	\
+				simulate.o	\
+				stategen.o	\
+				combowrp.o	\
+				combo.o		\
+				qtgcount.o	\
 				$(GSLFLAG)	\
 				$(GMPFLAG)	\
-				-lgsl      	\
-				-lgslcblas 	\
-				-lgmp      	\
-				-O1 		\
+				-lgsl		\
+				-lgslcblas	\
+				-lgmp		\
+				-O1			\
 				-g			\
-				-o main    	
+				-o main
 
 	@echo "deleting non used files"
 	@$(RM) qtgcount.o simulate.o stategen.o combowrp.o combo.o knapsack.o syslinks.o
