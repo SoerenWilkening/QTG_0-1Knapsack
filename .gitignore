@@ -1,5 +1,6 @@
 instances/
 .to_be_considered
+*.py
 *.DS_Store
 *.o
 *.pdf
