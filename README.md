@@ -52,4 +52,4 @@ During the execution, the following data is created and stored:
 - optimal values Combo achieves on all relevant subinstances (stored in `ìnstance_name`/combo/size=`n`_capacity=`c`.txt, where `n` and `c`are the instances number of items and capacity, respectively)
 - peak memory usage and elapsed cycles of Combo when only calculating the optimal value (stored in ìnstance_name`/combo/combo_counts_def=false.csv)
 - peak memory usage and elapsed cycles of Combo when also finding a solution vector (stored in ìnstance_name`/combo/combo_counts_def=true.csv)
-- number of qubits, necessary quantum cycles and gates with and without decomposing arising Toffoli gates, and whether optimal value was achieved by QMaxSerahc (stored in `instance_name`/QTG/qtg_statistics_bias=`bias`_maxiter=`qsearch_iter`.csv)
+- number of qubits, necessary quantum cycles and gates with and without decomposing arising Toffoli gates, and whether optimal value was achieved by QMaxSearch (stored in `instance_name`/QTG/qtg_statistics_bias=`bias`_maxiter=`qsearch_iter`.csv)
