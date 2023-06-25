@@ -4,7 +4,11 @@
  * =============================================================================
  */
 
-#include "knapsack.h"
+#if defined(_WIN32) || defined(_WIN64)
+    #include "..\include\knapsack.h"
+#else
+    #include "../include/knapsack.h"
+#endif
 
 /* 
  * =============================================================================

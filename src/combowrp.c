@@ -8,7 +8,11 @@
  * =============================================================================
  */
 
-#include "combowrp.h"
+#if defined(_WIN32) || defined(_WIN64)
+    #include "..\include\combowrp.h"
+#else
+    #include "../include/combowrp.h"
+#endif
 
 /* 
  * =============================================================================

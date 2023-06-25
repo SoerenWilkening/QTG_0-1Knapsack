@@ -4,7 +4,11 @@
  * =============================================================================
  */
 
-#include "simulate.h"
+#if defined(_WIN32) || defined(_WIN64)
+    #include "..\include\simulate.h"
+#else
+    #include "../include/simulate.h"
+#endif
 
 /* 
  * =============================================================================

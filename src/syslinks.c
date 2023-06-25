@@ -1,11 +1,3 @@
-/* 
- * =============================================================================
- *                            OS-independent includes
- * =============================================================================
- */
-
-#include "syslinks.h"
-
 #if defined(_WIN32) || defined(_WIN64)
 
 /* 
@@ -13,7 +5,7 @@
  *                            Windows: includes
  * =============================================================================
  */
-
+#include "..\include\syslinks.h"
 #include <windows.h>
 #include <direct.h>
 #include <intrin.h>
@@ -100,7 +92,7 @@ rdmd(const char* executable, size_t argc, char* argv[], uint64_t* mem_count, \
     *mem_count = pmc.PeakWorkingSetSize;
 }
 
-#elif defined(__unix__) || defined(__APPLE__)
+#else
 
 /* 
  * =============================================================================
@@ -108,6 +100,7 @@ rdmd(const char* executable, size_t argc, char* argv[], uint64_t* mem_count, \
  * =============================================================================
  */
 
+#include "../include/syslinks.h"
 #include <unistd.h>
 #include <sys/stat.h>
 

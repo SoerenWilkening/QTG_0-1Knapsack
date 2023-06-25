@@ -46,7 +46,12 @@
 
 #undef HASCHANCE             /* should strong upper bounds be used? */
 
-#include "combo.h" /* header file included */
+/* header file included */
+#if defined(_WIN32) || defined(_WIN64)
+    #include "..\include\combo.h"
+#else
+    #include "../include/combo.h"
+#endif
 #include <stdlib.h>
 #include <stdio.h>
 #include <time.h>

@@ -4,7 +4,11 @@
  * =============================================================================
  */
 
-#include "stategen.h"
+#if defined(_WIN32) || defined(_WIN64)
+    #include "..\include\stategen.h"
+#else
+    #include "../include/stategen.h"
+#endif
 
 /* 
  * =============================================================================

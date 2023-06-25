@@ -1,9 +1,47 @@
-#include "header/simulate.h"
+/* 
+ * =============================================================================
+ *                            includes
+ * =============================================================================
+ */
+
+#if defined(_WIN32) || defined(_WIN64)
+    #include "include\simulate.h"
+#else
+    #include "include/simulate.h"
+#endif
+
+/* 
+ * =============================================================================
+ *                            C++ check
+ * =============================================================================
+ */
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+/* 
+ * =============================================================================
+ *                            macros
+ * =============================================================================
+ */
 
 #define TRUE                    1
 #define FALSE                   0
 
+/* 
+ * =============================================================================
+ *                            declare global RNG
+ * =============================================================================
+ */
+
 gsl_rng* r;  /* global generator */
+
+/* 
+ * =============================================================================
+ *                            main
+ * =============================================================================
+ */
 
 int main(int argc, char* argv[]) {
 	const gsl_rng_type* T;
@@ -30,7 +68,6 @@ int main(int argc, char* argv[]) {
 	while (fgets(line, sizeof(line), file_instances) != NULL) {
 		line[strcspn(line, "\n")] = '\0';
 		k = create_jooken_knapsack(line);
-		// printf("test: %"PRIu64"\n", (uint64_t)combo_wrap(k, 0, k->capacity, 0, 0, 1));
 		for (i = 0; i < runs_per_instance; ++i) {
 			measure_combo(k);
 			sol = q_max_search(k, bias, COMPARE, max_iter, r);
@@ -42,3 +79,7 @@ int main(int argc, char* argv[]) {
 
 	return 0;
 }
+
+#ifdef __cplusplus
+}
+#endif
