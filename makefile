@@ -2,14 +2,12 @@ GSLPATH =
 GMPPATH = 
 
 ifeq ($(OS),Windows_NT)
-	CC = gcc
 	GSLFLAG = -I$(GSLPATH)\\include -L$(GSLPATH)\\lib
 	GMPFLAG = -I$(GMPPATH)\\include -L$(GMPPATH)\\lib
 	RM = del
 	PATH_SEP = \\
 
 else
-	CC = clang
 	GSLFLAG =
 	GMPFLAG =
 	RM = rm
@@ -19,7 +17,7 @@ endif
 
 compile:
 	@echo "creating .o files"
-	@$(CC)		-c							\
+	@gcc		-c							\
 				src$(PATH_SEP)syslinks.c	\
 				src$(PATH_SEP)knapsack.c	\
 				src$(PATH_SEP)simulate.c	\
@@ -28,7 +26,7 @@ compile:
 				src$(PATH_SEP)combo.c		\
 				src$(PATH_SEP)qtgcount.c
 	@echo "creating cmbcount executable"
-	@$(CC)		cmbcount.c	\
+	@gcc		cmbcount.c	\
 				syslinks.o	\
 				knapsack.o	\
 				combowrp.o	\
@@ -42,7 +40,7 @@ compile:
 				-g			\
 				-o cmbcount
 	@echo "creating main executable"
-	@$(CC)		main.c		\
+	@gcc		main.c		\
 				syslinks.o	\
 				knapsack.o	\
 				simulate.o	\
