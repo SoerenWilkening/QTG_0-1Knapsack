@@ -299,5 +299,6 @@ qtg(const knapsack_t* k, num_t threshold, num_t exact, size_t bias, \
         // printf("---------------------------------\n");
     }
     /* final layer is comprised of all feasible paths above threshold */
+    // printf("Number of states after QTG: %zu\n", *num_states);
     return parent;
 }
