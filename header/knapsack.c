@@ -287,7 +287,7 @@ create_jooken_knapsack(char* filename) {
     stream = fopen(filename, "r");
 
     /* determine size of knapsack */
-    size = atoi(fgets(line, sizeof(line), stream));
+    fscanf(stream, "%d", &size);
 
     /* instanciate knapsack and set name (capacity is determined later */
     new_knapsack = create_empty_knapsack(size, 0);
@@ -295,35 +295,18 @@ create_jooken_knapsack(char* filename) {
     sprintf(new_knapsack->name, "%s", filename + 10);
 
     while (num_line < size && fgets(line, sizeof(line), stream) != NULL) {
-        line_pos = profit_pos = cost_pos = 0;
-        /* skip item number and first space */
-        while(line[line_pos++] != ' ') {
-            ;
-        }
-        /* save profit and skip second space */
-        while((profit[profit_pos++] = line[line_pos++]) != ' ') {
-            ;
-        }
-        profit[profit_pos - 1] = '\0';
-
-        new_knapsack->items[num_line].profit = atoi(profit);
-
-        /* save cost*/
-        while((cost[cost_pos++] = line[line_pos++]) != '\n') {
-            ;
-        }
-        cost[cost_pos - 1] = '\0';
-
-        new_knapsack->items[num_line].cost = atoi(cost);
-
+        fscanf(stream, "%d %ld %ld", &a, &(new_knapsack->items[num_line].profit), \
+               &(new_knapsack->items[num_line].cost));
         ++num_line;
     }
 
     /* determine capacity */
-    new_knapsack->capacity = atoi(fgets(line, sizeof(line), stream));
+    fscanf(stream, "%ld", &(new_knapsack->capacity));
     new_knapsack->remain_cost = new_knapsack->capacity;
 
     fclose(stream);
+
+    return new_knapsack;
 
     return new_knapsack;
 }
