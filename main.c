@@ -75,9 +75,11 @@ int main(int argc, char* argv[]) {
 			create_dir(line);
 		}
 		for (i = 0; i < runs_per_instance; ++i) {
+			// num_t cmb_sol = combo_wrap(k, 0, k->capacity, 1, 0, 1);
+			// printf("Combo's solution: %"PRIu64"\n", (uint64_t)cmb_sol);
 			measure_combo(k);
-			sol = q_max_search(k, bias, COMPARE, max_iter, r);
-	 		free_path(sol);
+			// sol = q_max_search(k, bias, COMPARE, max_iter, r);
+	 		// free_path(sol);
 	 		printf("%zu-th iteration done.\n", i + 1);
 		}
 		free_knapsack(k);
