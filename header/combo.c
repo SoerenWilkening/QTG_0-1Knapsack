@@ -42,7 +42,7 @@
 #define MINRUDI      1000    /* parameter M1 from paper: 1000 normally */
 #define MINSET       2000    /* parameter M2 from paper: 2000 normally */
 #define MINHEUR     10000    /* parameter M3 from paper: 10000 normally */
-#define MAXSTATES 1500000    /* adapted for bigger instances */
+#define MAXSTATES  400000000    /*Deals with how many states gthe algorithm can assess at once. Bigger can handle bigger problems theoretically, but slows down code. Keep same on Combo and Minknap for fair assessment of instances*/
 
 #undef HASCHANCE             /* should strong upper bounds be used? */
 

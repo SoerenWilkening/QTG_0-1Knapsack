@@ -31,7 +31,9 @@ int main(int argc, char* argv[]) {
 		line[strcspn(line, "\n")] = '\0';
 		k = create_jooken_knapsack(line);
 		for (i = 0; i < runs_per_instance; ++i) {
+			printf("start combo\n");
 			measure_combo(k);
+			printf("finished combo\n");
 			sol = q_max_search(k, bias, COMPARE, max_iter, r);
 	 		free_path(sol);
 	 		printf("%zu-th iteration done.\n", i + 1);
