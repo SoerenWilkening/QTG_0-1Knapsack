@@ -14,3 +14,4 @@ cmake-build-debug
 .calculations
 .idea
 generatorExecutable
+new_plots.py
