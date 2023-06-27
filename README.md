@@ -53,3 +53,20 @@ During the execution, the following data is created and stored:
 - peak memory usage and elapsed cycles of Combo when only calculating the optimal value (stored in ìnstance_name`/combo/combo_counts_def=false.csv)
 - peak memory usage and elapsed cycles of Combo when also finding a solution vector (stored in ìnstance_name`/combo/combo_counts_def=true.csv)
 - number of qubits, necessary quantum cycles and gates with and without decomposing arising Toffoli gates, and whether optimal value was achieved by QMaxSearch (stored in `instance_name`/QTG/qtg_statistics_bias=`bias`_maxiter=`qsearch_iter`.csv)
+
+## Generate new instances
+
+New instances can be generated using the instance generator by Jooken et al. with the command
+
+`make generate`
+
+THe methods reads the `generator_input.txt` file, that has to be in the format
+
+```
+n
+c
+g
+f
+eps
+s
+```
