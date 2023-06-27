@@ -74,12 +74,15 @@ int main(int argc, char* argv[]) {
 			line[strlen(line) - 4] = '\0';
 			create_dir(line);
 		}
+		printf("%s\n", k->name);
 		for (i = 0; i < runs_per_instance; ++i) {
 			measure_combo(k);
 			sol = q_max_search(k, bias, COMPARE, max_iter, r);
 	 		free_path(sol);
-	 		printf("%zu-th iteration done.\n", i + 1);
+	 		printf("\33[2K\r%4zu-th iteration done.", i + 1);
+	 		fflush(stdout);
 		}
+        printf("\n");
 		free_knapsack(k);
 	}
 
