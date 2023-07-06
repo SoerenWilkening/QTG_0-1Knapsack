@@ -45,7 +45,7 @@ extern "C" {
  *      parameter6: Determines whether Combo is actually executed or not.
  * Returns:         Optimal solution found by Combo.
  */
-num_t combo_wrap(const knapsack_t*, bit_t, num_t, bool_t, bool_t, bool_t);
+num_t combo_wrap(const knapsack_t*, bit_t, num_t, bool_t, bool_t, bool_t, bool_t);
 
 /* 
  * =============================================================================

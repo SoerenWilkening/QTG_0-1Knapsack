@@ -179,7 +179,7 @@ q_max_search(knapsack_t* k, size_t bias, branch_t method, size_t maxiter, \
                                          TOFFOLI, TRUE);
 
     /* obtain optimal solution via Combo */
-    exact = combo_wrap(k, 0, k->capacity, FALSE, FALSE, TRUE);
+    exact = combo_wrap(k, 0, k->capacity, FALSE, FALSE, TRUE, FALSE);
     do {
         /*
          * The application of the QTG is simulated. Only states (paths) with 

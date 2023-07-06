@@ -78,7 +78,7 @@ int main(int argc, char* argv[]) {
 		for (i = 0; i < runs_per_instance; ++i) {
 			measure_combo(k);
 			sol = q_max_search(k, bias, COMPARE, max_iter, r);
-	 		free_path(sol);
+ 			free_path(sol);
 	 		printf("\33[2K\r%4zu-th iteration done.", i + 1);
 	 		fflush(stdout);
 		}
