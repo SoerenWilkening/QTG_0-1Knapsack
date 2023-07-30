@@ -5,6 +5,8 @@ instances/
 *.o
 *.pdf
 *.txt
+!generator_input.txt
+!benchmark_instances.txt
 *.tex
 main
 cmbcount
@@ -14,3 +16,4 @@ venv
 cmake-build-debug
 .calculations
 .idea
+generatorExecutable

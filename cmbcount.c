@@ -96,7 +96,7 @@ int main(int argc, char* argv[]){
     bool_t exe_combo;
     exe_combo = (*(argv[4]) == '0') ? FALSE : TRUE;
 
-    num_t res = combo_wrap(k, 0, k->capacity, def, relx, exe_combo);
+    num_t res = combo_wrap(k, 0, k->capacity, def, relx, exe_combo, 0);
 
     free_knapsack(k);
 
