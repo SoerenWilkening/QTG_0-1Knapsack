@@ -158,10 +158,12 @@ q_max_search(knapsack_t* k, size_t bias, branch_t method, size_t maxiter, \
 
     /*
      * A resource counter is initialized. The number of required qubits is given
-     * by the total number of qubits on all three registers of the QTG plus one
-     * for saving the AA phase flip, plus the number of ancilla qubits required
-     * to decompose the AA flip operator. The cycle and gate counts are
-     * initialized to zero and will be updated after every call to QSearch.
+     * by the total number of qubits on all three registers of the QTG plus the
+     * number of ancilla qubits necessary for decomposing the QTG's comparison
+     * operations, plus one for saving the AA phase flip, plus the number of
+     * ancilla qubits required to decompose the AA flip operator. The cycle and
+     * gate counts are initialized to zero and will be updated after every call
+     * to QSearch.
      */
     profit_qubits = profit_reg_size(k, FGREEDY);
     resource_t res = { .qubit_count = qubit_count_qtg(k, FGREEDY, COPPERSMITH, \
@@ -197,29 +199,38 @@ q_max_search(knapsack_t* k, size_t bias, branch_t method, size_t maxiter, \
         if (cur_nodes != NULL) {
             free_nodes(cur_nodes, num_states);
         }
-        /* update cycle and gate count after application of QSearch */
+        /*
+         * The cycle is updated after applying QSearch. The QTG is applied at
+         * the start of every round plus two times within each application of
+         * the Amplitude Amplification Operator.
+         */
         res.cycle_count += (rounds + 2 * iter) * qtg_cycles;
         res.cycle_count_decomp += (rounds + 2 * iter) * qtg_cycles_decomp;
-        res.cycle_count += cycle_count_mc(profit_qubits, TOFFOLI, FALSE);
-        res.cycle_count_decomp += cycle_count_mc(profit_qubits, TOFFOLI, TRUE);
-        res.cycle_count += MIN(cycle_count_comp(profit_qubits, \
+        /* adding the cycles for implementing the reflection about |0> */
+        res.cycle_count += iter * cycle_count_mc(profit_qubits, TOFFOLI, FALSE);
+        res.cycle_count_decomp += iter * cycle_count_mc(profit_qubits, \
+                                  TOFFOLI, TRUE);
+        /* adding the cycles for implementing the phase oracle */
+        res.cycle_count += iter * MIN(cycle_count_comp(profit_qubits, \
                                cur_sol->tot_profit, TOFFOLI, TRUE, FALSE), \
                                cycle_count_comp(profit_qubits, \
                                cur_sol->tot_profit, TOFFOLI, FALSE, FALSE));
-        res.cycle_count_decomp += MIN(cycle_count_comp(profit_qubits, \
+        res.cycle_count_decomp += iter * MIN(cycle_count_comp(profit_qubits, \
                                       cur_sol->tot_profit, TOFFOLI, TRUE, \
                                       TRUE), cycle_count_comp(profit_qubits, \
                                       cur_sol->tot_profit, TOFFOLI, FALSE, \
                                       TRUE));
+        /* updating the gate count according to the same rules */
         res.gate_count += (rounds + 2 * iter) * qtg_gates;
         res.gate_count_decomp += (rounds + 2 * iter) * qtg_gates_decomp;
-        res.gate_count += gate_count_mc(profit_qubits, TOFFOLI, FALSE);
-        res.gate_count_decomp += gate_count_mc(profit_qubits, TOFFOLI, TRUE);
-        res.gate_count += MIN(gate_count_comp(profit_qubits, \
+        res.gate_count += iter * gate_count_mc(profit_qubits, TOFFOLI, FALSE);
+        res.gate_count_decomp += iter * gate_count_mc(profit_qubits, TOFFOLI, \
+                                 TRUE);
+        res.gate_count += iter * MIN(gate_count_comp(profit_qubits, \
                               cur_sol->tot_profit, TOFFOLI, TRUE, TRUE),
                               gate_count_comp(profit_qubits, \
                               cur_sol->tot_profit, TOFFOLI, FALSE, TRUE));
-        res.gate_count_decomp += MIN(gate_count_comp(profit_qubits, \
+        res.gate_count_decomp += iter * MIN(gate_count_comp(profit_qubits, \
                                      cur_sol->tot_profit, TOFFOLI, TRUE, \
                                      TRUE), gate_count_comp(profit_qubits, \
                                      cur_sol->tot_profit, TOFFOLI, FALSE, \
