@@ -212,13 +212,13 @@ q_max_search(knapsack_t* k, size_t bias, branch_t method, size_t maxiter, \
                                   TOFFOLI, TRUE);
         /* adding the cycles for implementing the phase oracle */
         res.cycle_count += iter * MIN(cycle_count_comp(profit_qubits, \
-                               cur_sol->tot_profit, TOFFOLI, TRUE, FALSE), \
+                               cur_sol->tot_profit + 1, TOFFOLI, TRUE, FALSE), \
                                cycle_count_comp(profit_qubits, \
-                               cur_sol->tot_profit, TOFFOLI, FALSE, FALSE));
+                               cur_sol->tot_profit + 1, TOFFOLI, FALSE, FALSE));
         res.cycle_count_decomp += iter * MIN(cycle_count_comp(profit_qubits, \
-                                      cur_sol->tot_profit, TOFFOLI, TRUE, \
+                                      cur_sol->tot_profit + 1, TOFFOLI, TRUE, \
                                       TRUE), cycle_count_comp(profit_qubits, \
-                                      cur_sol->tot_profit, TOFFOLI, FALSE, \
+                                      cur_sol->tot_profit + 1, TOFFOLI, FALSE, \
                                       TRUE));
         /* updating the gate count according to the same rules */
         res.gate_count += (rounds + 2 * iter) * qtg_gates;
