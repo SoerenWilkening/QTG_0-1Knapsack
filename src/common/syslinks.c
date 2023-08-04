@@ -100,7 +100,7 @@ rdmd(const char* executable, size_t argc, char* argv[], uint64_t* mem_count, \
  * =============================================================================
  */
 
-#include "../include/syslinks.h"
+#include "common/syslinks.h"
 #include <unistd.h>
 #include <sys/stat.h>
 

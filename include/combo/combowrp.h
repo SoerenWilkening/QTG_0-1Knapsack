@@ -11,7 +11,7 @@
  * =============================================================================
  */
 
-#include "knapsack.h"
+#include "common/knapsack.h"
 #include "combo.h"
 
 /* 

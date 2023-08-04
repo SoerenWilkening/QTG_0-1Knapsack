@@ -5,8 +5,10 @@ instances/
 *.o
 *.pdf
 *.txt
+!conanfile.txt
 !generator_input.txt
 !benchmark_instances.txt
+!CMakeLists.txt
 *.tex
 main
 cmbcount

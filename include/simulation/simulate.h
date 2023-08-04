@@ -7,7 +7,7 @@
  * =============================================================================
  */
 
-#include "stategen.h"
+#include "common/stategen.h"
 #include "qtgcount.h"
 
 /* 

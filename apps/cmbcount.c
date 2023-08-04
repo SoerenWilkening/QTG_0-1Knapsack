@@ -4,13 +4,8 @@
  * =============================================================================
  */
 
-#if defined(_WIN32) || defined(_WIN64)
-    #include "include\knapsack.h"
-    #include "include\combowrp.h"
-#else
-    #include "include/knapsack.h"
-    #include "include/combowrp.h"
-#endif
+#include "common/knapsack.h"
+#include "combo/combowrp.h"
 
 /* 
  * =============================================================================

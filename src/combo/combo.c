@@ -50,7 +50,7 @@
 #if defined(_WIN32) || defined(_WIN64)
     #include "..\include\combo.h"
 #else
-    #include "../include/combo.h"
+    #include "combo/combo.h"
 #endif
 #include <stdlib.h>
 #include <stdio.h>

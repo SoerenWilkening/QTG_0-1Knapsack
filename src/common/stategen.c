@@ -4,11 +4,7 @@
  * =============================================================================
  */
 
-#if defined(_WIN32) || defined(_WIN64)
-    #include "..\include\stategen.h"
-#else
-    #include "../include/stategen.h"
-#endif
+#include "common/stategen.h"
 
 /* 
  * =============================================================================
@@ -28,7 +24,7 @@
  * =============================================================================
  */
 
-const char*
+const char *
 get_branch_name(branch_t method) {
     switch (method) {
         case COMPARE: {
@@ -51,13 +47,13 @@ get_branch_name(branch_t method) {
  * =============================================================================
  */
 
- void
- free_nodes(node_t nodes[], size_t num_nodes) {
+void
+free_nodes(node_t nodes[], size_t num_nodes) {
     for (size_t i = 0; i < num_nodes; ++i) {
         mpz_clear(nodes[i].path.vector);
     }
     free(nodes);
- }
+}
 
 /* 
  * =============================================================================
@@ -66,16 +62,16 @@ get_branch_name(branch_t method) {
  */
 
 double
-branch_prob(const knapsack_t* k, bit_t i, size_t bias, bool_t left, \
+branch_prob(const knapsack_t *k, bit_t i, size_t bias, bool_t left, \
             branch_t method, mpz_t cur_sol) {
     switch (method) {
         case COMPARE: {
             if (left) {
                 return (1. + (1 - mpz_tstbit(cur_sol, i)) * bias) \
-                        / (bias + 2);
+ / (bias + 2);
             } else {
                 return (1. + mpz_tstbit(cur_sol, i) * bias) \
-                        / (bias + 2);
+ / (bias + 2);
             }
             break;
         }
@@ -84,9 +80,9 @@ branch_prob(const knapsack_t* k, bit_t i, size_t bias, bool_t left, \
             if (left) {
                 return sqrt(1. / (bias + 2));
             } else {
-                return sqrt((1. + bias) / (bias + 2)); 
+                return sqrt((1. + bias) / (bias + 2));
             }
-            
+
             break;
         }
 
@@ -103,18 +99,18 @@ branch_prob(const knapsack_t* k, bit_t i, size_t bias, bool_t left, \
  * =============================================================================
  */
 
-node_t*
-qtg(const knapsack_t* k, num_t threshold, num_t exact, size_t bias, \
-    branch_t method, mpz_t cur_sol, size_t* num_states) {
+node_t *
+qtg(const knapsack_t *k, num_t threshold, num_t exact, size_t bias, \
+    branch_t method, mpz_t cur_sol, size_t *num_states) {
     if (threshold == exact) {
         /* return empty node array if optimal solution is already reached */
         *num_states = 0;
         return NULL;
     }
-	*num_states = 1; /* start from the root */
+    *num_states = 1; /* start from the root */
     size_t a = 0; /* start from leftmost node */
     /* initialize root node as single-element node_t array */
-    node_t* parent = malloc(sizeof(node_t));
+    node_t *parent = malloc(sizeof(node_t));
     parent->path.remain_cost = k->capacity;
     parent->path.tot_profit = 0;
     mpz_init(parent->path.vector);
@@ -126,7 +122,7 @@ qtg(const knapsack_t* k, num_t threshold, num_t exact, size_t bias, \
          * The size of the child layer is upper bounded by twice the parent
          * layer's size which is given as the current number of states.
          */
-        node_t* child = malloc(2 * (*num_states) * sizeof(node_t));
+        node_t *child = malloc(2 * (*num_states) * sizeof(node_t));
         for (size_t j = 0; j < (*num_states); ++j) {
             if (parent[j].path.remain_cost < k->items[i].cost) {
                 /* item cannot be included, thus no branching */
@@ -154,7 +150,7 @@ qtg(const knapsack_t* k, num_t threshold, num_t exact, size_t bias, \
              */
             left_ub = combo_data(k, i + 1, parent[j].path.remain_cost, FALSE, \
                                  FALSE, TRUE) \
-                      + parent[j].path.tot_profit;
+ + parent[j].path.tot_profit;
             if (left_ub > threshold) {
                 /*
                  * The left subtree has at least one path with objective value
@@ -187,10 +183,10 @@ qtg(const knapsack_t* k, num_t threshold, num_t exact, size_t bias, \
                      * is considered to be included into the knapsack.
                      */
                     right_ub = combo_data(k, i + 1, parent[j].path.remain_cost \
-                                          - k->items[i].cost, FALSE, FALSE, \
+ - k->items[i].cost, FALSE, FALSE, \
                                           TRUE) \
-                               + parent[j].path.tot_profit \
-                               + k->items[i].profit;
+ + parent[j].path.tot_profit \
+ + k->items[i].profit;
                     if (right_ub > threshold) {
                         /*
                          * The right subtree has at least one path with
@@ -200,10 +196,10 @@ qtg(const knapsack_t* k, num_t threshold, num_t exact, size_t bias, \
 
                         /* update remaining cost */
                         child[a].path.remain_cost = parent[j].path.remain_cost \
-                                                    - k->items[i].cost;
+ - k->items[i].cost;
                         /* update total profit */
                         child[a].path.tot_profit = k->items[i].profit \
-                                                   + parent[j].path.tot_profit;
+ + parent[j].path.tot_profit;
                         /* include item: set the corresponding bit to 1 */
                         mpz_init(child[a].path.vector);
                         mpz_set(child[a].path.vector, parent[j].path.vector);
@@ -234,10 +230,10 @@ qtg(const knapsack_t* k, num_t threshold, num_t exact, size_t bias, \
 
                     /* update remaining cost */
                     child[a].path.remain_cost = parent[j].path.remain_cost \
-                                           - k->items[i].cost;
+ - k->items[i].cost;
                     /* update total profit */
                     child[a].path.tot_profit = k->items[i].profit \
-                                             + parent[j].path.tot_profit;
+ + parent[j].path.tot_profit;
                     /* include item: set the corresponding bit to 1 */
                     mpz_init(child[a].path.vector);
                     mpz_set(child[a].path.vector, parent[j].path.vector);
@@ -263,10 +259,10 @@ qtg(const knapsack_t* k, num_t threshold, num_t exact, size_t bias, \
 
                 /* update remaining cost */
                 child[a].path.remain_cost = parent[j].path.remain_cost \
-                                       - k->items[i].cost;
+ - k->items[i].cost;
                 /* update total profit */
                 child[a].path.tot_profit = k->items[i].profit \
-                                         + parent[j].path.tot_profit;
+ + parent[j].path.tot_profit;
                 /* include item: set the corresponding bit to 1 */
                 mpz_init(child[a].path.vector);
                 mpz_set(child[a].path.vector, parent[j].path.vector);
