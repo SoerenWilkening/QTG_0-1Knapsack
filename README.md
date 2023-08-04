@@ -24,14 +24,16 @@ Further contents are:
 
 ## Preparation
 
-Since the entire source code is written in C, a suitable compiler is necessary. The [**makefile**](makefile_old) is written to utilize [gcc](https://gcc.gnu.org). The first step is to ensure to have it installed. On MacOS, gcc typically is an alias for [clang](https://clang.llvm.org) which therefore should be installed instead.
-
-This module integrates two external libraries: [GNU Scientific Library (GSL)](https://www.gnu.org/software/gsl/) and [GNU Multiple Precission Arithmetic Library (GMP)](https://gmplib.org) which also have to be installed in advance. On Windows, the installation paths for these libraries have to be given explicitely during the linking process. For this, the [**makefile**](makefile_old) contains two variables to which the installation path names should be assigned, respectively.
-
-```
-GSLPATH = path/to/gsl/directory
-GMPPATH = path/to/gmp/directory
-```
+Cmake and Conan are used to manage the dependencies of this project.
+Therefore, it is necessary to have [cmake](https://cmake.org) and [conan](https://conan.io) installed.
+Create a build directory `mkdir build` and run `conan install . -of build --build=missing --settings=build_type=Release` in it.
+As we require x86 assembly, we need to compile the conan dependencies with a matching profile, e.g. when you use an arm
+machine (`conan install [...] --profile=x86`).
+Then, inside the `build` directory run `cmake .. -DCMAKE_BUILD_TYPE=Release` to generate the makefiles.
+Finally, run `make` to compile the project. We provide three executables:
+* `cmbcount` to count the cycles and memory usage of Combo
+* `simulation` to simulate the QTG
+* `generator` to generate new instances
 
 The functions provided in [**knapsack.c**](src/common/knapsack.c) are able to format benchmark instances from two sources: [Pisinger's instances](http://hjemmesider.diku.dk/~pisinger/codes.html) described in [D. Pisinger, Computers & Operations Research 32, 2271 (2005)](https://doi.org/10.1016/j.cor.2004.03.002) and [Jooken et al.'s instances](https://github.com/JorikJooken/knapsackProblemInstances) described in [J. Jooken, P. Leyman, and P. De Causmaecker, European Journal of Operational Research 301, 841 (2022)](https://doi.org/10.1016/j.ejor.2021.12.009). The corresponding directories are assumed to exist within a folder called **instances**, but are not distributed within this repository.
 
@@ -60,7 +62,7 @@ New instances can be generated using the instance generator by Jooken et al. wit
 
 `make generate`
 
-THe methods reads the `generator_input.txt` file, that has to be in the format
+The methods reads the `generator_input.txt` file, that has to be in the format
 
 ```
 n
