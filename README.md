@@ -22,8 +22,10 @@ Further contents are:
 - [stategen](src/common/stategen.c): Simulates the QTG
 - [syslinks](src/common/syslinks.c): Provides OS-dependent functionalities for Windows, Linux, and MacOS
 
-## Preparation
+## Installation
 
+Usually we would provide this project as a python package, but due to the need for x86 assembly, the user has to compile
+the project on their own.
 Cmake and Conan are used to manage the dependencies of this project.
 Therefore, it is necessary to have [cmake](https://cmake.org) and [conan](https://conan.io) installed.
 Create a build directory `mkdir build` and run `conan install . -of build --build=missing --settings=build_type=Release` in it.
