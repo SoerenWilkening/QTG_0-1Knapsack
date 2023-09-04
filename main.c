@@ -1,16 +1,22 @@
 #include "header/simulate.h"
+#include <time.h>
 
 #define TRUE                    1
 #define FALSE                   0
 
-gsl_rng* r;  /* global generator */
+gsl_rng *r;  /* global generator */
 
-int main(int argc, char* argv[]) {
-	const gsl_rng_type* T;
-	gsl_rng_env_setup();
+int main(int argc, char *argv[]) {
 
-	T = gsl_rng_default;
-	r = gsl_rng_alloc(T);
+    time_t rawtime;
+    time ( &rawtime );
+
+    const gsl_rng_type *T;
+    gsl_rng_env_setup();
+
+    T = gsl_rng_default;
+    r = gsl_rng_alloc(T);
+    gsl_rng_set(r, rawtime);
 
 	size_t bias, max_iter, runs_per_instance, i;
 	knapsack_t* k;
@@ -41,5 +47,5 @@ int main(int argc, char* argv[]) {
 		free_knapsack(k);
 	}
 
-	return 0;
+    return 0;
 }

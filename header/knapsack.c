@@ -279,6 +279,7 @@ create_jooken_knapsack(char* filename) {
     size_t profit_pos;
     size_t cost_pos;
     size_t num_line = 0;
+    int a;
 
     if(!file_exists(filename)) {
         return NULL;
