@@ -4,10 +4,14 @@
  * =============================================================================
  */
 
+#include <time.h>
+
 #if defined(_WIN32) || defined(_WIN64)
-    #include "include\simulate.h"
+#include "include\simulate.h"
 #else
-    #include "include/simulate.h"
+
+#include "include/simulate.h"
+
 #endif
 
 /* 
@@ -35,7 +39,7 @@ extern "C" {
  * =============================================================================
  */
 
-gsl_rng* r;  /* global generator */
+gsl_rng *r;  /* global generator */
 
 /* 
  * =============================================================================
@@ -43,50 +47,54 @@ gsl_rng* r;  /* global generator */
  * =============================================================================
  */
 
-int main(int argc, char* argv[]) {
-	const gsl_rng_type* T;
-	gsl_rng_env_setup();
+int main(int argc, char *argv[]) {
+    const gsl_rng_type *T;
+    gsl_rng_env_setup();
 
-	T = gsl_rng_default;
-	r = gsl_rng_alloc(T);
+    T = gsl_rng_default;
+    r = gsl_rng_alloc(T);
 
-	size_t bias, max_iter, runs_per_instance, i;
-	knapsack_t* k;
-	path_t* sol;
+    time_t rawtime;
+    time(&rawtime);
+    gsl_rng_set(r, rawtime);
 
-	/* determine bias */
-	bias = atoi(argv[1]);
+    size_t bias, max_iter, runs_per_instance, i;
+    knapsack_t *k;
+    path_t *sol;
 
-	/* determine maximum number of iteration within Qsearch */
-	max_iter = atoi(argv[2]);
+    /* determine bias */
+    bias = atoi(argv[1]);
 
-	/* determine runs per instance */
-	runs_per_instance = atoi(argv[3]);
+    /* determine maximum number of iteration within Qsearch */
+    max_iter = atoi(argv[2]);
 
-	FILE* file_instances = fopen("benchmark_instances.txt", "r");
-	char line[256];
-	while (fgets(line, sizeof(line), file_instances) != NULL) {
-		line[strcspn(line, "\n")] = '\0';
-		if (line[10] == 'p') {
-			k = create_jooken_knapsack(line);
-		} else {
-			k = create_pisinger_knapsack(line);
-			line[strlen(line) - 4] = '\0';
-			create_dir(line);
-		}
-		printf("%s\n", k->name);
-		for (i = 0; i < runs_per_instance; ++i) {
-			measure_combo(k);
-			sol = q_max_search(k, bias, COMPARE, max_iter, r);
- 			free_path(sol);
-	 		printf("\33[2K\r%4zu-th iteration done.", i + 1);
-	 		fflush(stdout);
-		}
+    /* determine runs per instance */
+    runs_per_instance = atoi(argv[3]);
+
+    FILE *file_instances = fopen("benchmark_instances.txt", "r");
+    char line[256];
+    while (fgets(line, sizeof(line), file_instances) != NULL) {
+        line[strcspn(line, "\n")] = '\0';
+        if (line[10] == 'p') {
+            k = create_jooken_knapsack(line);
+        } else {
+            k = create_pisinger_knapsack(line);
+            line[strlen(line) - 4] = '\0';
+            create_dir(line);
+        }
+        printf("%s\n", k->name);
+        for (i = 0; i < runs_per_instance; ++i) {
+            measure_combo(k);
+            sol = q_max_search(k, bias, COMPARE, max_iter, r);
+            free_path(sol);
+            printf("\33[2K\r%4zu-th iteration done.", i + 1);
+            fflush(stdout);
+        }
         printf("\n");
-		free_knapsack(k);
-	}
+        free_knapsack(k);
+    }
 
-	return 0;
+    return 0;
 }
 
 #ifdef __cplusplus

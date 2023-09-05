@@ -40,7 +40,7 @@ extern "C" {
  *      parameter3: Pointer to GSL's random number generator.
  * Returns:         Index of the state obtained by the simulated measurement.
  */
-size_t sampling(const double[], size_t, const gsl_rng*);
+size_t sampling(const double*, size_t, const gsl_rng*);
 
 /* 
  * =============================================================================
