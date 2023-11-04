@@ -84,11 +84,11 @@ int main(int argc, char *argv[]) {
         }
         printf("%s\n", k->name);
         for (i = 0; i < runs_per_instance; ++i) {
-            long zzz = expkap_wrap(k, 0, k->capacity, 1, 0, 1, 1);
-            printf("sol = %ld\n", zzz);
+//            long zzz = expkap_wrap(k, 0, k->capacity, 1, 0, 1, 1);
+//            printf("sol = %ld\n", zzz);
 //            measure_combo(k);
-//            sol = q_max_search(k, bias, COMPARE, max_iter, r);
-//            free_path(sol);
+            sol = q_max_search(k, bias, COMPARE, max_iter, r);
+            free_path(sol);
             printf("\33[2K\r%4zu-th iteration done.", i + 1);
             fflush(stdout);
         }

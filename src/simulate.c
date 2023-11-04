@@ -111,6 +111,7 @@ q_search(const node_t nodes[], size_t num_states, size_t* rounds, \
         *iter += j;
         m_tot += 2 * j + 1;
         sample = ampl_amp(nodes, num_states, j, rng);
+        printf("%ld\n", m_tot);
         if (sample != NULL) {
             return sample;
         }
@@ -234,6 +235,7 @@ q_max_search(knapsack_t* k, size_t bias, branch_t method, size_t maxiter, \
                                      TRUE), gate_count_comp(profit_qubits, \
                                      cur_sol->tot_profit, TOFFOLI, FALSE, \
                                      TRUE));
+
         if (cur_path != NULL) {              
             free_path(cur_sol);
             cur_sol = cur_path;
