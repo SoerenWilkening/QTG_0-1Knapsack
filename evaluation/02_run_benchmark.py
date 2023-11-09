@@ -23,14 +23,18 @@ def run_benchmark(instance_path):
         return
 
     try:
-        output = subprocess.run(f"scalene --json --cli 01_run_solver.py --instance {instance_path}",
-                                capture_output=True,
-                                text=True, check=True,
-                                shell=True)
+        subprocess.run(f"scalene --json --cli 01_run_solver.py --instance {instance_path} --outfile profile.json",
+                       capture_output=True,
+                       text=True, check=True,
+                       shell=True)
     except subprocess.CalledProcessError:
         return
 
-    memory_result = json.loads(output.stdout)
+    with open("profile.json", "r") as f:
+        memory_result = json.load(f)
+
+    os.remove("profile.json")
+
     memory_footprint = memory_result["max_footprint_mb"]
 
     return {
@@ -49,6 +53,7 @@ def run_benchmark(instance_path):
 
 if __name__ == "__main__":
     import argparse
+
     parser = argparse.ArgumentParser()
     parser.add_argument("-i", "--instances", type=str, required=False)
     args = parser.parse_args()
