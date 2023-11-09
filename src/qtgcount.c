@@ -55,7 +55,7 @@ get_add_name(add_t method) {
         }
 
         case COPYDIRECT: {
-            return "Copy&Direct"
+            return "Copy&Direct";
         }
 
         default: {
@@ -214,7 +214,7 @@ cycle_count_add(bit_t reg_size, num_t summand, add_t method, \
         }
 
         case COPYDIRECT: {
-            return 2 * num_bits(reg_size - LSO(summand) - 1) + 1;
+            return 2 * num_bits(reg_size - lso(summand) - 1) + 1;
         }
 
         default: {

@@ -111,7 +111,6 @@ q_search(const node_t nodes[], size_t num_states, size_t* rounds, \
         *iter += j;
         m_tot += 2 * j + 1;
         sample = ampl_amp(nodes, num_states, j, rng);
-        printf("%ld\n", m_tot);
         if (sample != NULL) {
             return sample;
         }
