@@ -42,7 +42,7 @@
 #define MINRUDI      1000    /* parameter M1 from paper: 1000 normally */
 #define MINSET       2000    /* parameter M2 from paper: 2000 normally */
 #define MINHEUR     10000    /* parameter M3 from paper: 10000 normally */
-#define MAXSTATES 4000000000    /* adapted for bigger instances */
+#define MAXSTATES 9000000    /* adapted for bigger instances */
 
 #undef HASCHANCE             /* should strong upper bounds be used? */
 

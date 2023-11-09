@@ -17,7 +17,10 @@ def load_instance(file_path: str):
         size = int(lines[0])
         items = ItemVector()
         for line in lines[1:-1]:
-            profit, cost = line.split(" ")
+            if len(line.split()) == 2:
+                profit, cost = line.split()
+            else:
+                _, profit, cost = line.split()
             items.append(Item(int(profit), int(cost)))
         capacity = int(lines[-1])
 
