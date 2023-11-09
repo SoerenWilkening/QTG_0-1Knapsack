@@ -52,6 +52,7 @@ typedef enum qft {
 typedef enum add {
     DRAPER,
     DIRECT,
+    COPYDIRECT,
 } add_t;
 
 typedef enum mc {
@@ -106,6 +107,21 @@ const char* get_mc_name(mc_t);
  * Returns:		Number of bits of the given input.
  */
 bit_t num_bits(num_t);
+
+/* 
+ * =============================================================================
+ *                            least signifcant one
+ * =============================================================================
+ */
+
+/*
+ * Function: 	lso
+ * ----------------
+ * Description:	This function returns the index of the least significant one.
+ * Parameter:	Number whose least significant one should be evaluated.
+ * Returns:		Least significant one of the input number.
+ */
+bit_t lso(num_t) {
 
 /* 
  * =============================================================================

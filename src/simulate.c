@@ -160,24 +160,22 @@ q_max_search(knapsack_t* k, size_t bias, branch_t method, size_t maxiter, \
      * A resource counter is initialized. The number of required qubits is given
      * by the total number of qubits on all three registers of the QTG plus the
      * number of ancilla qubits necessary for decomposing the QTG's comparison
-     * operations, plus one for saving the AA phase flip, plus the number of
-     * ancilla qubits required to decompose the AA flip operator. The cycle and
-     * gate counts are initialized to zero and will be updated after every call
-     * to QSearch.
+     * operations, plus one for saving the AA phase flip. The cycle and gate
+     * counts are initialized to zero and will be updated after every call to 
+     * QSearch.
      */
     profit_qubits = profit_reg_size(k, FGREEDY);
     resource_t res = { .qubit_count = qubit_count_qtg(k, FGREEDY, COPPERSMITH, \
-                                                 DIRECT, TOFFOLI) + 1 \
-                                 + anc_count_mc(profit_qubits, TOFFOLI),
+                                       COPYDIRECT, TOFFOLI) + 1, \
                        .cycle_count = 0, .gate_count = 0, \
                        .cycle_count_decomp = 0, .gate_count_decomp = 0};
-    qtg_cycles = cycle_count_qtg(k, FGREEDY, COPPERSMITH, DIRECT, \
+    qtg_cycles = cycle_count_qtg(k, FGREEDY, COPPERSMITH, COPYDIRECT, \
                                          TOFFOLI, FALSE);
-    qtg_gates = gate_count_qtg(k, FGREEDY, COPPERSMITH, DIRECT, \
+    qtg_gates = gate_count_qtg(k, FGREEDY, COPPERSMITH, COPYDIRECT, \
                                          TOFFOLI, FALSE);
-    qtg_cycles_decomp = cycle_count_qtg(k, FGREEDY, COPPERSMITH, DIRECT, \
+    qtg_cycles_decomp = cycle_count_qtg(k, FGREEDY, COPPERSMITH, COPYDIRECT, \
                                          TOFFOLI, TRUE);
-    qtg_gates_decomp = gate_count_qtg(k, FGREEDY, COPPERSMITH, DIRECT, \
+    qtg_gates_decomp = gate_count_qtg(k, FGREEDY, COPPERSMITH, COPYDIRECT, \
                                          TOFFOLI, TRUE);
 
     /* obtain optimal solution via Combo */

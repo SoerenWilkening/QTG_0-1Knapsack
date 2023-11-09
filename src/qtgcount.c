@@ -54,6 +54,10 @@ get_add_name(add_t method) {
             return "Direct";
         }
 
+        case COPYDIRECT: {
+            return "Copy&Direct"
+        }
+
         default: {
             return "Unspecified adder method!";
         }
@@ -82,11 +86,27 @@ get_mc_name(mc_t method) {
 bit_t
 num_bits(num_t number) {
     bit_t result = 0;
-    num_t remainder = number;
     do {
-        remainder = remainder >> 1; /* removes last bit */
+        number >>= 1; /* removes last bit */
         ++result; /* increases counter */
-    } while (0 != remainder);
+    } while (0 != number);
+
+    return result;
+}
+
+/* 
+ * =============================================================================
+ *                            least signifcant one
+ * =============================================================================
+ */
+
+bit_t
+lso(num_t number) {
+    bit_t result = 0;
+    while (!(number & 1)) {
+        number >>= 1;
+        ++result;
+    }
 
     return result;
 }
@@ -165,6 +185,10 @@ anc_count_add(bit_t reg_size, num_t summand, add_t method) {
             return 0; 
         }
 
+        case COPYDIRECT: {
+            return reg_size - lso(summand) - 1;
+        }
+
         default: {
             printf("Unspecified adder method!");
             return -1;
@@ -189,6 +213,10 @@ cycle_count_add(bit_t reg_size, num_t summand, add_t method, \
             return result;
         }
 
+        case COPYDIRECT: {
+            return 2 * num_bits(reg_size - LSO(summand) - 1) + 1;
+        }
+
         default: {
             printf("Unspecified adder method!");
             return -1;
@@ -210,6 +238,10 @@ gate_count_add(bit_t reg_size, num_t summand, add_t method, bool_t tof_decomp) {
                 result += (reg_size - i) * ((summand >> i) & 1);
             }
             return result;
+        }
+
+        case COPYDIRECT: {
+            return 3 * (reg_size - lso(summand)) - 2;
         }
 
         default: {
@@ -237,8 +269,8 @@ count_t
 cycle_count_mc(bit_t control_qubits, mc_t method, bool_t tof_decomp) {
     switch (method) {
         case TOFFOLI: { /* decompose into cascade of Toffoli gates */
-            count_t toffolis = 2 * (control_qubits - 1);
-            return (tof_decomp) ? 5 * toffolis + 1 : toffolis + 1;
+            count_t toffoli_cycles = 2 * num_bits(control_qubits - 1);
+            return (tof_decomp) ? 5 * toffoli_cycles + 1 : toffoli_cycles + 1;
             /* decomposing Toffolis yields 5 addtional gates per Toffoli gate*/
         }
 
@@ -344,41 +376,10 @@ qubit_count_qtg(const knapsack_t* k, ub_t method_ub, qft_t method_qft, \
     bit_t reg_b = cost_reg_size(k);
     bit_t reg_c = profit_reg_size(k, method_ub);
 
-    bit_t anc_comp = 0;
-    /* 
-     * optimize comparison circuits with respect to gates and set number of
-     * ancillas as the maximum of ancillas needed in any of those circuits
-     */
-    for (bit_t i = 0; i < k->size; ++i) {
-        if (gate_count_comp(reg_b, k->items[i].cost, method_mc, TRUE, FALSE)
-             > gate_count_comp(reg_b, k->items[i].cost, method_mc, TRUE, \
-                               FALSE)) {
-            /* unnegated version is more efficient */
-            anc_comp = MAX(anc_count_comp(reg_b, k->items[i].cost, \
-                                          method_mc, FALSE), anc_comp);
-        } else {
-            /* negated version is more efficient */
-            anc_comp = MAX(anc_count_comp(reg_b, k->items[i].cost, \
-                                          method_mc, TRUE), anc_comp);
-        }
-    }
+    bit_t reg_anc = MAX(reg_a, reg_b);
+    reg_anc = MAX(reg_anc, reg_c);
 
-    return reg_a /* qubits in the path register */ \
-            + reg_b /* qubits in the cost register */ \
-            + reg_c /* qubits in the profit register */ \
-            /* ancilla qubits for the QFT on the cost register */ \
-            + anc_count_qft(reg_b, method_qft) \
-            /* ancilla qubits for the QFT on the profit register */ \
-            + anc_count_qft(reg_c, method_qft) \
-            /* ancilla qubits for the adder on the cost register */ \
-            + anc_count_add(reg_b, max_cost(k), method_add) \
-            /* ancilla qubits for the adder on the profit register */ \
-            + anc_count_add(reg_c, max_profit(k), method_add) \
-            /*
-             * ancilla qubits for the multi-controlled comparison over the 
-             * cost register
-             */ \
-            + anc_comp;
+    return reg_a + reg_b + reg_c + reg_anc - 1;
 }
 
 count_t
@@ -437,6 +438,11 @@ cycle_count_qtg(const knapsack_t* k, ub_t method_ub, qft_t method_qft, \
             break;
         }
 
+        case COPYDIRECT: {
+            goto first_block_copy;
+            break;
+        }
+
         default: {
             return -1;
         }
@@ -491,6 +497,13 @@ cycle_count_qtg(const knapsack_t* k, ub_t method_ub, qft_t method_qft, \
                                                   + 2 * cost_qft);
     }
 
+first_block_copy:
+    if (reg_b > reg_c) {
+        first_block = first_comp + cost_qft + profit_qft;
+    } else {
+        first_block = first_comp + 2 * cost_qft + 1;
+    }
+
     /* 
      * second block consisting of k->size - 2 similar blocks, each consiting of:
      * - comparison on the cost register for controlled operation on the path
@@ -530,6 +543,8 @@ cycle_count_qtg(const knapsack_t* k, ub_t method_ub, qft_t method_qft, \
                  * 2. two-controlled gates have to be decomposed into 5
                  *    single-controlled gates
                  */
+                second_block += second_comp + second_sub + MAX(2 * cost_qft,
+                                                               second_add);
                 break;
             }
 
@@ -544,6 +559,13 @@ cycle_count_qtg(const knapsack_t* k, ub_t method_ub, qft_t method_qft, \
                  * two-controlled gates: parallelization is impossible, thus
                  * cycles match gates
                  */
+                second_block += second_comp + second_sub + MAX(2 * cost_qft,
+                                                               second_add);
+                break;
+            }
+
+            case COPYDIRECT: {
+                second_block += second_comp + 2 * cost_qft + 1;
                 break;
             }
 
@@ -558,8 +580,6 @@ cycle_count_qtg(const knapsack_t* k, ub_t method_ub, qft_t method_qft, \
          * comparison and subtraction on the cost register canot be parallelized
          * further, both their lenghts have to be added.
          */
-        second_block += second_comp + second_sub + MAX(2 * cost_qft,
-                                                       second_add);
     }
 
     /*
@@ -598,12 +618,17 @@ cycle_count_qtg(const knapsack_t* k, ub_t method_ub, qft_t method_qft, \
         }
 
         case DIRECT: { /* rotational gates are directly implemented */
-            last_add = gate_count_add(reg_c, ((k->items)[k->size - 1]).profit, \
+            last_add = gate_count_add(reg_c, k->items[k->size - 1].profit, \
                                       DIRECT, tof_decomp);
             /* 
              * additional control on path register qubit creates two-controlled
              * gates: parallelization is impossible, thus cycles match gates
              */
+            break;
+        }
+
+        case COPYDIRECT: {
+            last_add = num_bits(reg_c - lso(k->items[k->size - 1].profit) - 1) + 1;
             break;
         }
 
@@ -663,8 +688,24 @@ gate_count_qtg(const knapsack_t* k, ub_t method_ub, qft_t method_qft, \
              * Since last subtraction is omitted, for the last item, only the
              * addition is considered.
              */
-            add_gates += gate_count_add(reg_c, k->items[k->size - 1].cost, \
+            add_gates += gate_count_add(reg_c, k->items[k->size - 1].profit, \
                                         DIRECT, tof_decomp);
+            break;
+        }
+
+        case COPYDIRECT: {
+            for (bit_t i = 0; i < k->size - 1; ++i) {
+                add_gates += 2 * (MAX(reg_b, reg_c) - \
+                                  MIN(lso(k->items[i].profit), lso(k->items[i].cost)) - 1);
+                sub_gates += reg_b - lso(k->items[i].cost);
+                add_gates += reg_c - lso(k->items[i].profit);
+            }
+            /* 
+             * Since last subtraction is omitted, for the last item, only the
+             * addition is considered.
+             */
+            add_gates += gate_count_add(reg_c, k->items[k->size - 1].profit, \
+                                        COPYDIRECT, tof_decomp);
             break;
         }
 
