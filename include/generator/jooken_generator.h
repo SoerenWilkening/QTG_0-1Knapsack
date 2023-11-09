@@ -1,9 +1,10 @@
-#include "common/knapsack.h"
 #include "common/utils.hpp"
 #include <cstdint>
 #include <memory>
 
 namespace generator {
+    using capacity_type = long long;
+
     std::unique_ptr<utils::cpp_knapsack>
-    generate(int n, int cap, int classes, double frac, double eps, int small);
+    generate(capacity_type n, capacity_type cap, capacity_type classes, double frac, double eps, capacity_type small);
 }

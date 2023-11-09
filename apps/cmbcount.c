@@ -7,15 +7,6 @@
 #include "common/knapsack.h"
 #include "combo/combowrp.h"
 
-/* 
- * =============================================================================
- *                            C++ check
- * =============================================================================
- */
-
-#ifdef __cplusplus
-extern "C" {
-#endif
 
 /* 
  * =============================================================================
@@ -43,7 +34,7 @@ typedef enum ins {
  * =============================================================================
  */
 
-int main(int argc, char* argv[]){
+int main(int argc, char *argv[]) {
 
     /* determine which type of knapsack should be created */
     ins_t instance;
@@ -58,7 +49,7 @@ int main(int argc, char* argv[]){
     offset += snprintf(filename, sizeof(filename), "instances%c%s", \
                        path_sep(), argv[1]);
 
-    knapsack_t* k;
+    knapsack_t *k;
     switch (instance) {
         case JOOKEN: {
             snprintf(filename + offset, sizeof(filename) + offset, \
@@ -97,7 +88,3 @@ int main(int argc, char* argv[]){
 
     return 0;
 }
-
-#ifdef __cplusplus
-}
-#endif

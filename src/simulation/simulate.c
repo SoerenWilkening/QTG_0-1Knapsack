@@ -4,11 +4,8 @@
  * =============================================================================
  */
 
-#if defined(_WIN32) || defined(_WIN64)
-    #include "..\include\simulate.h"
-#else
-    #include "../../include/simulation/simulate.h"
-#endif
+
+#include "simulation/simulate.h"
 
 /* 
  * =============================================================================
@@ -19,8 +16,8 @@
 #define TRUE                    1
 #define FALSE                   0
 
-#define MIN(a,b)                ((a) < (b) ? (a) : (b))
-#define MAX(a,b)                ((a) > (b) ? (a) : (b))
+#define MIN(a, b)                ((a) < (b) ? (a) : (b))
+#define MAX(a, b)                ((a) > (b) ? (a) : (b))
 
 /* 
  * =============================================================================
@@ -29,7 +26,7 @@
  */
 
 size_t
-sampling(const double prob[], size_t num_states, const gsl_rng* rng) {
+sampling(const double prob[], size_t num_states, const gsl_rng *rng) {
     double random_num = gsl_rng_uniform(rng);
     double cumulative_prob = 0;
     for (size_t i = 0; i < num_states; ++i) {
@@ -47,9 +44,9 @@ sampling(const double prob[], size_t num_states, const gsl_rng* rng) {
  * =============================================================================
  */
 
-path_t*
+path_t *
 ampl_amp(const node_t nodes[], size_t num_states, size_t calls, \
-         const gsl_rng* rng) {
+         const gsl_rng *rng) {
     if (nodes == NULL) {
         return NULL;
     }
@@ -62,7 +59,7 @@ ampl_amp(const node_t nodes[], size_t num_states, size_t calls, \
     }
 
     amp_factor = pow(sin((2 * calls + 1) * asin(sqrt(cumulative_prob))), 2) \
-                 / cumulative_prob;
+ / cumulative_prob;
 
     cumulative_prob = 0;
     for (size_t i = 0; i < num_states; ++i) {
@@ -77,7 +74,7 @@ ampl_amp(const node_t nodes[], size_t num_states, size_t calls, \
         return NULL;
     } else {
         /* a state (path) with improved profit was measured */
-        path_t* result = malloc(sizeof(path_t));
+        path_t *result = malloc(sizeof(path_t));
         result->tot_profit = nodes[measurement].path.tot_profit;
         result->remain_cost = nodes[measurement].path.remain_cost;
         mpz_init(result->vector);
@@ -92,24 +89,24 @@ ampl_amp(const node_t nodes[], size_t num_states, size_t calls, \
  * =============================================================================
  */
 
-path_t*
-q_search(const node_t nodes[], size_t num_states, size_t* rounds, \
-         size_t* iter, size_t maxiter, const gsl_rng* rng) {
+path_t *
+q_search(const node_t nodes[], size_t num_states, size_t *rounds, \
+         size_t *iter, size_t maxiter, const gsl_rng *rng) {
     size_t m, j, l, m_tot;
     l = m_tot = 0;
     double c = 6. / 5;
     *rounds = 0; /* reset rounds counter */
     *iter = 0; /* reset iteration counter */
-    
-    path_t* sample;
-    while(m_tot < maxiter) {
+
+    path_t *sample;
+    while (m_tot < maxiter) {
         ++(*rounds);
         ++l;
         m = ceil(pow(c, l));
         j = gsl_rng_uniform_int(rng, m) + 1;
         *iter += j;
         m_tot += 2 * j + 1;
-        path_t* sample = ampl_amp(nodes, num_states, j, rng);
+        path_t *sample = ampl_amp(nodes, num_states, j, rng);
         if (sample != NULL) {
             return sample;
         }
@@ -123,14 +120,14 @@ q_search(const node_t nodes[], size_t num_states, size_t* rounds, \
  * =============================================================================
  */
 
-path_t*
-q_max_search(knapsack_t* k, size_t bias, branch_t method, size_t maxiter, \
-             const gsl_rng* rng) {
+path_t *
+q_max_search(knapsack_t *k, size_t bias, branch_t method, size_t maxiter, \
+             const gsl_rng *rng) {
     size_t rounds; /* counter of AA rounds within QSearch; will be updated */
     size_t iter; /* counter of AA calls within QSearch; will be updated */
     size_t num_states; /* number of states; will be updated */
 
-    path_t* cur_sol; /* current solution; will be updated */
+    path_t *cur_sol; /* current solution; will be updated */
     bit_t profit_qubits; /* size of the profit register */
     /*
      * declare cycle and gate counter for the QTG with and without decomposing
@@ -139,10 +136,10 @@ q_max_search(knapsack_t* k, size_t bias, branch_t method, size_t maxiter, \
     count_t qtg_cycles, qtg_gates, qtg_cycles_decomp, qtg_gates_decomp;
     num_t exact; /* exact optimal profit for the knapsack instance */
 
-    node_t* cur_nodes; /* set of states after applying QTG and filtering */
-    path_t* cur_path; /* current result of applying QSearch */
+    node_t *cur_nodes; /* set of states after applying QTG and filtering */
+    path_t *cur_path; /* current result of applying QSearch */
 
-    FILE* stream;
+    FILE *stream;
     char instancename[256];
     char filename[256];
     char line[128];
@@ -165,7 +162,7 @@ q_max_search(knapsack_t* k, size_t bias, branch_t method, size_t maxiter, \
      * QSearch.
      */
     profit_qubits = profit_reg_size(k, FGREEDY);
-    resource_t res = { .qubit_count = qubit_count_qtg(k, FGREEDY, COPPERSMITH, \
+    resource_t res = {.qubit_count = qubit_count_qtg(k, FGREEDY, COPPERSMITH, \
                                        COPYDIRECT, TOFFOLI) + 1, \
                        .cycle_count = 0, .gate_count = 0, \
                        .cycle_count_decomp = 0, .gate_count_decomp = 0};
@@ -226,7 +223,7 @@ q_max_search(knapsack_t* k, size_t bias, branch_t method, size_t maxiter, \
                                  TRUE);
         res.gate_count += iter * MIN(gate_count_comp(profit_qubits, \
                               cur_sol->tot_profit, TOFFOLI, TRUE, TRUE),
-                              gate_count_comp(profit_qubits, \
+                                     gate_count_comp(profit_qubits, \
                               cur_sol->tot_profit, TOFFOLI, FALSE, TRUE));
         res.gate_count_decomp += iter * MIN(gate_count_comp(profit_qubits, \
                                      cur_sol->tot_profit, TOFFOLI, TRUE, \
@@ -245,10 +242,10 @@ q_max_search(knapsack_t* k, size_t bias, branch_t method, size_t maxiter, \
             create_dir(instancename);
             stream = fopen(filename, "a");
             fprintf(stream, "%"PRIu64" %"PRIu64" %"PRIu64" %"PRIu64" %"PRIu64 \
-                    " %d\n", (uint64_t)res.qubit_count, \
-                    (uint64_t)res.cycle_count, (uint64_t)res.gate_count, \
-                    (uint64_t)res.cycle_count_decomp, \
-                    (uint64_t)res.gate_count_decomp, \
+                    " %d\n", (uint64_t) res.qubit_count, \
+                    (uint64_t) res.cycle_count, (uint64_t) res.gate_count, \
+                    (uint64_t) res.cycle_count_decomp, \
+                    (uint64_t) res.gate_count_decomp, \
                     (cur_sol->tot_profit == exact) ? 1 : 0);
             fclose(stream);
             return cur_sol;

@@ -4,11 +4,7 @@
  * =============================================================================
  */
 
-#if defined(_WIN32) || defined(_WIN64)
-    #include "..\include\qtgcount.h"
-#else
-    #include "../../include/simulation/qtgcount.h"
-#endif
+#include "simulation/qtgcount.h"
 
 /* 
  * =============================================================================
@@ -19,8 +15,8 @@
 #define TRUE                    1
 #define FALSE                   0
 
-#define MIN(a,b)                ((a) < (b) ? (a) : (b))
-#define MAX(a,b)                ((a) > (b) ? (a) : (b))
+#define MIN(a, b)                ((a) < (b) ? (a) : (b))
+#define MAX(a, b)                ((a) > (b) ? (a) : (b))
 #define SWAP(a, b, T)           do { register T q; q = *(a); *(a) = *(b); \
                                 *(b) = q; } while(0)
 
@@ -30,7 +26,7 @@
  * =============================================================================
  */
 
-const char*
+const char *
 get_qft_name(qft_t method) {
     switch (method) {
         case COPPERSMITH: {
@@ -43,7 +39,7 @@ get_qft_name(qft_t method) {
     }
 }
 
-const char*
+const char *
 get_add_name(add_t method) {
     switch (method) {
         case DRAPER: {
@@ -55,7 +51,7 @@ get_add_name(add_t method) {
         }
 
         case COPYDIRECT: {
-            return "Copy&Direct"
+            return "Copy&Direct";
         }
 
         default: {
@@ -64,7 +60,7 @@ get_add_name(add_t method) {
     }
 }
 
-const char*
+const char *
 get_mc_name(mc_t method) {
     switch (method) {
         case TOFFOLI: {
@@ -118,17 +114,17 @@ lso(num_t number) {
  */
 
 bit_t
-path_reg_size(const knapsack_t* k) {
+path_reg_size(const knapsack_t *k) {
     return k->size;
 }
 
 bit_t
-cost_reg_size(const knapsack_t* k) {
+cost_reg_size(const knapsack_t *k) {
     return num_bits(k->capacity);
 }
 
 bit_t
-profit_reg_size(const knapsack_t* k, ub_t method) {
+profit_reg_size(const knapsack_t *k, ub_t method) {
     return num_bits(get_ub(k, method));
 }
 
@@ -150,7 +146,7 @@ count_t
 cycle_count_qft(bit_t reg_size, qft_t method, bool_t tof_decomp) {
     switch (method) {
         case COPPERSMITH: { /* original QFT version without swaps */
-            return 2 * reg_size - 1; 
+            return 2 * reg_size - 1;
         }
 
         default: {
@@ -164,7 +160,7 @@ count_t
 gate_count_qft(bit_t reg_size, qft_t method, bool_t tof_decomp) {
     switch (method) {
         case COPPERSMITH: { /* original QFT version without swaps */
-            return reg_size * (reg_size + 1) / 2; 
+            return reg_size * (reg_size + 1) / 2;
         }
 
         default: {
@@ -178,11 +174,11 @@ bit_t
 anc_count_add(bit_t reg_size, num_t summand, add_t method) {
     switch (method) {
         case DRAPER: { /* rotational gates are controlled on summands bits */
-            return num_bits(summand); 
+            return num_bits(summand);
         }
 
         case DIRECT: { /* rotational gates are directly implemented */
-            return 0; 
+            return 0;
         }
 
         case COPYDIRECT: {
@@ -202,7 +198,7 @@ cycle_count_add(bit_t reg_size, num_t summand, add_t method, \
     bit_t summand_size = num_bits(summand);
     switch (method) {
         case DRAPER: { /* rotational gates are controlled on summands bits */
-            return reg_size; 
+            return reg_size;
         }
 
         case DIRECT: { /* rotational gates are directly implemented */
@@ -214,7 +210,7 @@ cycle_count_add(bit_t reg_size, num_t summand, add_t method, \
         }
 
         case COPYDIRECT: {
-            return 2 * num_bits(reg_size - LSO(summand) - 1) + 1;
+            return 2 * num_bits(reg_size - lso(summand) - 1) + 1;
         }
 
         default: {
@@ -324,7 +320,7 @@ cycle_count_comp(bit_t reg_size, num_t to_compare, mc_t method, \
         /* check whether being strictly larger than (to_compare - 1) */
         cycle_count = 0;
         for (bit_t i = 0; i < num_bits(to_compare); ++i) {
-            if (!(((to_compare - 1)>> i) & 1)) {
+            if (!(((to_compare - 1) >> i) & 1)) {
                 /* invoke multi-controlled single-qubit gate if bit is a zero */
                 cycle_count += cycle_count_mc(reg_size - i, method, tof_decomp);
             }
@@ -351,8 +347,8 @@ gate_count_comp(bit_t reg_size, num_t to_compare, mc_t method, \
         /* check whether being strictly larger than (to_compare - 1) */
         gate_count = 0;
         for (bit_t i = 0; i < num_bits(to_compare); ++i) {
-            if (!(((to_compare - 1)>> i) & 1)) {
-            /* invoke multi-controlled single-qubit gate if bit is a zero */
+            if (!(((to_compare - 1) >> i) & 1)) {
+                /* invoke multi-controlled single-qubit gate if bit is a zero */
                 gate_count += gate_count_mc(reg_size - i, method, tof_decomp);
             }
         }
@@ -370,7 +366,7 @@ gate_count_comp(bit_t reg_size, num_t to_compare, mc_t method, \
 }
 
 bit_t
-qubit_count_qtg(const knapsack_t* k, ub_t method_ub, qft_t method_qft, \
+qubit_count_qtg(const knapsack_t *k, ub_t method_ub, qft_t method_qft, \
                 add_t method_add, mc_t method_mc) {
     bit_t reg_a = path_reg_size(k);
     bit_t reg_b = cost_reg_size(k);
@@ -383,7 +379,7 @@ qubit_count_qtg(const knapsack_t* k, ub_t method_ub, qft_t method_qft, \
 }
 
 count_t
-cycle_count_qtg(const knapsack_t* k, ub_t method_ub, qft_t method_qft, \
+cycle_count_qtg(const knapsack_t *k, ub_t method_ub, qft_t method_qft, \
                 add_t method_add, mc_t method_mc, bool_t tof_decomp) {
     bit_t reg_b = cost_reg_size(k);
     bit_t reg_c = profit_reg_size(k, method_ub);
@@ -471,7 +467,7 @@ cycle_count_qtg(const knapsack_t* k, ub_t method_ub, qft_t method_qft, \
          * length.
          */
         first_block = MAX(profit_qft + first_add, first_comp + 2 * cost_qft) \
-                      + first_sub;
+ + first_sub;
     } else if (profit_qft <= first_comp + cost_qft + first_sub) {
         /* 
          * QFT on profit register is executed partially during subtraction on
@@ -483,7 +479,7 @@ cycle_count_qtg(const knapsack_t* k, ub_t method_ub, qft_t method_qft, \
          * order, resulting in adding all their lengths separately.
          */
         first_block = first_comp + cost_qft + first_sub \
-                      + MAX(first_add, cost_qft);
+ + MAX(first_add, cost_qft);
     } else {
         /* 
          * QFT on the profit register requires more cycles than first
@@ -494,10 +490,10 @@ cycle_count_qtg(const knapsack_t* k, ub_t method_ub, qft_t method_qft, \
          * register's circuits rather than their sum gives the correct result. 
          */
         first_block = MAX(profit_qft + first_add, first_comp + first_sub \
-                                                  + 2 * cost_qft);
+ + 2 * cost_qft);
     }
 
-first_block_copy:
+    first_block_copy:
     if (reg_b > reg_c) {
         first_block = first_comp + cost_qft + profit_qft;
     } else {
@@ -647,7 +643,7 @@ first_block_copy:
 }
 
 count_t
-gate_count_qtg(const knapsack_t* k, ub_t method_ub, qft_t method_qft, \
+gate_count_qtg(const knapsack_t *k, ub_t method_ub, qft_t method_qft, \
                add_t method_add, mc_t method_mc, bool_t tof_decomp) {
     bit_t reg_b = cost_reg_size(k);
     bit_t reg_c = profit_reg_size(k, method_ub);
@@ -665,10 +661,10 @@ gate_count_qtg(const knapsack_t* k, ub_t method_ub, qft_t method_qft, \
         case DRAPER: { /* rotational gates are controlled on summands bits */
             sub_gates += 5 * gate_count_add(reg_b, max_cost(k), DRAPER, \
                                             tof_decomp) \
-                         * (((count_t)k->size) - 1);
+ * (((count_t) k->size) - 1);
             add_gates += 5 * gate_count_add(reg_c, max_profit(k), DRAPER, \
                                             tof_decomp) \
-                         * ((count_t)(k->size));
+ * ((count_t) (k->size));
             /* 
              * All addition and subtraction cycles have the same length. Since
              * the last subtraction is omitted, the number of subtraction
@@ -714,16 +710,16 @@ gate_count_qtg(const knapsack_t* k, ub_t method_ub, qft_t method_qft, \
         }
     }
     return comp_gates /* all comparison gates */ \
-           + 2 * gate_count_qft(reg_b, method_qft, tof_decomp) \
-             * ((count_t)(k->size) - 1) /* (un)QFT-ing cost register */ \
-           + sub_gates /* all subtraction gates */ 
+ + 2 * gate_count_qft(reg_b, method_qft, tof_decomp) \
+ * ((count_t) (k->size) - 1) /* (un)QFT-ing cost register */ \
+ + sub_gates /* all subtraction gates */
            /* (un)QFT-ing profit register */ \
-           + 2 * gate_count_qft(reg_c, method_qft, tof_decomp) \
-           + add_gates; // all addition gates
+ + 2 * gate_count_qft(reg_c, method_qft, tof_decomp) \
+ + add_gates; // all addition gates
 }
 
 void
-print_qtg_counts(const knapsack_t* k, ub_t method_ub, qft_t method_qft,
+print_qtg_counts(const knapsack_t *k, ub_t method_ub, qft_t method_qft,
                  add_t method_add, mc_t method_mc, bool_t tof_decomp) {
     printf("The QTG ressources are estimated with the following methods:\n");
     printf("Upper bound on the total profit (for profit register size): %s\n", \

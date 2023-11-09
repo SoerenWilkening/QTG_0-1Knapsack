@@ -1,4 +1,4 @@
-from .bindings import Knapsack
+from .bindings import Knapsack, Item, ItemVector
 import os
 
 
@@ -15,10 +15,11 @@ def load_instance(file_path: str):
     with open(file_path, "r") as f:
         lines = f.readlines()
         size = int(lines[0])
-        items = []
+        items = ItemVector()
         for line in lines[1:-1]:
             profit, cost = line.split(" ")
-            items.append((int(profit), int(cost)))
+            items.append(Item(int(profit), int(cost)))
         capacity = int(lines[-1])
 
-        return Knapsack(size, items, capacity, os.path.basename(file_path))
+        knapsack = Knapsack(size, capacity, items, os.path.basename(file_path))
+        return knapsack

@@ -6,7 +6,7 @@ sys.path.append(os.path.abspath('../pysrc'))
 
 from qtg.bindings import jooken_generate
 from qtg.utils import save_instance, load_instance
-
+#n_1600_c_10000000000_g_2_f_0.3_eps_1e-05_s_300
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("-n", type=int, default=10)

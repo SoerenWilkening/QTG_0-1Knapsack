@@ -20,16 +20,6 @@
 
 /* 
  * =============================================================================
- *                            C++ check
- * =============================================================================
- */
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-/* 
- * =============================================================================
  *                            type definitions
  * =============================================================================
  */
@@ -640,9 +630,5 @@ num_t get_ub(const knapsack_t*, ub_t);
  * Parameter:   Pointer to knapsack whose state should be printed.
  */
 void print_knapsack(const knapsack_t*);
-
-#ifdef __cplusplus
-}
-#endif
 
 #endif

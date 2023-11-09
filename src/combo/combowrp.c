@@ -29,8 +29,7 @@
  * =============================================================================
  */
 
-num_t
-combo_wrap(const knapsack_t *k, bit_t first_item, num_t capacity, bool_t def, \
+num_t combo_wrap(const knapsack_t *k, bit_t first_item, num_t capacity, bool_t def, \
            bool_t relx, bool_t exe_combo, bool_t save) {
 
     num_t opt_sol;
@@ -47,15 +46,15 @@ combo_wrap(const knapsack_t *k, bit_t first_item, num_t capacity, bool_t def, \
         return opt_sol;
     }
 
-    item *f;
-    item *l;
+    combo_item *f;
+    combo_item *l;
 
     /* Set lower and upper bound */
-    // num_t lbi = int_greedy(&k_new, RATIO);
-    // num_t ubi = frac_greedy(k, RATIO);
+    // capacity_type lbi = int_greedy(&k_new, RATIO);
+    // capacity_type ubi = frac_greedy(k, RATIO);
 
     /* conversation of item_t structure to Combo's item structure */
-    item items[k->size - first_item];
+    combo_item items[k->size - first_item];
     for (size_t i = 0; i < k_copy.size; ++i) {
         items[i].p = k_copy.items[i].profit;
         items[i].w = k_copy.items[i].cost;

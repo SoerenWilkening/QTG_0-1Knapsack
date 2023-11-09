@@ -23,25 +23,25 @@ extern "C" {
 				 type declarations
    ====================================================================== */
 
-typedef int           boolean; /* logical variable         */
-typedef int           ntype;   /* number of states/items   */
-typedef long          itype;   /* item profits and weights */
-typedef long          stype;   /* sum of profit or weight  */
+typedef int boolean; /* logical variable         */
+typedef int ntype;   /* number of states/items   */
+typedef long itype;   /* item profits and weights */
+typedef long stype;   /* sum of profit or weight  */
 
 /* item record */
 typedef struct {
-  itype   p;              /* profit                  */
-  itype   w;              /* weight                  */
-  boolean x;              /* solution variable       */
-} item;
+    itype p;              /* profit                  */
+    itype w;              /* weight                  */
+    boolean x;              /* solution variable       */
+} combo_item;
 
 /* ======================================================================
 			      forward declarations
    ====================================================================== */
 
-stype combo(item *f, item *l, stype c, stype lb, stype ub,
-                   boolean def, boolean relx);
-/* f,l : first, last item                                               */
+stype combo(combo_item *f, combo_item *l, stype c, stype lb, stype ub,
+            boolean def, boolean relx);
+/* f,l : first, last combo_item                                               */
 /* c   : capacity of knapsack                                           */
 /* lb  : lower bound. Solution vector is only updated if better z found */
 /* ub  : upper bound. When upper bound is reached terminate immediately */
@@ -49,8 +49,8 @@ stype combo(item *f, item *l, stype c, stype lb, stype ub,
 /* relx: relaxed problem is solved (no more relaxations will be made)   */
 /* returns the objective value of the problem                           */
 
+
 #ifdef __cplusplus
 }
 #endif
-
 #endif

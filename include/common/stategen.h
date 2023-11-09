@@ -11,16 +11,6 @@
 
 /* 
  * =============================================================================
- *                            C++ check
- * =============================================================================
- */
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-/* 
- * =============================================================================
  *                            type definitions
  * =============================================================================
  */
@@ -134,9 +124,5 @@ double branch_prob(const knapsack_t*, bit_t, size_t, bool_t, branch_t, mpz_t);
  * Side Effect:     Allocates dynamically; pointer should eventually be freed. 
  */
 node_t* qtg(const knapsack_t*, num_t, num_t, size_t, branch_t, mpz_t, size_t*);
-
-#ifdef __cplusplus
-}
-#endif
 
 #endif

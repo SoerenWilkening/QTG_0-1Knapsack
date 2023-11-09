@@ -11,16 +11,6 @@
 
 /* 
  * =============================================================================
- *                            C++ check
- * =============================================================================
- */
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-/* 
- * =============================================================================
  *                            type definitions
  * =============================================================================
  */
@@ -121,7 +111,7 @@ bit_t num_bits(num_t);
  * Parameter:	Number whose least significant one should be evaluated.
  * Returns:		Least significant one of the input number.
  */
-bit_t lso(num_t) {
+bit_t lso(num_t);
 
 /* 
  * =============================================================================
@@ -393,9 +383,5 @@ count_t gate_count_qtg(const knapsack_t*, ub_t, qft_t, add_t, mc_t, bool_t);
  *      parameter6: Whether toffoli gates should be decomposed or not.
  */
 void print_qtg_counts(const knapsack_t*, ub_t, qft_t, add_t, mc_t, bool_t);
-
-#ifdef __cplusplus
-}
-#endif
 
 #endif

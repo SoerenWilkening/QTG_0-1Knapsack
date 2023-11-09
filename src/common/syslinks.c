@@ -18,10 +18,10 @@
 
 uint8_t
 path_sep() {
-	return '\\';
+    return '\\';
 }
 
-/* 
+/*
  * =============================================================================
  *                            Windows: file exists
  * =============================================================================
@@ -31,10 +31,10 @@ uint8_t
 file_exists(const char* filename) {
     DWORD file_att = GetFileAttributes(filename);
     return file_att != INVALID_FILE_ATTRIBUTES && \
-    	   !(file_att & FILE_ATTRIBUTE_DIRECTORY);
+           !(file_att & FILE_ATTRIBUTE_DIRECTORY);
 }
 
-/* 
+/*
  * =============================================================================
  *                            Windows: create directory
  * =============================================================================
@@ -42,7 +42,7 @@ file_exists(const char* filename) {
 
 uint8_t
 create_dir(const char* dirname) {
-	return _mkdir(dirname);
+    return _mkdir(dirname);
 }
 
 /* 
@@ -112,7 +112,7 @@ rdmd(const char* executable, size_t argc, char* argv[], uint64_t* mem_count, \
 
 uint8_t
 path_sep() {
-	return '/';
+    return '/';
 }
 
 /* 
@@ -122,8 +122,8 @@ path_sep() {
  */
 
 uint8_t
-file_exists(const char* filename) {
-	return !access(filename, F_OK);
+file_exists(const char *filename) {
+    return !access(filename, F_OK);
 }
 
 /* 
@@ -133,8 +133,8 @@ file_exists(const char* filename) {
  */
 
 uint8_t
-create_dir(const char* dirname) {
-	return !mkdir(dirname, 0777);
+create_dir(const char *dirname) {
+    return !mkdir(dirname, 0777);
 }
 
 /* 
@@ -147,9 +147,9 @@ uint64_t
 rdtsc() {
     uint32_t lo, hi;
     __asm__ __volatile__ (
-    	"rdtsc" : "=a" (lo), "=d" (hi)
-    );
-    return ((uint64_t)hi << 32) | lo;
+            "rdtsc" : "=a" (lo), "=d" (hi)
+            );
+    return ((uint64_t) hi << 32) | lo;
 }
 
 /* 
@@ -159,8 +159,8 @@ rdtsc() {
  */
 
 void
-rdmd(const char* executable, size_t argc, char* argv[], uint64_t* mem_count, \
-     uint64_t* cycle_count) {
+rdmd(const char *executable, size_t argc, char *argv[], uint64_t *mem_count, \
+     uint64_t *cycle_count) {
     char arg_str[256];
     size_t offset = 0;
     for (size_t i = 0; i < argc; ++i) {
@@ -173,7 +173,7 @@ rdmd(const char* executable, size_t argc, char* argv[], uint64_t* mem_count, \
              "2>&1)\" | grep \"maximum resident set size\\|cycles elapsed\"", \
              executable, arg_str);
 
-    FILE* pipe = popen(command, "r");
+    FILE *pipe = popen(command, "r");
     if (!pipe) {
         printf("Error opening pipe!\n");
         return;
