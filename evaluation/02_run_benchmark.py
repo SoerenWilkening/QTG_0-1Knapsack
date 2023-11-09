@@ -57,8 +57,8 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("-i", "--instances", type=str, required=False)
     args = parser.parse_args()
-    for instance_name in os.listdir(args.instances):
+    for instance_name in sorted(os.listdir(args.instances)):
         if not instance_name.endswith(".knap"):
             continue
-
+        print("Solving instance", instance_name)
         benchmark.run(run_benchmark, os.path.join(args.instances, instance_name))
