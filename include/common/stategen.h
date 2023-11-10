@@ -7,7 +7,7 @@
  * =============================================================================
  */
 
-#include "combo/combowrp.h"
+#include "common/knapsack.h"
 
 #ifdef __cplusplus
 extern "C" {

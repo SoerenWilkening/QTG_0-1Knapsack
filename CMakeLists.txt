@@ -27,4 +27,3 @@ find_package(GSL REQUIRED)
 CPMAddPackage("gh:pybind/pybind11@2.10.0")  # pybind11, essential
 
 add_subdirectory(src)
-add_subdirectory(apps)

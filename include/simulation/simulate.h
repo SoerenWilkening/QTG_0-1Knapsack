@@ -96,40 +96,6 @@ path_t *ampl_amp(const node_t[], size_t, size_t, const gsl_rng *);
 path_t *q_search(const node_t[], size_t, size_t *, size_t *, size_t, \
                  const gsl_rng *);
 
-/* 
- * =============================================================================
- *                            QMaxSearch
- * =============================================================================
- */
-
-/*
- * Function:        q_max_search
- * -----------------------------
- * Description:     This funtion simulates the application of the QMaxSearch
- *                  algorithm to a given knapsack instance. The routine starts
- *                  with sorting the input knapsack in-place and then calculates
- *                  its integer greedy solution, obtaining the first threshold.
- *                  It also calculates its optimal total profit via Combo.
- *                  Then, the application of the QTG, and subsequently of the
- *                  QSearch is simulated as long as an improved state (path) is
- *                  found. After each application of QSearch, the found state's
- *                  total profit serves as an updated threshold, determining
- *                  the parameter for the next application of QSearch. As soon
- *                  as no improved state is found by QSearch, the entire routine
- *                  terminates and returns the last found state.
- * Parameters:
- *      parameter1: Pointer to knapsack instance that should be considered.
- *      parameter2: Bias towards certain branch.
- *      parameter3: Method that should be used for branching.
- *      parameter4: Specifies how often the QTG should be applied in total per
- *                  QSearch subroutine.
- *      parameter5: Pointer to GSL's random number generator.
- * Returns:         Index of the state obtained by the simulated measurement.
- * Side Effect:     Allocates dynamically; pointer should eventually be freed.
- */
-path_t *q_max_search(knapsack_t *, size_t, branch_t, size_t, const gsl_rng *);
-
-
 #ifdef __cplusplus
 }
 #endif

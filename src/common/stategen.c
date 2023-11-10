@@ -5,6 +5,7 @@
  */
 
 #include "common/stategen.h"
+#include "combo/combowrp.h"
 
 /* 
  * =============================================================================
@@ -148,9 +149,7 @@ qtg(const knapsack_t *k, num_t threshold, num_t exact, size_t bias, \
              * for the left subtree, i.e., where the current item is not
              * included into the knapsack.
              */
-            left_ub = combo_data(k, i + 1, parent[j].path.remain_cost, FALSE, \
-                                 FALSE, TRUE) \
- + parent[j].path.tot_profit;
+            left_ub = combo_wrap(k, i + 1, parent[j].path.remain_cost, FALSE, FALSE) + parent[j].path.tot_profit;
             if (left_ub > threshold) {
                 /*
                  * The left subtree has at least one path with objective value
@@ -182,11 +181,9 @@ qtg(const knapsack_t *k, num_t threshold, num_t exact, size_t bias, \
                      * subtree has to be calculated, too. Here, the current item
                      * is considered to be included into the knapsack.
                      */
-                    right_ub = combo_data(k, i + 1, parent[j].path.remain_cost \
- - k->items[i].cost, FALSE, FALSE, \
-                                          TRUE) \
- + parent[j].path.tot_profit \
- + k->items[i].profit;
+                    right_ub = combo_wrap(k, i + 1, parent[j].path.remain_cost - k->items[i].cost, FALSE, FALSE)
+                               + parent[j].path.tot_profit
+                               + k->items[i].profit;
                     if (right_ub > threshold) {
                         /*
                          * The right subtree has at least one path with
