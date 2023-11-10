@@ -18,17 +18,23 @@
 #include <gsl/gsl_rng.h>
 #include "syslinks.h"
 
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+
 /* 
  * =============================================================================
  *                            type definitions
  * =============================================================================
  */
 
-typedef int         bool_t;             /* logical variable         */
-typedef int         bit_t;              /* bit/qubit counting       */
-typedef long        num_t;              /* large integers           */
-typedef double      ratio_t;            /* ratios                   */
-typedef uint32_t    count_t;            /* gate, cycle counting     */
+typedef int bool_t;             /* logical variable         */
+typedef int bit_t;              /* bit/qubit counting       */
+typedef long long num_t;              /* large integers           */
+typedef double ratio_t;            /* ratios                   */
+typedef uint32_t count_t;            /* gate, cycle counting     */
 
 /*
  * Struct:          item_t
@@ -40,8 +46,9 @@ typedef uint32_t    count_t;            /* gate, cycle counting     */
  *      included:   Marks whether item is included into knapsack.
  */
 typedef struct item {
-	num_t profit;
-	num_t cost;
+    num_t idx;
+    num_t profit;
+    num_t cost;
     bool_t included;
 } item_t;
 
@@ -58,12 +65,12 @@ typedef struct item {
  *      name:           Instance name.
  */
 typedef struct knapsack {
-	bit_t size;
-	num_t capacity;
-	num_t remain_cost;
-	num_t tot_profit;
-	item_t* items;
-    char* name;
+    bit_t size;
+    num_t capacity;
+    num_t remain_cost;
+    num_t tot_profit;
+    item_t *items;
+    char *name;
 } knapsack_t;
 
 /*
@@ -116,7 +123,7 @@ typedef enum category {
  * Parameter:   Sorting method.
  * Returns:     Sorting method's name as a string.
  */
-const char* get_sort_name(sort_t);
+const char *get_sort_name(sort_t);
 
 /*
  * Function:    get_lb_name
@@ -125,7 +132,7 @@ const char* get_sort_name(sort_t);
  * Parameter:   Lower bound method.
  * Returns:     Lower bound method's name as a string.
  */
-const char* get_lb_name(lb_t);
+const char *get_lb_name(lb_t);
 
 /*
  * Function:    get_ub_name
@@ -134,7 +141,7 @@ const char* get_lb_name(lb_t);
  * Parameter:   Upper bound method.
  * Returns:     Upper bound method's name as a string.
  */
-const char* get_ub_name(ub_t);
+const char *get_ub_name(ub_t);
 
 /*
  * Function:    get_category_name
@@ -144,7 +151,7 @@ const char* get_ub_name(ub_t);
  * Parameter:   Category.
  * Returns:     Category's name as a string.
  */
-const char* get_category_name(category_t);
+const char *get_category_name(category_t);
 
 /* 
  * =============================================================================
@@ -178,7 +185,7 @@ bit_t num_digits(num_t);
  * Returns:			Pointer to the allocated item.
  * Side Effect:		Allocates dynamically; pointer should eventually be freed.
  */
-item_t* create_item(num_t, num_t);
+item_t *create_item(num_t, num_t);
 
 /*
  * Function:    free_path
@@ -187,7 +194,7 @@ item_t* create_item(num_t, num_t);
  *              its vector.
  * Parameter:   Pointer to the path that should be freed.
  */
-void free_path(path_t*);
+void free_path(path_t *);
 
 /*
  * Function: 		create_empty_knapsack
@@ -203,7 +210,7 @@ void free_path(path_t*);
  *		- Also allocates items and include statements dynamically; their
  *        pointers should also eventually be freed.
  */
-knapsack_t* create_empty_knapsack(bit_t, num_t);
+knapsack_t *create_empty_knapsack(bit_t, num_t);
 
 /*
  * Function:        pisinger_filename
@@ -252,7 +259,7 @@ void jooken_filename(bit_t, num_t, bit_t, double, double, num_t, char[], \
  *      - Also allocates items and include statements dynamically; their
  *        pointers should also eventually be freed.
  */
-knapsack_t* create_pisinger_knapsack(char*);
+knapsack_t *create_pisinger_knapsack(char *);
 
 /*
  * Function:        create_jooken_knapsack
@@ -268,7 +275,7 @@ knapsack_t* create_pisinger_knapsack(char*);
  *      - Also allocates items and include statements dynamically; their
  *        pointers should also eventually be freed.
  */
-knapsack_t* create_jooken_knapsack(char*);
+knapsack_t *create_jooken_knapsack(char *);
 
 /*
  * Function:    copy_knapsack
@@ -282,7 +289,7 @@ knapsack_t* create_jooken_knapsack(char*);
  *      - Also allocates items and include statements dynamically; their
  *        pointers should also eventually be freed.
  */
-knapsack_t* copy_knapsack(const knapsack_t*);
+knapsack_t *copy_knapsack(const knapsack_t *);
 
 /*
  * Function: 		assign_item_values
@@ -293,7 +300,7 @@ knapsack_t* copy_knapsack(const knapsack_t*);
  *		parameter2:	Array of costs that should be assigned to the items.
  *		parameter3: Array of profits that should be assigned to the items.
  */
-void assign_item_values(knapsack_t*, num_t[], num_t[]);
+void assign_item_values(knapsack_t *, num_t[], num_t[]);
 
 /*
  * Function:	free_knapsack
@@ -302,7 +309,7 @@ void assign_item_values(knapsack_t*, num_t[], num_t[]);
  *              with its item array.
  * Parameter:	Pointer to the knapsack that should be freed.
  */
-void free_knapsack(knapsack_t*);
+void free_knapsack(knapsack_t *);
 
 /* 
  * =============================================================================
@@ -310,21 +317,21 @@ void free_knapsack(knapsack_t*);
  * =============================================================================
  */
 
- /*
- * Function:        put_item
- * -------------------------
- * Description:     This function puts an item into a knapsack, lowering the
- *                  remaining cost and increasing the total profit. If including
- *                  the item was successful, one (true) is returned. If the item
- *                  is already included or the remaining cost does not allow to
- *                  include it, nothing happens and zero (false) is returned
- *                  instead.
- * Parameters:
- *      parameter1: Pointer to knapsack in which the item should be included.
- *      parameter2: Index of item that should be included into knapsack.
- * Returns:         Whether including the item was successful or not.
- */
-bool_t put_item(knapsack_t*, bit_t);
+/*
+* Function:        put_item
+* -------------------------
+* Description:     This function puts an item into a knapsack, lowering the
+*                  remaining cost and increasing the total profit. If including
+*                  the item was successful, one (true) is returned. If the item
+*                  is already included or the remaining cost does not allow to
+*                  include it, nothing happens and zero (false) is returned
+*                  instead.
+* Parameters:
+*      parameter1: Pointer to knapsack in which the item should be included.
+*      parameter2: Index of item that should be included into knapsack.
+* Returns:         Whether including the item was successful or not.
+*/
+bool_t put_item(knapsack_t *, bit_t);
 
 /*
  * Function:        remove_item
@@ -339,7 +346,7 @@ bool_t put_item(knapsack_t*, bit_t);
  *      parameter2: Index of item that should be excluded from knapsack.
  * Returns:         Whether removing the item was successful or not.
  */
-bool_t remove_item(knapsack_t*, bit_t);
+bool_t remove_item(knapsack_t *, bit_t);
 
 /*
  * Function:    remove_all_items
@@ -348,7 +355,7 @@ bool_t remove_item(knapsack_t*, bit_t);
  *              remaining cost and total profit.
  * Parameters:  Pointer to knapsack whose items should be removed.
  */
-void remove_all_items(knapsack_t*);
+void remove_all_items(knapsack_t *);
 
 /*
  * Function:        swap_knapsack_items
@@ -359,7 +366,7 @@ void remove_all_items(knapsack_t*);
  *      parameter1: Index of first item in knapsack.
  *      parameter2: Index of second item in knapsack.
  */
-void swap_knapsack_items(knapsack_t*, bit_t, bit_t);
+void swap_knapsack_items(knapsack_t *, bit_t, bit_t);
 
 /*
  * Function:        knapsack_partition
@@ -377,7 +384,7 @@ void swap_knapsack_items(knapsack_t*, bit_t, bit_t);
  *      parameter4: Sorting method that should be used for the partition.
  * Returns:         Index of pivot element after sorting.
  */
-int32_t knapsack_partition(knapsack_t*, int32_t, int32_t, sort_t);
+int32_t knapsack_partition(knapsack_t *, int32_t, int32_t, sort_t);
 
 /*
  * Function:        knapsack_quicksort
@@ -394,7 +401,7 @@ int32_t knapsack_partition(knapsack_t*, int32_t, int32_t, sort_t);
  *                  initial pivot element.
  *      parameter4: Method that should be used for the sorting.
  */
-void knapsack_quicksort(knapsack_t*, int32_t, int32_t, sort_t);
+void knapsack_quicksort(knapsack_t *, int32_t, int32_t, sort_t);
 
 /*
  * Function:        sort_knapsack
@@ -407,7 +414,7 @@ void knapsack_quicksort(knapsack_t*, int32_t, int32_t, sort_t);
  *      parameter1: Pointer to knapsack whose items should be sorted.
  *      parameter2: Method that should be used for the sorting.
  */
-void sort_knapsack(knapsack_t*, sort_t);
+void sort_knapsack(knapsack_t *, sort_t);
 
 /*
  * Function:    apply_int_greedy
@@ -418,7 +425,7 @@ void sort_knapsack(knapsack_t*, sort_t);
  *              knapsack items in advance.
  * Parameter:   Pointer to knapsack whose items should be included.
  */
-void apply_int_greedy(knapsack_t*);
+void apply_int_greedy(knapsack_t *);
 
 /* 
  * =============================================================================
@@ -436,7 +443,7 @@ void apply_int_greedy(knapsack_t*);
  *                  should be translated into a bit string.
  *      parameter2: Bit string which should carry the current item assignment.
  */
-void bit_rep(const knapsack_t*, mpz_t);
+void bit_rep(const knapsack_t *, mpz_t);
 
 /*
  * Function:    path_rep
@@ -447,7 +454,7 @@ void bit_rep(const knapsack_t*, mpz_t);
  * Returns:     Pointer to path representing the knapsack.
  * Side Effect: Allocates dynamically; pointer should eventually be freed.
  */
-path_t* path_rep(const knapsack_t*);
+path_t *path_rep(const knapsack_t *);
 
 /*
  * Function:    tot_cost
@@ -457,7 +464,7 @@ path_t* path_rep(const knapsack_t*);
  *              calculated.
  * Returns:     Total cost of all knapsack items.
  */
-num_t tot_cost(const knapsack_t*);
+num_t tot_cost(const knapsack_t *);
 
 /*
  * Function:    max_cost
@@ -467,7 +474,7 @@ num_t tot_cost(const knapsack_t*);
  *              calculated.
  * Returns:     Maximum item cost among the knapsack.
  */
-num_t max_cost(const knapsack_t*);
+num_t max_cost(const knapsack_t *);
 
 /*
  * Function:    min_cost
@@ -477,7 +484,7 @@ num_t max_cost(const knapsack_t*);
  *              calculated.
  * Returns:     Minimum item cost among the knapsack.
  */
-num_t min_cost(const knapsack_t*);
+num_t min_cost(const knapsack_t *);
 
 /*
  * Function:    max_profit
@@ -487,7 +494,7 @@ num_t min_cost(const knapsack_t*);
  *              calculated.
  * Returns:     Maximum item profit among the knapsack.
  */
-num_t max_profit(const knapsack_t*);
+num_t max_profit(const knapsack_t *);
 
 /*
  * Function:    min_profit
@@ -497,7 +504,7 @@ num_t max_profit(const knapsack_t*);
  *              calculated.
  * Returns:     Minimum item profit among the knapsack.
  */
-num_t min_profit(const knapsack_t*);
+num_t min_profit(const knapsack_t *);
 
 /*
  * Function:    max_ratio
@@ -508,7 +515,7 @@ num_t min_profit(const knapsack_t*);
  *              calculated.
  * Returns:     Maximum item ratio among the knapsack.
  */
-ratio_t max_ratio(const knapsack_t*);
+ratio_t max_ratio(const knapsack_t *);
 
 /*
  * Function:    min_ratio
@@ -519,7 +526,7 @@ ratio_t max_ratio(const knapsack_t*);
  *              calculated.
  * Returns:     Minimum item ratio among the knapsack.
  */
-ratio_t min_ratio(const knapsack_t*);
+ratio_t min_ratio(const knapsack_t *);
 
 /*
  * Function:    profit_sum
@@ -529,7 +536,7 @@ ratio_t min_ratio(const knapsack_t*);
  *              calculated.
  * Returns:     Sum of all items' profit.
  */
-num_t profit_sum(const knapsack_t*);
+num_t profit_sum(const knapsack_t *);
 
 /*
  * Function:    cost_sum
@@ -539,7 +546,7 @@ num_t profit_sum(const knapsack_t*);
  *              calculated.
  * Returns:     Sum of all items' cost.
  */
-num_t cost_sum(const knapsack_t*);
+num_t cost_sum(const knapsack_t *);
 
 /*
  * Function:        is_trivial
@@ -553,7 +560,7 @@ num_t cost_sum(const knapsack_t*);
  *                  saved.
  * Returns:         Whether knapsack is trivial or not.
  */
-bool_t is_trivial(const knapsack_t*, num_t*);
+bool_t is_trivial(const knapsack_t *, num_t *);
 
 /*
  * Function:    int_greedy
@@ -571,7 +578,7 @@ bool_t is_trivial(const knapsack_t*, num_t*);
  * Returns:         Total profit achieved by the integer greedy method.
  * Side Effect:     Temporarily creates a knapsack copy on the stack.
  */
-num_t int_greedy(const knapsack_t*, sort_t);
+num_t int_greedy(const knapsack_t *, sort_t);
 
 /*
  * Function:    frac_greedy
@@ -589,7 +596,7 @@ num_t int_greedy(const knapsack_t*, sort_t);
  * Returns:         Total profit achieved by the fractional greedy method.
  * Side Effect:     Temporarily creates a knapsack copy on the stack.
  */
-num_t frac_greedy(const knapsack_t*, sort_t);
+num_t frac_greedy(const knapsack_t *, sort_t);
 
 /*
  * Function:        get_lb
@@ -603,7 +610,7 @@ num_t frac_greedy(const knapsack_t*, sort_t);
  * Returns:         Lower bound to the total profit.
  * Side Effect:     May temprarily create a knapsack copy on the stack.
  */
-num_t get_lb(const knapsack_t*, lb_t);
+num_t get_lb(const knapsack_t *, lb_t);
 
 /*
  * Function:        get_ub
@@ -617,7 +624,7 @@ num_t get_lb(const knapsack_t*, lb_t);
  * Returns:         Upper bound to the total profit.
  * Side Effect:     May temporarily create a knapsack copy on the stack.
  */
-num_t get_ub(const knapsack_t*, ub_t);
+num_t get_ub(const knapsack_t *, ub_t);
 
 /*
  * Function:    print_knapsack
@@ -629,6 +636,11 @@ num_t get_ub(const knapsack_t*, ub_t);
  *              shown.
  * Parameter:   Pointer to knapsack whose state should be printed.
  */
-void print_knapsack(const knapsack_t*);
+void print_knapsack(const knapsack_t *);
+
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

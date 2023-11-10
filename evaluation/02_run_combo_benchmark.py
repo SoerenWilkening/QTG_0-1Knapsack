@@ -1,3 +1,10 @@
+"""
+This script runs the benchmark for the combo algorithm.
+Because we have to measure memory usage, we execute the solver in a different progress and
+measure RSS with GNU time. Note that in order to run this script in a conda environment you might
+have to pass a --gnu-time-cmd (namely a path to the gnu time executable).
+"""
+
 import json
 import subprocess
 import sys

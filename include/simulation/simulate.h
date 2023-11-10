@@ -10,6 +10,10 @@
 #include "common/stategen.h"
 #include "qtgcount.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /* 
  * =============================================================================
  *                            sampling
@@ -30,7 +34,7 @@
  *      parameter3: Pointer to GSL's random number generator.
  * Returns:         Index of the state obtained by the simulated measurement.
  */
-size_t sampling(const double[], size_t, const gsl_rng*);
+size_t sampling(const double[], size_t, const gsl_rng *);
 
 /* 
  * =============================================================================
@@ -57,7 +61,7 @@ size_t sampling(const double[], size_t, const gsl_rng*);
  *                  Otherwise, a null pointer.
  * Side Effect:     Allocates dynamically; pointer should eventually be freed.
  */
-path_t* ampl_amp(const node_t[], size_t, size_t, const gsl_rng*);
+path_t *ampl_amp(const node_t[], size_t, size_t, const gsl_rng *);
 
 /* 
  * =============================================================================
@@ -89,8 +93,8 @@ path_t* ampl_amp(const node_t[], size_t, size_t, const gsl_rng*);
  *                  Otherwise, a null pointer.
  * Side Effect:     Allocates dynamically; pointer should eventually be freed.
  */
-path_t* q_search(const node_t[], size_t, size_t*, size_t*, size_t, \
-                 const gsl_rng*);
+path_t *q_search(const node_t[], size_t, size_t *, size_t *, size_t, \
+                 const gsl_rng *);
 
 /* 
  * =============================================================================
@@ -123,8 +127,12 @@ path_t* q_search(const node_t[], size_t, size_t*, size_t*, size_t, \
  * Returns:         Index of the state obtained by the simulated measurement.
  * Side Effect:     Allocates dynamically; pointer should eventually be freed.
  */
-path_t* q_max_search(knapsack_t*, size_t, branch_t, size_t, const gsl_rng*);
+path_t *q_max_search(knapsack_t *, size_t, branch_t, size_t, const gsl_rng *);
 
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif
 

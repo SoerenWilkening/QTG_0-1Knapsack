@@ -9,6 +9,10 @@
 
 #include "common/knapsack.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /* 
  * =============================================================================
  *                            type definitions
@@ -62,7 +66,7 @@ typedef enum mc {
  * Parameter:   Implementation method for the QFT.
  * Returns:     QFT method's name as a string.
  */
-const char* get_qft_name(qft_t);
+const char *get_qft_name(qft_t);
 
 /*
  * Function:    get_add_name
@@ -71,7 +75,7 @@ const char* get_qft_name(qft_t);
  * Parameter:   Implementation method for the adder.
  * Returns:     Adder method's name as a string.
  */
-const char* get_add_name(add_t);
+const char *get_add_name(add_t);
 
 /*
  * Function:    get_mc_name
@@ -81,7 +85,7 @@ const char* get_add_name(add_t);
  * Parameter:   Decomposition method for the multi-control.
  * Returns:     Decomposition method's name as a string.
  */
-const char* get_mc_name(mc_t);
+const char *get_mc_name(mc_t);
 
 /* 
  * =============================================================================
@@ -128,7 +132,7 @@ bit_t lso(num_t);
  * Parameters:  Pointer to knapsack that should be considered.
  * Returns:     Size (number of qubits) of the path register.
  */
-bit_t path_reg_size(const knapsack_t*);
+bit_t path_reg_size(const knapsack_t *);
 
 /*
  * Function:    cost_reg_size
@@ -139,7 +143,7 @@ bit_t path_reg_size(const knapsack_t*);
  * Parameters:  Pointer to knapsack that should be considered.
  * Returns:     Size (number of qubits) of the cost register.
  */
-bit_t cost_reg_size(const knapsack_t*);
+bit_t cost_reg_size(const knapsack_t *);
 
 /*
  * Function: 		profit_reg_size
@@ -153,7 +157,7 @@ bit_t cost_reg_size(const knapsack_t*);
  *		parameter2: Method used for upper bounding the total profit.
  * Returns:			Size (number of qubits) of the profit register.
  */
-bit_t profit_reg_size(const knapsack_t*, ub_t);
+bit_t profit_reg_size(const knapsack_t *, ub_t);
 
 /*
  * Function: 		anc_count_qft
@@ -331,7 +335,7 @@ count_t gate_count_comp(bit_t, num_t, mc_t, bool_t, bool_t);
  *		parameter5:	Decomposition method for any multi-controls.
  * Returns:			Number of qubits of one application of the QTG.
  */
-bit_t qubit_count_qtg(const knapsack_t*, ub_t, qft_t, add_t, mc_t);
+bit_t qubit_count_qtg(const knapsack_t *, ub_t, qft_t, add_t, mc_t);
 
 /*
  * Function: 		cycle_count_qtg
@@ -349,7 +353,7 @@ bit_t qubit_count_qtg(const knapsack_t*, ub_t, qft_t, add_t, mc_t);
  *      parameter6: Whether toffoli gates should be decomposed or not.
  * Returns:			Number of cycles of one application of the QTG.
  */
-count_t cycle_count_qtg(const knapsack_t*, ub_t, qft_t, add_t, mc_t, bool_t);
+count_t cycle_count_qtg(const knapsack_t *, ub_t, qft_t, add_t, mc_t, bool_t);
 
 /*
  * Function: 		gate_count_qtg
@@ -366,7 +370,7 @@ count_t cycle_count_qtg(const knapsack_t*, ub_t, qft_t, add_t, mc_t, bool_t);
  *      parameter6: Whether toffoli gates should be decomposed or not.
  * Returns:			Number of gates of one application of the QTG.
  */
-count_t gate_count_qtg(const knapsack_t*, ub_t, qft_t, add_t, mc_t, bool_t);
+count_t gate_count_qtg(const knapsack_t *, ub_t, qft_t, add_t, mc_t, bool_t);
 
 /*
  * Function:        print-qtg_counts
@@ -382,6 +386,9 @@ count_t gate_count_qtg(const knapsack_t*, ub_t, qft_t, add_t, mc_t, bool_t);
  *      parameter5: Decomposition method for any multi-controls.
  *      parameter6: Whether toffoli gates should be decomposed or not.
  */
-void print_qtg_counts(const knapsack_t*, ub_t, qft_t, add_t, mc_t, bool_t);
+void print_qtg_counts(const knapsack_t *, ub_t, qft_t, add_t, mc_t, bool_t);
 
+#ifdef __cplusplus
+}
+#endif
 #endif

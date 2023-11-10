@@ -8,10 +8,19 @@
 #include <unistd.h>
 
 #include "combo/combo.h"
+#include "knapsack.h"
+#include "simulation/simulate.h"
 
 namespace utils {
 
     using capacity_type = long long;
+
+    struct qtg_measurement {
+        capacity_type remaining_cost;
+        capacity_type objective_value;
+        std::vector<bool> item_assignments;
+        resource_t resources;
+    };
 
     struct cpp_item {
         capacity_type profit;
@@ -60,26 +69,6 @@ namespace utils {
             return result;
         }
     };
-
-    inline void process_mem_usage(double &vm_usage, double &resident_set) {
-        vm_usage = 0.0;
-        resident_set = 0.0;
-
-        // the two fields we want
-        unsigned long vsize;
-        long rss;
-        {
-            std::string ignore;
-            std::ifstream ifs("/proc/self/stat", std::ios_base::in);
-            ifs >> ignore >> ignore >> ignore >> ignore >> ignore >> ignore >> ignore >> ignore >> ignore >> ignore
-                >> ignore >> ignore >> ignore >> ignore >> ignore >> ignore >> ignore >> ignore >> ignore >> ignore
-                >> ignore >> ignore >> vsize >> rss;
-        }
-
-        long page_size_kb = sysconf(_SC_PAGE_SIZE) / 1024; // in case x86-64 is configured to use 2MB pages
-        vm_usage = vsize / 1024.0;
-        resident_set = rss * page_size_kb;
-    }
 }
 
 #endif //UTILS_HPP
