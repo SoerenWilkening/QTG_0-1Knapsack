@@ -11,10 +11,10 @@ if __name__ == "__main__":
     print("Running")
     combo_result = execute_combo(knapsack, True, False)
 
-    for seed in range(50):
+    for seed in range(1):
         qtg_result = execute_q_max_search(knapsack,
                                           len(knapsack.items) // 4,
-                                          100 if len(knapsack.items) == 30 else 200,
+                                          1,
                                           seed)
 
         obj_check = sum(int(assign) * item.profit for assign, item in zip(qtg_result.item_assignments, knapsack.items))

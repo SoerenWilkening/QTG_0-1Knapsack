@@ -115,6 +115,8 @@ utils::qtg_measurement execute_q_max_search(const utils::cpp_knapsack &instance,
     // We have to convert the knapsack instance into the used knapsack_t type.
     auto converted_knapsack = create_empty_knapsack((int) instance.size, instance.capacity);
 
+    converted_knapsack->name = (char *) instance.name.c_str();
+
     for (int i = 0; i < instance.items.size(); i++) {
         converted_knapsack->items[i].idx = i;
         converted_knapsack->items[i].cost = instance.items[i].cost;
