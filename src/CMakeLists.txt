@@ -2,7 +2,7 @@ add_library(common common/knapsack.c common/stategen.c common/syslinks.c)
 target_include_directories(common PUBLIC ${INCLUDE_DIRECTORY})
 target_link_libraries(common PUBLIC ${GSL_LIBRARIES} ${gmp_LIBRARIES})
 
-add_library(map map/map.cpp)
+add_library(map map/map.c)
 target_include_directories(map PUBLIC ${INCLUDE_DIRECTORY})
 
 add_library(combo combo/combo.c combo/combowrp.c)
