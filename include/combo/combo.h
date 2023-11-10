@@ -24,12 +24,13 @@ extern "C" {
    ====================================================================== */
 
 typedef int boolean; /* logical variable         */
-typedef int ntype;   /* number of states/items   */
+typedef long ntype;   /* number of states/items   */
 typedef long itype;   /* item profits and weights */
 typedef long stype;   /* sum of profit or weight  */
 
 /* item record */
 typedef struct {
+    ntype idx;              /* profit                  */
     itype p;              /* profit                  */
     itype w;              /* weight                  */
     boolean x;              /* solution variable       */

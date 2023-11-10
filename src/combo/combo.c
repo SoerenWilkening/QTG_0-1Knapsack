@@ -87,7 +87,7 @@
 #define DET(a1, a2, b1, b2)    ((a1) * (prod)(b2) - (a2) * (prod)(b1))
 #define SWAP(a, b)   { register combo_item q; q = *(a); *(a) = *(b); *(b) = q; }
 #define NO(a, p)                ((int) ((p) - (a)->fitem + 1))
-#define DIFF(a, b)              ((int) (((b)+1) - (a)))
+#define DIFF(a, b)              ((long long) (((b)+1) - (a)))
 #define TIME(t)                ((double) t / 1000)
 #define MIN(a, b)               ((a) < (b) ? (a) : (b))
 #define MAX(a, b)               ((a) > (b) ? (a) : (b))
@@ -98,13 +98,12 @@
    ====================================================================== */
 
 typedef int boolean; /* logical variable         */
-typedef int ntype;   /* number of states/items   */
+typedef long ntype;   /* number of states/items   */
 typedef long itype;   /* item profits and weights */
 typedef long stype;   /* sum of profit or weight  */
 typedef unsigned long btype;   /* binary solution vector   */
 typedef double prod;    /* product of state, item   */
 
-typedef int (*funcptr)(const void *, const void *);
 
 /* item record */
 //typedef struct {
@@ -181,7 +180,7 @@ typedef struct { /* all info for solving separated problem */
 
     boolean relx;
     boolean master;
-    int coresize;
+    ntype coresize;
 } allinfo;
 
 
@@ -189,17 +188,17 @@ typedef struct { /* all info for solving separated problem */
                                 debug variables
    ====================================================================== */
 
-long simpreduced;
-long iterates;
-long maxstates;
-long coresize;
-long optsur;
-long relaxations;
-long relfeasible;
-long reltime;
-long pitested;
-long pireduced;
-long dynheur;
+long long simpreduced;
+long long iterates;
+long long maxstates;
+long long coresize;
+long long optsur;
+long long relaxations;
+long long relfeasible;
+long long reltime;
+long long pitested;
+long long pireduced;
+long long dynheur;
 
 
 /* ======================================================================
@@ -462,7 +461,7 @@ static void partsort(allinfo *a, combo_item *f, combo_item *l, stype ws, stype c
     register itype mp, mw;
     register combo_item *i, *j, *m;
     register stype wi;
-    int d;
+    stype d;
 
     d = l - f + 1;
     if (d > 1) {
@@ -520,7 +519,7 @@ static combo_item *minweights(combo_item *f, combo_item *l, stype c) {
     register itype mw;
     register combo_item *i, *j, *m;
     register stype ws;
-    int d;
+    stype d;
 
     for (;;) {
         d = l - f + 1;
@@ -571,7 +570,7 @@ static combo_item *maxprofits(combo_item *f, combo_item *l, stype z) {
     register itype mp;
     register combo_item *i, *j, *m;
     register stype ps;
-    int d;
+    stype d;
 
     for (;;) {
         d = l - f + 1;
@@ -627,7 +626,7 @@ static void sursort(combo_item *f, combo_item *l, itype sur, stype c,
     static combo_item nn;
     combo_item *l1;
     stype psum;
-    int d;
+    stype d;
 
     psum = 0;
     s = sur;

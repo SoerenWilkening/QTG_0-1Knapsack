@@ -20,11 +20,7 @@ namespace utils {
         cpp_item(capacity_type profit, capacity_type cost) : profit(profit), cost(cost) {}
 
         [[nodiscard]] inline combo_item to_combo_item() const {
-            return combo_item{
-                    .p = profit,
-                    .w = cost,
-                    .x = false
-            };
+            return combo_item{0, profit, cost, false};
         }
     };
 

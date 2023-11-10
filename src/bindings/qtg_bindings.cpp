@@ -30,12 +30,18 @@ utils::combo_measurement execute_combo(const utils::cpp_knapsack &instance, bool
     }
 
     auto combo_items = new combo_item[instance.items.size()];
+
     for (int i = 0; i < instance.items.size(); ++i) {
         combo_items[i] = instance.items[i].to_combo_item();
+        combo_items[i].idx = i;
+
+        assert(combo_items[i].p == instance.items[i].profit);
+        assert(combo_items[i].w == instance.items[i].cost);
+        assert(combo_items[i].x == false);
     }
 
     auto first_item = combo_items;
-    auto last_item = combo_items + instance.items.size() - 1;
+    auto last_item = &combo_items[instance.items.size() - 1];
 
     /* Set lower and upper bound */
     // capacity_type lbi = int_greedy(&k_new, RATIO);
@@ -46,11 +52,16 @@ utils::combo_measurement execute_combo(const utils::cpp_knapsack &instance, bool
     auto opt_sol = combo(first_item, last_item, instance.capacity, 0, 0, write_solution, relx);
     uint64_t end = rdtsc();
 
-    std::vector<bool> solution;
+    std::vector<bool> solution = std::vector<bool>(instance.items.size(), false);
 
     if (write_solution) {
-        for (int i = 0; i < instance.items.size(); ++i) {
-            solution.push_back(combo_items[i].x);
+        for (int j = 0; j < instance.items.size(); ++j) {
+            // Combo modifies the items, so we have to find the original index
+            auto i = combo_items[j].idx;
+            assert(combo_items[j].p == instance.items[i].profit);
+            assert(combo_items[j].w == instance.items[i].cost);
+
+            solution[i] = combo_items[j].x;
         }
     }
 
