@@ -98,7 +98,7 @@
    ====================================================================== */
 
 typedef int boolean; /* logical variable         */
-typedef long ntype;   /* number of states/items   */
+typedef int ntype;   /* number of states/items   */
 typedef long itype;   /* item profits and weights */
 typedef long stype;   /* sum of profit or weight  */
 typedef unsigned long btype;   /* binary solution vector   */

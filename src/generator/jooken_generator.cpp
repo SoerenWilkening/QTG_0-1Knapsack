@@ -49,7 +49,7 @@ namespace generator {
         }
 
         instance->capacity = cap;
-        instance->name = string_format("n_%d_c_%d_g_%d_f_%.2f_e_%.5f_s_%d",
+        instance->name = string_format("n_%lld_c_%lld_g_%lld_f_%.2f_eps_%.5f_s_%lld",
                                        n, cap, classes, frac, eps, small);
 
         return instance;
