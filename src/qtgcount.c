@@ -214,7 +214,7 @@ cycle_count_add(bit_t reg_size, num_t summand, add_t method, \
         }
 
         case COPYDIRECT: {
-            return 2 * num_bits(reg_size - LSO(summand) - 1) + 1;
+            return 2 * num_bits(reg_size - lso(summand) - 1) + 1;
         }
 
         default: {
@@ -496,6 +496,7 @@ cycle_count_qtg(const knapsack_t* k, ub_t method_ub, qft_t method_qft, \
         first_block = MAX(profit_qft + first_add, first_comp + first_sub \
                                                   + 2 * cost_qft);
     }
+    goto first_block_noncopy;
 
 first_block_copy:
     if (reg_b > reg_c) {
@@ -514,6 +515,7 @@ first_block_copy:
      * - inverse QFT on the cost register
      * - addition on the profit register
      */
+first_block_noncopy:
     count_t second_block = 0;
     count_t second_comp;
     count_t second_sub;
@@ -524,9 +526,9 @@ first_block_copy:
          * for each item, check whether unnegated or netaged comparison is more
          * efficient
          */
-        second_comp = MIN(cycle_count_comp(reg_b, ((k->items)[0]).cost, \
+        second_comp = MIN(cycle_count_comp(reg_b, ((k->items)[i]).cost, \
                                            method_mc, TRUE, tof_decomp), \
-                          cycle_count_comp(reg_b, ((k->items)[0]).cost, \
+                          cycle_count_comp(reg_b, ((k->items)[i]).cost, \
                                            method_mc, FALSE, tof_decomp));
 
         switch (method_add) {
