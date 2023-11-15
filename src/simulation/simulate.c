@@ -52,14 +52,13 @@ ampl_amp(const node_t nodes[], size_t num_states, size_t calls, \
     }
     double amp_factor;
     double cumulative_prob = 0;
-    double prob[num_states + 1];
+    double *prob = malloc((num_states + 1) * sizeof(double));
 
     for (size_t i = 0; i < num_states; ++i) {
         cumulative_prob += nodes[i].prob;
     }
 
-    amp_factor = pow(sin((2 * calls + 1) * asin(sqrt(cumulative_prob))), 2) \
- / cumulative_prob;
+    amp_factor = pow(sin((2 * calls + 1) * asin(sqrt(cumulative_prob))), 2) / cumulative_prob;
 
     cumulative_prob = 0;
     for (size_t i = 0; i < num_states; ++i) {
@@ -70,6 +69,7 @@ ampl_amp(const node_t nodes[], size_t num_states, size_t calls, \
     /* executing a quantum measurement */
     size_t measurement = sampling(prob, num_states + 1, rng);
     if (measurement == num_states) {
+        free(prob);
         /* a junkyard state was measured */
         return NULL;
     } else {
@@ -79,6 +79,7 @@ ampl_amp(const node_t nodes[], size_t num_states, size_t calls, \
         result->remain_cost = nodes[measurement].path.remain_cost;
         mpz_init(result->vector);
         mpz_set(result->vector, nodes[measurement].path.vector);
+        free(prob);
         return result;
     }
 }
@@ -106,7 +107,7 @@ q_search(const node_t nodes[], size_t num_states, size_t *rounds, \
         j = gsl_rng_uniform_int(rng, m) + 1;
         *iter += j;
         m_tot += 2 * j + 1;
-        path_t *sample = ampl_amp(nodes, num_states, j, rng);
+        sample = ampl_amp(nodes, num_states, j, rng);
         if (sample != NULL) {
             return sample;
         }
