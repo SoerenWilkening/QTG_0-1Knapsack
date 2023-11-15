@@ -206,8 +206,8 @@ q_max_search(knapsack_t* k, size_t bias, branch_t method, size_t maxiter, \
         res.cycle_count += (rounds + 2 * iter) * qtg_cycles;
         res.cycle_count_decomp += (rounds + 2 * iter) * qtg_cycles_decomp;
         /* adding the cycles for implementing the reflection about |0> */
-        res.cycle_count += iter * cycle_count_mc(profit_qubits, TOFFOLI, FALSE);
-        res.cycle_count_decomp += iter * cycle_count_mc(profit_qubits, \
+        res.cycle_count += iter * cycle_count_mc(k->size, TOFFOLI, FALSE);
+        res.cycle_count_decomp += iter * cycle_count_mc(k->size, \
                                   TOFFOLI, TRUE);
         /* adding the cycles for implementing the phase oracle */
         res.cycle_count += iter * MIN(cycle_count_comp(profit_qubits, \
@@ -222,8 +222,8 @@ q_max_search(knapsack_t* k, size_t bias, branch_t method, size_t maxiter, \
         /* updating the gate count according to the same rules */
         res.gate_count += (rounds + 2 * iter) * qtg_gates;
         res.gate_count_decomp += (rounds + 2 * iter) * qtg_gates_decomp;
-        res.gate_count += iter * gate_count_mc(profit_qubits, TOFFOLI, FALSE);
-        res.gate_count_decomp += iter * gate_count_mc(profit_qubits, TOFFOLI, \
+        res.gate_count += iter * gate_count_mc(k->size, TOFFOLI, FALSE);
+        res.gate_count_decomp += iter * gate_count_mc(k->size, TOFFOLI, \
                                  TRUE);
         res.gate_count += iter * MIN(gate_count_comp(profit_qubits, \
                               cur_sol->tot_profit, TOFFOLI, TRUE, TRUE),
