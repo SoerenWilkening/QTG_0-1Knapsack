@@ -24,6 +24,8 @@ compile:
 				src$(PATH_SEP)stategen.c	\
 				src$(PATH_SEP)combowrp.c	\
 				src$(PATH_SEP)combo.c		\
+				src$(PATH_SEP)expknapwrp.c	\
+                src$(PATH_SEP)expknap.c		\
 				src$(PATH_SEP)qtgcount.c
 	@echo "creating cmbcount executable"
 	@gcc		cmbcount.c	\
@@ -31,6 +33,8 @@ compile:
 				knapsack.o	\
 				combowrp.o	\
 				combo.o		\
+				expknapwrp.o	\
+				expknap.o		\
 				$(GSLFLAG)	\
 				$(GMPFLAG)	\
 				-lgsl		\
@@ -47,6 +51,8 @@ compile:
 				stategen.o	\
 				combowrp.o	\
 				combo.o		\
+				expknapwrp.o	\
+				expknap.o		\
 				qtgcount.o	\
 				$(GSLFLAG)	\
 				$(GMPFLAG)	\
@@ -58,7 +64,7 @@ compile:
 				-o main
 
 	@echo "deleting non used files"
-	@$(RM) qtgcount.o simulate.o stategen.o combowrp.o combo.o knapsack.o syslinks.o
+	@$(RM) qtgcount.o simulate.o stategen.o combowrp.o combo.o expknapwrp.o expknap.o knapsack.o syslinks.o
 
 generate:
 	$(eval n := $(shell cat generator_input.txt | head -n 1))

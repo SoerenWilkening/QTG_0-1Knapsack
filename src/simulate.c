@@ -29,7 +29,7 @@
  */
 
 size_t
-sampling(const double prob[], size_t num_states, const gsl_rng* rng) {
+sampling(const double *prob, size_t num_states, const gsl_rng* rng) {
     double random_num = gsl_rng_uniform(rng);
     double cumulative_prob = 0;
     for (size_t i = 0; i < num_states; ++i) {
@@ -55,7 +55,7 @@ ampl_amp(const node_t nodes[], size_t num_states, size_t calls, \
     }
     double amp_factor;
     double cumulative_prob = 0;
-    double prob[num_states + 1];
+    double *prob = calloc(num_states + 1, sizeof(double));
 
     for (size_t i = 0; i < num_states; ++i) {
         cumulative_prob += nodes[i].prob;
@@ -69,10 +69,11 @@ ampl_amp(const node_t nodes[], size_t num_states, size_t calls, \
         cumulative_prob += (prob[i] = nodes[i].prob * amp_factor);
     }
 
-    prob[num_states] = 1. - cumulative_prob;
     /* executing a quantum measurement */
     size_t measurement = sampling(prob, num_states + 1, rng);
-    if (measurement == num_states) {
+    free(prob);
+
+    if (measurement == num_states + 1) {
         /* a junkyard state was measured */
         return NULL;
     } else {
@@ -109,7 +110,7 @@ q_search(const node_t nodes[], size_t num_states, size_t* rounds, \
         j = gsl_rng_uniform_int(rng, m) + 1;
         *iter += j;
         m_tot += 2 * j + 1;
-        path_t* sample = ampl_amp(nodes, num_states, j, rng);
+        sample = ampl_amp(nodes, num_states, j, rng);
         if (sample != NULL) {
             return sample;
         }
@@ -193,8 +194,8 @@ q_max_search(knapsack_t* k, size_t bias, branch_t method, size_t maxiter, \
          * Otherwise, the routine is interrupted and prior cur_sol is returned.
          */
         cur_path = q_search(cur_nodes, num_states, &rounds, &iter, maxiter, \
-                            rng);
-        if (cur_nodes != NULL) {
+                            rng);                            
+        if (cur_nodes != NULL) {                         
             free_nodes(cur_nodes, num_states);
         }
         /*
@@ -233,7 +234,8 @@ q_max_search(knapsack_t* k, size_t bias, branch_t method, size_t maxiter, \
                                      TRUE), gate_count_comp(profit_qubits, \
                                      cur_sol->tot_profit, TOFFOLI, FALSE, \
                                      TRUE));
-        if (cur_path != NULL) {
+
+        if (cur_path != NULL) {              
             free_path(cur_sol);
             cur_sol = cur_path;
         } else {

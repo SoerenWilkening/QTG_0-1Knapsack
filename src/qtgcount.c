@@ -55,7 +55,7 @@ get_add_name(add_t method) {
         }
 
         case COPYDIRECT: {
-            return "Copy&Direct"
+            return "Copy&Direct";
         }
 
         default: {

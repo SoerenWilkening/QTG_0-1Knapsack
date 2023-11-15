@@ -121,7 +121,7 @@ bit_t num_bits(num_t);
  * Parameter:	Number whose least significant one should be evaluated.
  * Returns:		Least significant one of the input number.
  */
-bit_t lso(num_t) {
+bit_t lso(num_t);
 
 /* 
  * =============================================================================
