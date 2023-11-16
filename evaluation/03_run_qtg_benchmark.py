@@ -8,7 +8,7 @@ import os
 
 from algbench import Benchmark
 
-benchmark = Benchmark("./qtg_results")
+benchmark = Benchmark("./results_qtg")
 
 sys.path.append(os.path.abspath('../pysrc'))
 

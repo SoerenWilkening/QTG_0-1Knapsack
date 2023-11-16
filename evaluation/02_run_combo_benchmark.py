@@ -13,7 +13,7 @@ import os
 import numpy as np
 from algbench import Benchmark
 
-benchmark = Benchmark("./results")
+benchmark = Benchmark("./results_combo")
 
 sys.path.append(os.path.abspath('../pysrc'))
 
