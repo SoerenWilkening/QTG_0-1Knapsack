@@ -387,7 +387,7 @@ cycle_count_qtg(const knapsack_t* k, ub_t method_ub, qft_t method_qft, \
                 add_t method_add, mc_t method_mc, bool_t tof_decomp) {
     bit_t reg_b = cost_reg_size(k);
     bit_t reg_c = profit_reg_size(k, method_ub);
-    bit_t break_item = break_item(k);
+    bit_t break__item = break_item(k);
 
     count_t cost_qft = cycle_count_qft(reg_b, method_qft, tof_decomp);
     count_t profit_qft = cycle_count_qft(reg_c, method_qft, tof_decomp);
@@ -410,6 +410,11 @@ cycle_count_qtg(const knapsack_t* k, ub_t method_ub, qft_t method_qft, \
                                               method_mc, FALSE, tof_decomp));
     count_t first_sub;
     count_t first_add;
+
+    count_t second_block = 0;
+    count_t second_comp;
+    count_t second_sub;
+    count_t second_add;
 
     switch (method_add) {
         case DRAPER: { /* rotational gates are controlled on summand's bits */
@@ -502,13 +507,13 @@ cycle_count_qtg(const knapsack_t* k, ub_t method_ub, qft_t method_qft, \
 first_block_copy:
     /* first item can always be included => no comparison needed */
     if (reg_b > reg_c) {
-        if (break_item == 0) {
+        if (break__item == 0) {
             first_block = 2 * cost_qft + 1;
         } else {
             first_block = cost_qft + 1;
         }
     } else {
-        if (break_item == 0) {
+        if (break__item == 0) {
             first_block = profit_qft + cost_qft;
         } else {
             first_block = profit_qft + 1;
@@ -526,12 +531,7 @@ first_block_copy:
      * - addition on the profit register
      */
 first_block_noncopy:
-    count_t second_block = 0;
-    count_t second_comp;
-    count_t second_sub;
-    count_t second_add;
-
-    for (bit_t i = 1; i < break_item; ++i) {
+    for (bit_t i = 1; i < break__item; ++i) {
         switch (method_add) {
             case DRAPER: {
                 /* rotational gates are controlled on summand's bits */
@@ -604,9 +604,9 @@ first_block_noncopy:
 
         case DIRECT: {
             /* rotational gates are directly implemented */
-            second_sub = gate_count_add(reg_b, k->items[break_item].cost, DIRECT, \
+            second_sub = gate_count_add(reg_b, k->items[break__item].cost, DIRECT, \
                                         tof_decomp);
-            second_add = gate_count_add(reg_c, k->items[break_item].profit, DIRECT, \
+            second_add = gate_count_add(reg_c, k->items[break__item].profit, DIRECT, \
                                         tof_decomp);
             /* 
                 * additional control on path register qubit creates
@@ -618,8 +618,8 @@ first_block_noncopy:
         }
 
         case COPYDIRECT: {
-            second_block += MAX(num_bits(reg_b - lso(k->items[break_item].cost) - 1), \
-                                num_bits(reg_c - lso(k->items[break_item].profit) - 1)) \
+            second_block += MAX(num_bits(reg_b - lso(k->items[break__item].cost) - 1), \
+                                num_bits(reg_c - lso(k->items[break__item].profit) - 1)) \
                             + 1 + cost_qft;
             break;
         }
@@ -630,7 +630,7 @@ first_block_noncopy:
     }
     
 
-    for (bit_t i = break_item + 1; i < k->size - 1; ++i) {
+    for (bit_t i = break__item + 1; i < k->size - 1; ++i) {
         /*
          * for each item, check whether unnegated or netaged comparison is more
          * efficient
@@ -765,7 +765,8 @@ gate_count_qtg(const knapsack_t* k, ub_t method_ub, qft_t method_qft, \
     count_t sub_gates = 0;
     count_t add_gates = 0;
     count_t comp_gates = 0;
-    for (bit_t i = break_item + 1; i < k->size; ++i) {
+    bit_t break__item = break_item(k);
+    for (bit_t i = break__item + 1; i < k->size; ++i) {
         comp_gates += MIN(gate_count_comp(reg_b, k->items[i].cost, method_mc, \
                                           1, tof_decomp), \
                           gate_count_comp(reg_b, k->items[i].cost, method_mc, \
@@ -826,7 +827,7 @@ gate_count_qtg(const knapsack_t* k, ub_t method_ub, qft_t method_qft, \
     }
     return comp_gates /* all comparison gates */ \
            + 2 * gate_count_qft(reg_b, method_qft, tof_decomp) \
-             * ((count_t)(k->size) - 1 - break_item - 1) /* (un)QFT-ing cost register */ \
+             * ((count_t)(k->size) - 1 - break__item - 1) /* (un)QFT-ing cost register */ \
            + gate_count_qft \
            + sub_gates /* all subtraction gates */ 
            /* (un)QFT-ing profit register */ \

@@ -573,7 +573,7 @@ bool_t is_trivial(const knapsack_t*, num_t*);
  * Parameter:   Pointer to knapsack whose break item should be inferred.
  * Returns:     The break item's index.
  */
-bit_t break_item(const knapsack_t* k)
+bit_t break_item(const knapsack_t* k);
 
 /*
  * Function:    int_greedy
