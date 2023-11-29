@@ -293,7 +293,6 @@ create_jooken_knapsack(char* filename) {
 
     /* determine size of knapsack */
     fscanf(stream, "%d", &size);
-    // size = atoi(fgets(line, sizeof(line), stream));
 
     /* instanciate knapsack and set name (capacity is determined later */
     new_knapsack = create_empty_knapsack(size, 0);
@@ -587,6 +586,17 @@ is_trivial(const knapsack_t* k, num_t* opt_profit) {
     } else {
         return FALSE;
     }
+}
+
+bit_t
+break_item(const knapsack_t* k) {
+    num_t break_cost = 0;
+    bit_t current_item = 0;
+    do {
+        break_cost += k->items[current_item].cost;
+        ++current_item;
+    } while(break_cost <= k->capacity);
+    return current_item - 1;
 }
 
 num_t

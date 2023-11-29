@@ -387,6 +387,7 @@ cycle_count_qtg(const knapsack_t* k, ub_t method_ub, qft_t method_qft, \
                 add_t method_add, mc_t method_mc, bool_t tof_decomp) {
     bit_t reg_b = cost_reg_size(k);
     bit_t reg_c = profit_reg_size(k, method_ub);
+    bit_t break_item = break_item(k);
 
     count_t cost_qft = cycle_count_qft(reg_b, method_qft, tof_decomp);
     count_t profit_qft = cycle_count_qft(reg_c, method_qft, tof_decomp);
@@ -499,20 +500,29 @@ cycle_count_qtg(const knapsack_t* k, ub_t method_ub, qft_t method_qft, \
     goto first_block_noncopy;
 
 first_block_copy:
+    /* first item can always be included => no comparison needed */
     if (reg_b > reg_c) {
-        first_block = first_comp + cost_qft + profit_qft;
+        if (break_item == 0) {
+            first_block = 2 * cost_qft + 1;
+        } else {
+            first_block = cost_qft + 1;
+        }
     } else {
-        first_block = first_comp + 2 * cost_qft + 1;
+        if (break_item == 0) {
+            first_block = profit_qft + cost_qft;
+        } else {
+            first_block = profit_qft + 1;
+        }
+        
     }
 
     /* 
      * second block consisting of k->size - 2 similar blocks, each consiting of:
      * - comparison on the cost register for controlled operation on the path
-     *   register
-     * - QFT on the cost register
+     *   register (only after break item)
+     * - QFT on the cost register (only after break item)
      * - subtraction on the cost register
-     * - inverse QFT on the cost register
-     * - inverse QFT on the cost register
+     * - inverse QFT on the cost register (starting at break item)
      * - addition on the profit register
      */
 first_block_noncopy:
@@ -521,7 +531,106 @@ first_block_noncopy:
     count_t second_sub;
     count_t second_add;
 
-    for (bit_t i = 1; i < k->size - 1; ++i) {
+    for (bit_t i = 1; i < break_item; ++i) {
+        switch (method_add) {
+            case DRAPER: {
+                /* rotational gates are controlled on summand's bits */
+                second_sub = 5 * gate_count_add(reg_b, max_cost(k), DRAPER, \
+                                                tof_decomp);
+                second_add = 5 * gate_count_add(reg_c, max_profit(k), DRAPER, \
+                                                tof_decomp);
+                /* 
+                 * additional control on path register qubit creates
+                 * two-controlled gates:
+                 * 1. parallelization is impossible, thus cycles match gates
+                 * 2. two-controlled gates have to be decomposed into 5
+                 *    single-controlled gates
+                 */
+                second_block += second_sub + second_add;
+                break;
+            }
+
+            case DIRECT: {
+                /* rotational gates are directly implemented */
+                second_sub = gate_count_add(reg_b, k->items[i].cost, DIRECT, \
+                                            tof_decomp);
+                second_add = gate_count_add(reg_c, k->items[i].profit, DIRECT, \
+                                            tof_decomp);
+                /* 
+                 * additional control on path register qubit creates
+                 * two-controlled gates: parallelization is impossible, thus
+                 * cycles match gates
+                 */
+                second_block += second_sub + second_add;
+                break;
+            }
+
+            case COPYDIRECT: {
+                second_block += 2 * MAX(num_bits(reg_b - lso(k->items[i].cost) - 1), \
+                                        num_bits(reg_c - lso(k->items[i].profit) - 1)) + 2;
+                break;
+            }
+
+            default: {
+                return -1;
+            }
+        }
+        /* 
+         * for each item: Since adding on the profit register can be
+         * parallelized with the QFT and the inverse QFT on the cost register,
+         * the maximum of their lengths rather than their sum contributes. Since
+         * comparison and subtraction on the cost register canot be parallelized
+         * further, both their lenghts have to be added.
+         */
+    }
+
+    switch (method_add) {
+        case DRAPER: {
+            /* rotational gates are controlled on summand's bits */
+            second_sub = 5 * gate_count_add(reg_b, max_cost(k), DRAPER, \
+                                            tof_decomp);
+            second_add = 5 * gate_count_add(reg_c, max_profit(k), DRAPER, \
+                                            tof_decomp);
+            /* 
+                * additional control on path register qubit creates
+                * two-controlled gates:
+                * 1. parallelization is impossible, thus cycles match gates
+                * 2. two-controlled gates have to be decomposed into 5
+                *    single-controlled gates
+                */
+            second_block += second_sub + MAX(cost_qft, second_add);
+            break;
+        }
+
+        case DIRECT: {
+            /* rotational gates are directly implemented */
+            second_sub = gate_count_add(reg_b, k->items[break_item].cost, DIRECT, \
+                                        tof_decomp);
+            second_add = gate_count_add(reg_c, k->items[break_item].profit, DIRECT, \
+                                        tof_decomp);
+            /* 
+                * additional control on path register qubit creates
+                * two-controlled gates: parallelization is impossible, thus
+                * cycles match gates
+                */
+            second_block += second_sub + MAX(cost_qft, second_add);
+            break;
+        }
+
+        case COPYDIRECT: {
+            second_block += MAX(num_bits(reg_b - lso(k->items[break_item].cost) - 1), \
+                                num_bits(reg_c - lso(k->items[break_item].profit) - 1)) \
+                            + 1 + cost_qft;
+            break;
+        }
+
+        default: {
+            return -1;
+        }
+    }
+    
+
+    for (bit_t i = break_item + 1; i < k->size - 1; ++i) {
         /*
          * for each item, check whether unnegated or netaged comparison is more
          * efficient
@@ -656,7 +765,7 @@ gate_count_qtg(const knapsack_t* k, ub_t method_ub, qft_t method_qft, \
     count_t sub_gates = 0;
     count_t add_gates = 0;
     count_t comp_gates = 0;
-    for (bit_t i = 0; i < k->size; ++i) {
+    for (bit_t i = break_item + 1; i < k->size; ++i) {
         comp_gates += MIN(gate_count_comp(reg_b, k->items[i].cost, method_mc, \
                                           1, tof_decomp), \
                           gate_count_comp(reg_b, k->items[i].cost, method_mc, \
@@ -717,7 +826,8 @@ gate_count_qtg(const knapsack_t* k, ub_t method_ub, qft_t method_qft, \
     }
     return comp_gates /* all comparison gates */ \
            + 2 * gate_count_qft(reg_b, method_qft, tof_decomp) \
-             * ((count_t)(k->size) - 1) /* (un)QFT-ing cost register */ \
+             * ((count_t)(k->size) - 1 - break_item - 1) /* (un)QFT-ing cost register */ \
+           + gate_count_qft \
            + sub_gates /* all subtraction gates */ 
            /* (un)QFT-ing profit register */ \
            + 2 * gate_count_qft(reg_c, method_qft, tof_decomp) \
