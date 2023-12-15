@@ -167,17 +167,13 @@ q_max_search(knapsack_t* k, size_t bias, branch_t method, size_t maxiter, \
      */
     profit_qubits = profit_reg_size(k, FGREEDY);
     resource_t res = { .qubit_count = qubit_count_qtg(k, FGREEDY, COPPERSMITH, \
-                                       COPYDIRECT, TOFFOLI) + 1, \
+                                                      TOFFOLI) + 1, \
                        .cycle_count = 0, .gate_count = 0, \
                        .cycle_count_decomp = 0, .gate_count_decomp = 0};
-    qtg_cycles = cycle_count_qtg(k, FGREEDY, COPPERSMITH, COPYDIRECT, \
-                                         TOFFOLI, FALSE);
-    qtg_gates = gate_count_qtg(k, FGREEDY, COPPERSMITH, COPYDIRECT, \
-                                         TOFFOLI, FALSE);
-    qtg_cycles_decomp = cycle_count_qtg(k, FGREEDY, COPPERSMITH, COPYDIRECT, \
-                                         TOFFOLI, TRUE);
-    qtg_gates_decomp = gate_count_qtg(k, FGREEDY, COPPERSMITH, COPYDIRECT, \
-                                         TOFFOLI, TRUE);
+    qtg_cycles = cycle_count_qtg(k, FGREEDY, COPPERSMITH, TOFFOLI, FALSE);
+    qtg_gates = gate_count_qtg(k, FGREEDY, COPPERSMITH, TOFFOLI, FALSE);
+    qtg_cycles_decomp = cycle_count_qtg(k, FGREEDY, COPPERSMITH, TOFFOLI, TRUE);
+    qtg_gates_decomp = gate_count_qtg(k, FGREEDY, COPPERSMITH, TOFFOLI, TRUE);
 
     /* obtain optimal solution via Combo */
     exact = combo_wrap(k, 0, k->capacity, FALSE, FALSE, TRUE, FALSE);
