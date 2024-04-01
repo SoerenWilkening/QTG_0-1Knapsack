@@ -127,7 +127,7 @@ utils::qtg_measurement execute_q_max_search(const utils::cpp_knapsack &instance,
     size_t iter; /* counter of AA calls within QSearch; will be updated */
     size_t num_states; /* number of states; will be updated */
 
-    path_t *cur_sol; /* current solution; will be updated */
+    path_t* cur_sol; /* current solution; will be updated */
     bit_t profit_qubits; /* size of the profit register */
     /*
      * declare cycle and gate counter for the QTG with and without decomposing
@@ -136,17 +136,17 @@ utils::qtg_measurement execute_q_max_search(const utils::cpp_knapsack &instance,
     count_t qtg_cycles, qtg_gates, qtg_cycles_decomp, qtg_gates_decomp;
     num_t exact; /* exact optimal profit for the knapsack instance */
 
-    node_t *cur_nodes; /* set of states after applying QTG and filtering */
-    path_t *cur_path; /* current result of applying QSearch */
+    node_t* cur_nodes; /* set of states after applying QTG and filtering */
+    path_t* cur_path; /* current result of applying QSearch */
 
     /*
      * The knapsack is sorted by ration. Then the integer greedy method is
      * applied to yield the initial current solution and the initial threshold.
      */
-    sort_knapsack(converted_knapsack, RATIO);
-    apply_int_greedy(converted_knapsack);
-    cur_sol = path_rep(converted_knapsack);
-    remove_all_items(converted_knapsack);
+    sort_knapsack(k, RATIO);
+    apply_int_greedy(k);
+    cur_sol = path_rep(k);
+    remove_all_items(k);
 
     /*
      * A resource counter is initialized. The number of required qubits is given
@@ -156,35 +156,33 @@ utils::qtg_measurement execute_q_max_search(const utils::cpp_knapsack &instance,
      * counts are initialized to zero and will be updated after every call to
      * QSearch.
      */
-    profit_qubits = profit_reg_size(converted_knapsack, FGREEDY);
-    resource_t res = {
-            .qubit_count = qubit_count_qtg(converted_knapsack, FGREEDY, COPPERSMITH, COPYDIRECT, TOFFOLI) + 1,
-            .cycle_count = 0,
-            .gate_count = 0,
-            .cycle_count_decomp = 0,
-            .gate_count_decomp = 0
-    };
-    qtg_cycles = cycle_count_qtg(converted_knapsack, FGREEDY, COPPERSMITH, COPYDIRECT, TOFFOLI, false);
-    qtg_gates = gate_count_qtg(converted_knapsack, FGREEDY, COPPERSMITH, COPYDIRECT, TOFFOLI, false);
-    qtg_cycles_decomp = cycle_count_qtg(converted_knapsack, FGREEDY, COPPERSMITH, COPYDIRECT, TOFFOLI, true);
-    qtg_gates_decomp = gate_count_qtg(converted_knapsack, FGREEDY, COPPERSMITH, COPYDIRECT, TOFFOLI, true);
+    profit_qubits = profit_reg_size(k, FGREEDY);
+    resource_t res = { .qubit_count = qubit_count_qtg(k, FGREEDY, COPPERSMITH, \
+                                                      TOFFOLI) + 1, \
+                       .cycle_count = 0, .gate_count = 0, \
+                       .cycle_count_decomp = 0, .gate_count_decomp = 0};
+    qtg_cycles = cycle_count_qtg(k, FGREEDY, COPPERSMITH, TOFFOLI, FALSE);
+    qtg_gates = gate_count_qtg(k, FGREEDY, COPPERSMITH, TOFFOLI, FALSE);
+    qtg_cycles_decomp = cycle_count_qtg(k, FGREEDY, COPPERSMITH, TOFFOLI, TRUE);
+    qtg_gates_decomp = gate_count_qtg(k, FGREEDY, COPPERSMITH, TOFFOLI, TRUE);
 
     /* obtain optimal solution via Combo */
-    exact = execute_combo(instance, true, false).objective_value;
-
+    exact = combo_wrap(k, 0, k->capacity, FALSE, FALSE, TRUE, FALSE);
     do {
         /*
          * The application of the QTG is simulated. Only states (paths) with
          * total profit above the threshold are stored in cur_nodes.
          */
-        cur_nodes = qtg(converted_knapsack, cur_sol->tot_profit, exact, bias, method, cur_sol->vector, &num_states);
+        cur_nodes = qtg(k, cur_sol->tot_profit, exact, bias, method, \
+                        cur_sol->vector, &num_states);
         /*
          * QSearch is executed on the nodes created by the QTG. If this yields a
          * better solution, cur_sol (carrying the current threshold) is updated.
          * Otherwise, the routine is interrupted and prior cur_sol is returned.
          */
-        cur_path = q_search(cur_nodes, num_states, &rounds, &iter, maxiter, rng);
-        if (cur_nodes != nullptr) {
+        cur_path = q_search(cur_nodes, num_states, &rounds, &iter, maxiter, \
+                            rng);
+        if (cur_nodes != NULL) {
             free_nodes(cur_nodes, num_states);
         }
         /*
@@ -195,26 +193,34 @@ utils::qtg_measurement execute_q_max_search(const utils::cpp_knapsack &instance,
         res.cycle_count += (rounds + 2 * iter) * qtg_cycles;
         res.cycle_count_decomp += (rounds + 2 * iter) * qtg_cycles_decomp;
         /* adding the cycles for implementing the reflection about |0> */
-        res.cycle_count += iter * cycle_count_mc(profit_qubits, TOFFOLI, false);
-        res.cycle_count_decomp += iter * cycle_count_mc(profit_qubits, TOFFOLI, true);
+        res.cycle_count += iter * cycle_count_mc(k->size - 1, TOFFOLI, FALSE);
+        res.cycle_count_decomp += iter * cycle_count_mc(k->size - 1, \
+                                  TOFFOLI, TRUE);
         /* adding the cycles for implementing the phase oracle */
-        res.cycle_count +=
-                iter * std::min(cycle_count_comp(profit_qubits, cur_sol->tot_profit + 1, TOFFOLI, true, false),
-                                cycle_count_comp(profit_qubits, cur_sol->tot_profit + 1, TOFFOLI, false, false));
-        res.cycle_count_decomp +=
-                iter * std::min(cycle_count_comp(profit_qubits, cur_sol->tot_profit + 1, TOFFOLI, true, true),
-                                cycle_count_comp(profit_qubits, cur_sol->tot_profit + 1, TOFFOLI, false, true));
+        res.cycle_count += iter * MIN(cycle_count_comp(profit_qubits, \
+                               cur_sol->tot_profit + 1, TOFFOLI, TRUE, FALSE), \
+                               cycle_count_comp(profit_qubits, \
+                               cur_sol->tot_profit + 1, TOFFOLI, FALSE, FALSE));
+        res.cycle_count_decomp += iter * MIN(cycle_count_comp(profit_qubits, \
+                                      cur_sol->tot_profit + 1, TOFFOLI, TRUE, \
+                                      TRUE), cycle_count_comp(profit_qubits, \
+                                      cur_sol->tot_profit + 1, TOFFOLI, FALSE, \
+                                      TRUE));
         /* updating the gate count according to the same rules */
         res.gate_count += (rounds + 2 * iter) * qtg_gates;
         res.gate_count_decomp += (rounds + 2 * iter) * qtg_gates_decomp;
-        res.gate_count += iter * gate_count_mc(profit_qubits, TOFFOLI, false);
-        res.gate_count_decomp += iter * gate_count_mc(profit_qubits, TOFFOLI, true);
-        res.gate_count += iter * std::min(gate_count_comp(profit_qubits, cur_sol->tot_profit, TOFFOLI, true, true),
-                                          gate_count_comp(profit_qubits, cur_sol->tot_profit, TOFFOLI, false, true));
-        res.gate_count_decomp +=
-                iter * std::min(gate_count_comp(profit_qubits, cur_sol->tot_profit, TOFFOLI, true, true),
-                                gate_count_comp(profit_qubits, cur_sol->tot_profit, TOFFOLI, false, true));
-
+        res.gate_count += iter * gate_count_mc(k->size - 1, TOFFOLI, FALSE);
+        res.gate_count_decomp += iter * gate_count_mc(k->size - 1, TOFFOLI, \
+                                 TRUE);
+        res.gate_count += iter * MIN(gate_count_comp(profit_qubits, \
+                              cur_sol->tot_profit, TOFFOLI, TRUE, TRUE),
+                                     gate_count_comp(profit_qubits, \
+                              cur_sol->tot_profit, TOFFOLI, FALSE, TRUE));
+        res.gate_count_decomp += iter * MIN(gate_count_comp(profit_qubits, \
+                                     cur_sol->tot_profit, TOFFOLI, TRUE, \
+                                     TRUE), gate_count_comp(profit_qubits, \
+                                     cur_sol->tot_profit, TOFFOLI, FALSE, \
+                                     TRUE));
         if (cur_path != nullptr) {
             free_path(cur_sol);
             cur_sol = cur_path;
