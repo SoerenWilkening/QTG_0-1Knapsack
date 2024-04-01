@@ -550,7 +550,7 @@ num_t cost_sum(const knapsack_t *);
 
 /*
  * Function:        is_trivial
- * -----------------------
+ * ---------------------------
  * Description:     This function checks whether given knapsack instance is
  *                  trivial and if so saves the optimal profit at the given
  *                  address.
@@ -561,6 +561,16 @@ num_t cost_sum(const knapsack_t *);
  * Returns:         Whether knapsack is trivial or not.
  */
 bool_t is_trivial(const knapsack_t *, num_t *);
+
+/*
+ * Function:    break_item
+ * -----------------------
+ * Description: This function checks returns the index of a given knapsack
+ *              instance's break item.
+ * Parameter:   Pointer to knapsack whose break item should be inferred.
+ * Returns:     The break item's index.
+ */
+bit_t break_item(const knapsack_t* k);
 
 /*
  * Function:    int_greedy

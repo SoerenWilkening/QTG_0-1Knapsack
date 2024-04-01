@@ -43,12 +43,6 @@ typedef enum qft {
     COPPERSMITH,
 } qft_t;
 
-typedef enum add {
-    DRAPER,
-    DIRECT,
-    COPYDIRECT,
-} add_t;
-
 typedef enum mc {
     TOFFOLI,
 } mc_t;
@@ -67,15 +61,6 @@ typedef enum mc {
  * Returns:     QFT method's name as a string.
  */
 const char *get_qft_name(qft_t);
-
-/*
- * Function:    get_add_name
- * -------------------------
- * Description: This function returns an adder method's name as a string.
- * Parameter:   Implementation method for the adder.
- * Returns:     Adder method's name as a string.
- */
-const char *get_add_name(add_t);
 
 /*
  * Function:    get_mc_name
@@ -205,10 +190,9 @@ count_t gate_count_qft(bit_t, qft_t, bool_t);
  * Parameters:
  *		parameter1:	Size of the QFT-ed register the adder is performed on.
  *		parameter2: Number that should be added to the register's state.
- *		parameter3:	Implementation method for the adder.
  * Returns:			Number of ancilla qubits of the adder implementation.
  */
-bit_t anc_count_add(bit_t, num_t, add_t);
+bit_t anc_count_add(bit_t, num_t);
 
 /*
  * Function: 		cycle_count_adder
@@ -218,11 +202,9 @@ bit_t anc_count_add(bit_t, num_t, add_t);
  * Parameters:
  *		parameter1:	Size of the QFT-ed register the adder is performed on.
  *		parameter2: Number that should be added to the register's state.
- *		parameter3:	Implementation method for the adder.
- *      parameter4: Whether toffoli gates should be decomposed or not.
  * Returns:			Number of cycles of the adder implementation.
  */
-count_t cycle_count_add(bit_t, num_t, add_t, bool_t);
+count_t cycle_count_add(bit_t, num_t);
 
 /*
  * Function: 		gate_count_add
@@ -232,11 +214,9 @@ count_t cycle_count_add(bit_t, num_t, add_t, bool_t);
  * Parameters:
  *		parameter1:	Size of the QFT-ed register the adder is performed on.
  *		parameter2: Number that should be added to the register's state.
- *		parameter3:	Implementation method for the adder.
- *      parameter4: Whether toffoli gates should be decomposed or not.
  * Returns:			Number of gates of the adder implementation.
  */
-count_t gate_count_add(bit_t, num_t, add_t, bool_t);
+count_t gate_count_add(bit_t, num_t);
 
 /*
  * Function: 		anc_count_mc
@@ -331,11 +311,10 @@ count_t gate_count_comp(bit_t, num_t, mc_t, bool_t, bool_t);
  *		parameter1:	Pointer to knapsack that should be considered.
  *		parameter2:	Method used for upper bounding the total profit.
  *		parameter3:	Implementation method for the QFT.
- *		parameter4: Implementation method for the adder.
- *		parameter5:	Decomposition method for any multi-controls.
+ *		parameter4:	Decomposition method for any multi-controls.
  * Returns:			Number of qubits of one application of the QTG.
  */
-bit_t qubit_count_qtg(const knapsack_t *, ub_t, qft_t, add_t, mc_t);
+bit_t qubit_count_qtg(const knapsack_t*, ub_t, qft_t, mc_t);
 
 /*
  * Function: 		cycle_count_qtg
@@ -348,12 +327,11 @@ bit_t qubit_count_qtg(const knapsack_t *, ub_t, qft_t, add_t, mc_t);
  *      parameter1: Pointer to knapsack that should be considered.
  *      parameter2: Method used for upper bounding the total profit.
  *      parameter3: Implementation method for the QFT.
- *      parameter4: Implementation method for the adder.
- *      parameter5: Decomposition method for any multi-controls.
- *      parameter6: Whether toffoli gates should be decomposed or not.
+ *      parameter4: Decomposition method for any multi-controls.
+ *      parameter5: Whether toffoli gates should be decomposed or not.
  * Returns:			Number of cycles of one application of the QTG.
  */
-count_t cycle_count_qtg(const knapsack_t *, ub_t, qft_t, add_t, mc_t, bool_t);
+count_t cycle_count_qtg(const knapsack_t*, ub_t, qft_t, mc_t, bool_t);
 
 /*
  * Function: 		gate_count_qtg
@@ -365,12 +343,11 @@ count_t cycle_count_qtg(const knapsack_t *, ub_t, qft_t, add_t, mc_t, bool_t);
  *      parameter1: Pointer to knapsack that should be considered.
  *      parameter2: Method used for upper bounding the total profit.
  *      parameter3: Implementation method for the QFT.
- *      parameter4: Implementation method for the adder.
- *      parameter5: Decomposition method for any multi-controls.
- *      parameter6: Whether toffoli gates should be decomposed or not.
+ *      parameter4: Decomposition method for any multi-controls.
+ *      parameter5: Whether toffoli gates should be decomposed or not.
  * Returns:			Number of gates of one application of the QTG.
  */
-count_t gate_count_qtg(const knapsack_t *, ub_t, qft_t, add_t, mc_t, bool_t);
+count_t gate_count_qtg(const knapsack_t*, ub_t, qft_t, mc_t, bool_t);
 
 /*
  * Function:        print-qtg_counts
@@ -382,11 +359,10 @@ count_t gate_count_qtg(const knapsack_t *, ub_t, qft_t, add_t, mc_t, bool_t);
  *      parameter1: Pointer to knapsack that should be considered.
  *      parameter2: Method used for upper bounding the total profit.
  *      parameter3: Implementation method for the QFT.
- *      parameter4: Implementation method for the adder.
- *      parameter5: Decomposition method for any multi-controls.
- *      parameter6: Whether toffoli gates should be decomposed or not.
+ *      parameter4: Decomposition method for any multi-controls.
+ *      parameter5: Whether toffoli gates should be decomposed or not.
  */
-void print_qtg_counts(const knapsack_t *, ub_t, qft_t, add_t, mc_t, bool_t);
+void print_qtg_counts(const knapsack_t*, ub_t, qft_t, mc_t, bool_t);
 
 #ifdef __cplusplus
 }
