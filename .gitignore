@@ -1,4 +1,6 @@
 .idea
+.conan
+_skbuild
 
 CMakeUserPresets.json
 
