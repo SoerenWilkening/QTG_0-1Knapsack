@@ -19,8 +19,13 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    knapsack = jooken_generate(args.n, args.Z, args.g, 0.3, args.epsilon, args.small)
-
-    save_instance(knapsack, args.out)
-    print("Crated instance", knapsack.name)
+    for n in range(1000, 31000, 1000):
+        for eps in [0, 1e-05]:
+            for small in [100, 200, 300]:
+                knapsack = jooken_generate(n, args.Z, args.g, args.frac, eps, small)
+                knapsack.name = knapsack.name.replace("f_0.30", "f_0.3")
+                knapsack.name = knapsack.name.replace("0.00000", "0")
+                knapsack.name = knapsack.name.replace("0.00001", "1e-05")
+                save_instance(knapsack, args.out)
+                print("Crated instance", knapsack.name)
 
