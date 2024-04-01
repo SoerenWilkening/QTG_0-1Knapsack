@@ -127,7 +127,7 @@ utils::qtg_measurement execute_q_max_search(const utils::cpp_knapsack &instance,
     size_t iter; /* counter of AA calls within QSearch; will be updated */
     size_t num_states; /* number of states; will be updated */
 
-    path_t* cur_sol; /* current solution; will be updated */
+    path_t *cur_sol; /* current solution; will be updated */
     bit_t profit_qubits; /* size of the profit register */
     /*
      * declare cycle and gate counter for the QTG with and without decomposing
@@ -136,17 +136,17 @@ utils::qtg_measurement execute_q_max_search(const utils::cpp_knapsack &instance,
     count_t qtg_cycles, qtg_gates, qtg_cycles_decomp, qtg_gates_decomp;
     num_t exact; /* exact optimal profit for the knapsack instance */
 
-    node_t* cur_nodes; /* set of states after applying QTG and filtering */
-    path_t* cur_path; /* current result of applying QSearch */
+    node_t *cur_nodes; /* set of states after applying QTG and filtering */
+    path_t *cur_path; /* current result of applying QSearch */
 
     /*
      * The knapsack is sorted by ration. Then the integer greedy method is
      * applied to yield the initial current solution and the initial threshold.
      */
-    sort_knapsack(k, RATIO);
-    apply_int_greedy(k);
-    cur_sol = path_rep(k);
-    remove_all_items(k);
+    sort_knapsack(converted_knapsack, RATIO);
+    apply_int_greedy(converted_knapsack);
+    cur_sol = path_rep(converted_knapsack);
+    remove_all_items(converted_knapsack);
 
     /*
      * A resource counter is initialized. The number of required qubits is given
@@ -156,24 +156,25 @@ utils::qtg_measurement execute_q_max_search(const utils::cpp_knapsack &instance,
      * counts are initialized to zero and will be updated after every call to
      * QSearch.
      */
-    profit_qubits = profit_reg_size(k, FGREEDY);
-    resource_t res = { .qubit_count = qubit_count_qtg(k, FGREEDY, COPPERSMITH, \
+    profit_qubits = profit_reg_size(converted_knapsack, FGREEDY);
+    resource_t res = {.qubit_count = qubit_count_qtg(converted_knapsack, FGREEDY, COPPERSMITH, \
                                                       TOFFOLI) + 1, \
                        .cycle_count = 0, .gate_count = 0, \
                        .cycle_count_decomp = 0, .gate_count_decomp = 0};
-    qtg_cycles = cycle_count_qtg(k, FGREEDY, COPPERSMITH, TOFFOLI, FALSE);
-    qtg_gates = gate_count_qtg(k, FGREEDY, COPPERSMITH, TOFFOLI, FALSE);
-    qtg_cycles_decomp = cycle_count_qtg(k, FGREEDY, COPPERSMITH, TOFFOLI, TRUE);
-    qtg_gates_decomp = gate_count_qtg(k, FGREEDY, COPPERSMITH, TOFFOLI, TRUE);
+    qtg_cycles = cycle_count_qtg(converted_knapsack, FGREEDY, COPPERSMITH, TOFFOLI, false);
+    qtg_gates = gate_count_qtg(converted_knapsack, FGREEDY, COPPERSMITH, TOFFOLI, false);
+    qtg_cycles_decomp = cycle_count_qtg(converted_knapsack, FGREEDY, COPPERSMITH, TOFFOLI, true);
+    qtg_gates_decomp = gate_count_qtg(converted_knapsack, FGREEDY, COPPERSMITH, TOFFOLI, true);
 
     /* obtain optimal solution via Combo */
-    exact = combo_wrap(k, 0, k->capacity, FALSE, FALSE, TRUE, FALSE);
+    exact = execute_combo(instance, true, false).objective_value;
+
     do {
         /*
          * The application of the QTG is simulated. Only states (paths) with
          * total profit above the threshold are stored in cur_nodes.
          */
-        cur_nodes = qtg(k, cur_sol->tot_profit, exact, bias, method, \
+        cur_nodes = qtg(converted_knapsack, cur_sol->tot_profit, exact, bias, method, \
                         cur_sol->vector, &num_states);
         /*
          * QSearch is executed on the nodes created by the QTG. If this yields a
@@ -193,34 +194,34 @@ utils::qtg_measurement execute_q_max_search(const utils::cpp_knapsack &instance,
         res.cycle_count += (rounds + 2 * iter) * qtg_cycles;
         res.cycle_count_decomp += (rounds + 2 * iter) * qtg_cycles_decomp;
         /* adding the cycles for implementing the reflection about |0> */
-        res.cycle_count += iter * cycle_count_mc(k->size - 1, TOFFOLI, FALSE);
-        res.cycle_count_decomp += iter * cycle_count_mc(k->size - 1, \
-                                  TOFFOLI, TRUE);
+        res.cycle_count += iter * cycle_count_mc(converted_knapsack->size - 1, TOFFOLI, false);
+        res.cycle_count_decomp += iter * cycle_count_mc(converted_knapsack->size - 1, \
+                                  TOFFOLI, true);
         /* adding the cycles for implementing the phase oracle */
-        res.cycle_count += iter * MIN(cycle_count_comp(profit_qubits, \
-                               cur_sol->tot_profit + 1, TOFFOLI, TRUE, FALSE), \
+        res.cycle_count += iter * std::min(cycle_count_comp(profit_qubits, \
+                               cur_sol->tot_profit + 1, TOFFOLI, true, false), \
                                cycle_count_comp(profit_qubits, \
-                               cur_sol->tot_profit + 1, TOFFOLI, FALSE, FALSE));
-        res.cycle_count_decomp += iter * MIN(cycle_count_comp(profit_qubits, \
-                                      cur_sol->tot_profit + 1, TOFFOLI, TRUE, \
-                                      TRUE), cycle_count_comp(profit_qubits, \
-                                      cur_sol->tot_profit + 1, TOFFOLI, FALSE, \
-                                      TRUE));
+                               cur_sol->tot_profit + 1, TOFFOLI, false, false));
+        res.cycle_count_decomp += iter * std::min(cycle_count_comp(profit_qubits, \
+                                      cur_sol->tot_profit + 1, TOFFOLI, true, \
+                                      true), cycle_count_comp(profit_qubits, \
+                                      cur_sol->tot_profit + 1, TOFFOLI, false, \
+                                      true));
         /* updating the gate count according to the same rules */
         res.gate_count += (rounds + 2 * iter) * qtg_gates;
         res.gate_count_decomp += (rounds + 2 * iter) * qtg_gates_decomp;
-        res.gate_count += iter * gate_count_mc(k->size - 1, TOFFOLI, FALSE);
-        res.gate_count_decomp += iter * gate_count_mc(k->size - 1, TOFFOLI, \
-                                 TRUE);
-        res.gate_count += iter * MIN(gate_count_comp(profit_qubits, \
-                              cur_sol->tot_profit, TOFFOLI, TRUE, TRUE),
-                                     gate_count_comp(profit_qubits, \
-                              cur_sol->tot_profit, TOFFOLI, FALSE, TRUE));
-        res.gate_count_decomp += iter * MIN(gate_count_comp(profit_qubits, \
-                                     cur_sol->tot_profit, TOFFOLI, TRUE, \
-                                     TRUE), gate_count_comp(profit_qubits, \
-                                     cur_sol->tot_profit, TOFFOLI, FALSE, \
-                                     TRUE));
+        res.gate_count += iter * gate_count_mc(converted_knapsack->size - 1, TOFFOLI, false);
+        res.gate_count_decomp += iter * gate_count_mc(converted_knapsack->size - 1, TOFFOLI, \
+                                 true);
+        res.gate_count += iter * std::min(gate_count_comp(profit_qubits, \
+                              cur_sol->tot_profit, TOFFOLI, true, true),
+                                          gate_count_comp(profit_qubits, \
+                              cur_sol->tot_profit, TOFFOLI, false, true));
+        res.gate_count_decomp += iter * std::min(gate_count_comp(profit_qubits, \
+                                     cur_sol->tot_profit, TOFFOLI, true, \
+                                     true), gate_count_comp(profit_qubits, \
+                                     cur_sol->tot_profit, TOFFOLI, false, \
+                                     true));
         if (cur_path != nullptr) {
             free_path(cur_sol);
             cur_sol = cur_path;
@@ -251,41 +252,52 @@ utils::qtg_measurement execute_q_max_search(const utils::cpp_knapsack &instance,
 
 PYBIND11_MODULE(_qtg_bindings, m
 ) {
-    m.def("jooken_generate", &generator::generate);
-    m.def("execute_combo", &execute_combo);
-    m.def("execute_q_max_search", &execute_q_max_search);
+m.def("jooken_generate", &generator::generate);
+m.def("execute_combo", &execute_combo);
+m.def("execute_q_max_search", &execute_q_max_search);
 
-    py::bind_vector<std::vector<utils::cpp_item>>(m, "ItemVector");
+py::bind_vector <std::vector<utils::cpp_item>>(m,
+"ItemVector");
 
-    py::class_<resource_t>(m, "QTGResources")
-            .def_readwrite("cycle_count", &resource_t::cycle_count)
-            .def_readwrite("cycle_count_decomp", &resource_t::cycle_count_decomp)
-            .def_readwrite("gate_count", &resource_t::gate_count)
-            .def_readwrite("gate_count_decomp", &resource_t::gate_count_decomp)
-            .def_readwrite("qubit_count", &resource_t::qubit_count);
+py::class_<resource_t>(m,
+"QTGResources")
+.def_readwrite("cycle_count", &resource_t::cycle_count)
+.def_readwrite("cycle_count_decomp", &resource_t::cycle_count_decomp)
+.def_readwrite("gate_count", &resource_t::gate_count)
+.def_readwrite("gate_count_decomp", &resource_t::gate_count_decomp)
+.def_readwrite("qubit_count", &resource_t::qubit_count);
 
-    py::class_<utils::qtg_measurement>(m, "QTGMeasurement")
-            .def_readwrite("remaining_cost", &utils::qtg_measurement::remaining_cost)
-            .def_readwrite("objective_value", &utils::qtg_measurement::objective_value)
-            .def_readwrite("item_assignments", &utils::qtg_measurement::item_assignments)
-            .def_readwrite("resources", &utils::qtg_measurement::resources);
+py::class_<utils::qtg_measurement>(m,
+"QTGMeasurement")
+.def_readwrite("remaining_cost", &utils::qtg_measurement::remaining_cost)
+.def_readwrite("objective_value", &utils::qtg_measurement::objective_value)
+.def_readwrite("item_assignments", &utils::qtg_measurement::item_assignments)
+.def_readwrite("resources", &utils::qtg_measurement::resources);
 
-    py::class_<utils::cpp_knapsack>(m, "Knapsack")
-            .def(py::init<utils::capacity_type, utils::capacity_type, std::vector<utils::cpp_item>, std::string>())
-            .def_readwrite("size", &utils::cpp_knapsack::size)
-            .def_readwrite("capacity", &utils::cpp_knapsack::capacity)
-            .def_readwrite("items", &utils::cpp_knapsack::items)
-            .def_readwrite("name", &utils::cpp_knapsack::name);
+py::class_<utils::cpp_knapsack>(m,
+"Knapsack")
+.
+def(py::init<utils::capacity_type, utils::capacity_type, std::vector < utils::cpp_item>, std::string
+>())
+.def_readwrite("size", &utils::cpp_knapsack::size)
+.def_readwrite("capacity", &utils::cpp_knapsack::capacity)
+.def_readwrite("items", &utils::cpp_knapsack::items)
+.def_readwrite("name", &utils::cpp_knapsack::name);
 
-    py::class_<utils::cpp_item>(m, "Item")
-            .def(py::init<utils::capacity_type, utils::capacity_type>())
-            .def_readwrite("profit", &utils::cpp_item::profit)
-            .def_readwrite("cost", &utils::cpp_item::cost);
+py::class_<utils::cpp_item>(m,
+"Item")
+.
+
+def (py::init<utils::capacity_type, utils::capacity_type>())
+
+.def_readwrite("profit", &utils::cpp_item::profit)
+.def_readwrite("cost", &utils::cpp_item::cost);
 
 
-    py::class_<utils::combo_measurement>(m, "ComboMeasurement")
-            .def_readwrite("objective_value", &utils::combo_measurement::objective_value)
-            .def_readwrite("item_assignments", &utils::combo_measurement::item_assignments)
-            .def_readwrite("elapsed_cycles", &utils::combo_measurement::elapsed_cycles);
+py::class_<utils::combo_measurement>(m,
+"ComboMeasurement")
+.def_readwrite("objective_value", &utils::combo_measurement::objective_value)
+.def_readwrite("item_assignments", &utils::combo_measurement::item_assignments)
+.def_readwrite("elapsed_cycles", &utils::combo_measurement::elapsed_cycles);
 
 }

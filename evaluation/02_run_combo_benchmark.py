@@ -7,15 +7,12 @@ have to pass a --gnu-time-cmd (namely a path to the gnu time executable).
 
 import json
 import subprocess
-import sys
 import os
 
 import numpy as np
 from algbench import Benchmark
 
 benchmark = Benchmark("./results_combo")
-
-sys.path.append(os.path.abspath('../pysrc'))
 
 from qtg.bindings import execute_combo, Knapsack
 from qtg.utils import load_instance

@@ -24,18 +24,25 @@ Further contents are:
 
 ## Installation
 
-Usually we would provide this project as a python package, but due to the need for x86 assembly, the user has to compile
-the project on their own.
-Cmake and Conan are used to manage the dependencies of this project.
-Therefore, it is necessary to have [cmake](https://cmake.org) and [conan](https://conan.io) installed.
-Create a build directory `mkdir build` and run `conan install . -of build --build=missing --settings=build_type=Release` in it.
-As we require x86 assembly, we need to compile the conan dependencies with a matching profile, e.g. when you use an arm
-machine (`conan install [...] --profile=x86`).
-Then, inside the `build` directory run `cmake .. -DCMAKE_BUILD_TYPE=Release` to generate the makefiles.
-Finally, run `make` to compile the project. We provide three executables:
-* `cmbcount` to count the cycles and memory usage of Combo
-* `simulation` to simulate the QTG
-* `generator` to generate new instances
+The code in this repository can be build installed using the package manager pip:
+```
+pip install .
+```
+
+Note that the installation will use a "default" conan profile if not configured otherwise. 
+Due to the need for x86 assembly, you might have to setup a custom profile in `.conan2/profiles` if you are using an
+ARM Mac.
+Such a profile could look something like this
+```
+[settings]
+arch=x86_64
+build_type=Release
+compiler=apple-clang
+compiler.cppstd=gnu17
+compiler.libcxx=libc++
+compiler.version=14
+os=Macos
+```
 
 The functions provided in [**knapsack.c**](src/common/knapsack.c) are able to format benchmark instances from two sources: [Pisinger's instances](http://hjemmesider.diku.dk/~pisinger/codes.html) described in [D. Pisinger, Computers & Operations Research 32, 2271 (2005)](https://doi.org/10.1016/j.cor.2004.03.002) and [Jooken et al.'s instances](https://github.com/JorikJooken/knapsackProblemInstances) described in [J. Jooken, P. Leyman, and P. De Causmaecker, European Journal of Operational Research 301, 841 (2022)](https://doi.org/10.1016/j.ejor.2021.12.009). The corresponding directories are assumed to exist within a folder called **instances**, but are not distributed within this repository.
 

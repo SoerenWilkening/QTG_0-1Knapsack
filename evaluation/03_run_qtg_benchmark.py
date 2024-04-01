@@ -10,8 +10,6 @@ from algbench import Benchmark
 
 benchmark = Benchmark("./results_qtg")
 
-sys.path.append(os.path.abspath('../pysrc'))
-
 from qtg.bindings import execute_combo, Knapsack, execute_q_max_search
 from qtg.utils import load_instance
 

@@ -1,7 +1,0 @@
-[requires]
-gsl/2.6
-gmp/6.2.1
-
-[generators]
-CMakeToolchain
-CMakeDeps

@@ -40,27 +40,6 @@ get_qft_name(qft_t method) {
 }
 
 const char *
-get_add_name(add_t method) {
-    switch (method) {
-        case DRAPER: {
-            return "Draper";
-        }
-
-        case DIRECT: {
-            return "Direct";
-        }
-
-        case COPYDIRECT: {
-            return "Copy&Direct";
-        }
-
-        default: {
-            return "Unspecified adder method!";
-        }
-    }
-}
-
-const char *
 get_mc_name(mc_t method) {
     switch (method) {
         case TOFFOLI: {

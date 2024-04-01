@@ -17,13 +17,3 @@ add_library(generator generator/jooken_generator.cpp)
 target_include_directories(generator PUBLIC ${INCLUDE_DIRECTORY})
 target_link_libraries(generator PUBLIC common)
 
-pybind11_add_module(_qtg_bindings bindings/qtg_bindings.cpp)
-target_include_directories(_qtg_bindings PUBLIC ${INCLUDE_DIRECTORY})
-target_link_libraries(_qtg_bindings PUBLIC common generator combo qtg_lib)
-
-# just more extensive warnings to spot bugs
-target_compile_options(
-        _qtg_bindings PRIVATE "$<$<CXX_COMPILER_ID:GNU,Clang,AppleClang>:-Wall>")
-target_compile_definitions(_qtg_bindings PRIVATE PYBIND11_DETAILED_ERROR_MESSAGES)
-# move the binary `_bindings` to its destination in the Python module
-install(TARGETS _qtg_bindings DESTINATION ./pysrc/qtg/bindings/)

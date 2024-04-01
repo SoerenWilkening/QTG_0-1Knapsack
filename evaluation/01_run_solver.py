@@ -1,9 +1,5 @@
 import argparse
 import json
-import sys
-import os
-
-sys.path.append(os.path.abspath('../pysrc'))
 
 from qtg.bindings import execute_combo
 from qtg.utils import load_instance
