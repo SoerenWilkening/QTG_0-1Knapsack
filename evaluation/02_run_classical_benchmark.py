@@ -73,7 +73,7 @@ def run_benchmark(measure_params: dict, instance: dict, solver: str):
 
 
 @slurminade.slurmify()
-def run(benchmark_dir, instance_path, gnu_time_cmd):
+def run(benchmark_dir, instance_path, instance_name, gnu_time_cmd):
     instance = load_instance(instance_path)
 
     benchmark = Benchmark(benchmark_dir)
@@ -113,14 +113,17 @@ if __name__ == "__main__":
     parser.add_argument("--gnu-time-cmd", type=str, default="gtime")
     args = parser.parse_args()
 
-    with slurminade.JobBundling(max_size=20):  # automatically bundles up to 20 tasks
+    with slurminade.JobBundling(max_size=5):  # automatically bundles up to 20 tasks
         for instance_name in sorted(os.listdir(args.instances_dir)):
             if not instance_name.endswith(".knap"):
                 continue
             print("Solving instance", instance_name)
 
         instance_path = os.path.join(args.instances_dir, instance_name)
-        run.distribute(benchmark_dir=args.out, instance_path=instance_path, gnu_time_cmd=args.gnu_time_cmd)
+        run.distribute(benchmark_dir=args.out,
+                       instance_path=instance_path,
+                       instance_name=instance_name,
+                       gnu_time_cmd=args.gnu_time_cmd)
 
     slurminade.join()  # make sure that the clean up jobs runs after all other jobs
     clean_up.distribute(benchmark_dir=args.out)
