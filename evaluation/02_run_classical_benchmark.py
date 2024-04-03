@@ -120,11 +120,11 @@ if __name__ == "__main__":
                 continue
             print("Solving instance", instance_name)
 
-        instance_path = os.path.join(args.instances_dir, instance_name)
-        run.distribute(benchmark_dir=args.out,
-                       instance_path=instance_path,
-                       instance_name=instance_name,
-                       gnu_time_cmd=args.gnu_time_cmd)
+            instance_path = os.path.join(args.instances_dir, instance_name)
+            run.distribute(benchmark_dir=args.out,
+                           instance_path=instance_path,
+                           instance_name=instance_name,
+                           gnu_time_cmd=args.gnu_time_cmd)
 
     slurminade.join()  # make sure that the clean up jobs runs after all other jobs
     clean_up.distribute(benchmark_dir=args.out)
