@@ -1,9 +1,6 @@
 """
 This script runs the benchmark for the QTG algorithm.
-
 """
-
-import sys
 import os
 
 from algbench import Benchmark
