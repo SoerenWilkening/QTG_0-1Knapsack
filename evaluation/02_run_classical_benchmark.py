@@ -20,6 +20,7 @@ slurminade.update_default_configuration(
     constraint="alggen05",
     cpus_per_task=4,
     mem_per_cpu="3G",
+    mail_type="FAIL",
 )  # global options for slurm
 
 
@@ -72,7 +73,7 @@ def run_benchmark(measure_params: dict, instance: dict, solver: str):
     return result
 
 
-@slurminade.slurmify()
+@slurminade.slurmify(mail_type="ALL")
 def run(benchmark_dir, instance_path, instance_name, gnu_time_cmd):
     instance = load_instance(instance_path)
 
