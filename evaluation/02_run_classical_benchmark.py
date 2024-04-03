@@ -41,6 +41,9 @@ def configure_grb_license_path():
         raise RuntimeError(msg)
 
 
+configure_grb_license_path()
+
+
 def run_benchmark(measure_params: dict, instance: dict, solver: str):
     """
     Run the benchmark for a single instance.
