@@ -50,6 +50,9 @@ def run_benchmark(measure_params: dict, instance: dict, solver: str):
         process = subprocess.run(' '.join(cmd), capture_output=True, text=True, shell=True, check=True)
 
         if process.returncode != 0:
+            print("Error running solver with", ' '.join(cmd))
+            print(process.stdout)
+            print(process.stderr)
             raise Exception("Error running solver with", ' '.join(cmd), process.stderr)
 
         # parse result file
