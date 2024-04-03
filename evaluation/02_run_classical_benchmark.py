@@ -17,10 +17,10 @@ import slurminade
 
 slurminade.update_default_configuration(
     partition="alg",
-    constraint="alggen05",
-    #cpus_per_task=4,
-    #mem_per_cpu="3G",
-    exclusive=True,
+    constraint="alggen03",
+    cpus_per_task=4,
+    mem_per_cpu="3G",
+    #exclusive=True,
     mail_type="FAIL",
 )  # global options for slurm
 
@@ -34,45 +34,47 @@ def run_benchmark(measure_params: dict, instance: dict, solver: str):
     :return: A dictionary with the results of the benchmark.
     """
 
-    with tempfile.TemporaryDirectory() as tmp_dir:
-        tmp_result_file = os.path.join(tmp_dir, "tmp_result.json")
-        measurement_file = os.path.join(tmp_dir, "tmp_measurement.out")
+    tmp_dir = tempfile.mkdtemp()
+    tmp_result_file = os.path.join(tmp_dir, "tmp_result.json")
+    measurement_file = os.path.join(tmp_dir, "tmp_measurement.out")
 
-        cmd = [measure_params["gnu_time_command"],
-               '-o', measurement_file,
-               '--format "%M %e %S %U"',
-               "python",
-               "01_run_solver.py",
-               "--instance", instance["instance_path"],
-               "-t", str(measure_params["timeout"]),
-               "--solver", solver,
-               "--out", tmp_result_file]
+    cmd = [measure_params["gnu_time_command"],
+           '-o', measurement_file,
+           '--format "%M %e %S %U"',
+           "python",
+           "01_run_solver.py",
+           "--instance", instance["instance_path"],
+           "-t", str(measure_params["timeout"]),
+           "--solver", solver,
+           "--out", tmp_result_file]
 
-        process = subprocess.run(' '.join(cmd), capture_output=True, text=True, shell=True, check=True)
+    process = subprocess.run(' '.join(cmd), capture_output=True, text=True, shell=True, check=True)
 
-        if process.returncode != 0:
-            print("Error running solver with", ' '.join(cmd))
-            print(process.stdout)
-            print(process.stderr)
-            raise Exception("Error running solver with", ' '.join(cmd), process.stderr)
+    if process.returncode != 0:
+        print("Error running solver with", ' '.join(cmd))
+        print(process.stdout)
+        print(process.stderr)
+        raise Exception("Error running solver with", ' '.join(cmd), process.stderr)
 
-        # parse result file
-        with open(tmp_result_file, "r") as f:
-            result = json.load(f)
+    # parse result file
+    with open(tmp_result_file, "r") as f:
+        result = json.load(f)
 
-        os.remove(tmp_result_file)
+    os.remove(tmp_result_file)
 
-        # parse measurement file
-        with open(measurement_file, "r") as f:
-            gtime_line = f.readlines()[-1]
+    # parse measurement file
+    with open(measurement_file, "r") as f:
+        gtime_line = f.readlines()[-1]
 
-        os.remove(measurement_file)
-        maximum_resident_size_kb, elapsed_real_time, elapsed_system_time, elapsed_user_time = gtime_line.split()
+    os.remove(measurement_file)
+    maximum_resident_size_kb, elapsed_real_time, elapsed_system_time, elapsed_user_time = gtime_line.split()
 
-        result["maximum_resident_size_kb"] = (int(maximum_resident_size_kb))
-        result["elapsed_real_time"] = (float(elapsed_real_time))
-        result["elapsed_system_time"] = (float(elapsed_system_time))
-        result["elapsed_user_time"] = (float(elapsed_user_time))
+    result["maximum_resident_size_kb"] = (int(maximum_resident_size_kb))
+    result["elapsed_real_time"] = (float(elapsed_real_time))
+    result["elapsed_system_time"] = (float(elapsed_system_time))
+    result["elapsed_user_time"] = (float(elapsed_user_time))
+
+    os.rmdir(tmp_dir)
 
     return result
 
