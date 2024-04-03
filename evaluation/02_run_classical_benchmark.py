@@ -34,8 +34,8 @@ def run_benchmark(measure_params: dict, instance: dict, solver: str):
     """
 
     with tempfile.TemporaryDirectory() as tmp_dir:
-        tmp_result_file = os.path.join(tmp_dir, "./tmp_result.json")
-        measurement_file = os.path.join(tmp_dir, "./tmp_measurement.out")
+        tmp_result_file = os.path.join(tmp_dir, "tmp_result.json")
+        measurement_file = os.path.join(tmp_dir, "tmp_measurement.out")
 
         cmd = [measure_params["gnu_time_command"],
                '-o', measurement_file,
@@ -73,7 +73,7 @@ def run_benchmark(measure_params: dict, instance: dict, solver: str):
     return result
 
 
-@slurminade.slurmify(mail_type="ALL")
+@slurminade.slurmify()
 def run(benchmark_dir, instance_path, instance_name, gnu_time_cmd):
     instance = load_instance(instance_path)
 
@@ -98,7 +98,7 @@ def run(benchmark_dir, instance_path, instance_name, gnu_time_cmd):
                       })
 
 
-@slurminade.slurmify()
+@slurminade.slurmify(mail_type="ALL")
 def clean_up(benchmark_dir):
     print("Compressing")
     benchmark = Benchmark(benchmark_dir)
