@@ -10,6 +10,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("-i", "--instance", type=str, required=True)
     parser.add_argument("-o", "--out", type=str, required=False)
+    parser.add_argument("-t", "--timeout", type=float, required=True)
     parser.add_argument("--solver", type=str,
                         choices=["ip", "cp-sat", "combo"], required=True)
     args = parser.parse_args()
@@ -28,7 +29,7 @@ if __name__ == "__main__":
         }
     else:
         solver = KnapsackSolver(knapsack, model_type=args.solver)
-        solution = solver.solve()
+        solution = solver.solve(time_limit=args.timeout)
         result = {
             "item_assignments": solution.item_assignments,
             "objective_value": solution.objective_value,

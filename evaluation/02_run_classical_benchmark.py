@@ -42,6 +42,7 @@ def run_benchmark(measure_params: dict, instance: dict, solver: str):
                "python",
                "01_run_solver.py",
                "--instance", instance["instance_path"],
+               "-t", measure_params["timeout"],
                "--solver", solver,
                "--out", tmp_result_file]
 
@@ -81,7 +82,8 @@ def run(benchmark_dir, instance_path, gnu_time_cmd):
         benchmark.run(run_benchmark,
                       solver=solver,
                       measure_params={
-                          "gnu_time_command": gnu_time_cmd
+                          "gnu_time_command": gnu_time_cmd,
+                          "timeout": 900
                       },
                       instance={
                           "instance_path": instance_path,
