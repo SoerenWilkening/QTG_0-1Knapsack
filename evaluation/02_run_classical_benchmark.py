@@ -20,9 +20,25 @@ slurminade.update_default_configuration(
     constraint="alggen03",
     cpus_per_task=4,
     mem_per_cpu="3G",
-    #exclusive=True,
+    # exclusive=True,
     mail_type="FAIL",
 )  # global options for slurm
+
+
+def configure_grb_license_path():
+    import socket
+    import os
+    from pathlib import Path
+
+    if "alg" not in socket.gethostname():
+        return
+
+    os.environ["GRB_LICENSE_FILE"] = os.path.join(
+        Path.home(), ".gurobi", socket.gethostname(), "gurobi.lic"
+    )
+    if not os.path.exists(os.environ["GRB_LICENSE_FILE"]):
+        msg = "Gurobi License File not found."
+        raise RuntimeError(msg)
 
 
 def run_benchmark(measure_params: dict, instance: dict, solver: str):
@@ -48,7 +64,7 @@ def run_benchmark(measure_params: dict, instance: dict, solver: str):
            "--solver", solver,
            "--out", tmp_result_file]
 
-    process = subprocess.run(' '.join(cmd), capture_output=True, text=True, shell=True, check=True)
+    process = subprocess.run(' '.join(cmd), capture_output=True, text=True, shell=True)
 
     if process.returncode != 0:
         print("Error running solver with", ' '.join(cmd))
