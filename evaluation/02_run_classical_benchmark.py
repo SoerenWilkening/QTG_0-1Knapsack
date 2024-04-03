@@ -43,7 +43,7 @@ def run_benchmark(measure_params: dict, instance: dict, solver: str):
                "python",
                "01_run_solver.py",
                "--instance", instance["instance_path"],
-               "-t", measure_params["timeout"],
+               "-t", str(measure_params["timeout"]),
                "--solver", solver,
                "--out", tmp_result_file]
 
