@@ -12,7 +12,9 @@ namespace py = pybind11;
 
 PYBIND11_MAKE_OPAQUE(std::vector<utils::cpp_item>);
 
-utils::combo_measurement execute_combo(const utils::cpp_knapsack &instance, bool write_solution, bool relx) {
+utils::combo_measurement execute_combo(const utils::cpp_knapsack &instance) {
+    bool write_solution = true;
+    bool relx = false;
     /* check whether instance is trivial */
     if (instance.cost_sum() <= instance.capacity) {
         // Full knapsack
@@ -167,7 +169,7 @@ utils::qtg_measurement execute_q_max_search(const utils::cpp_knapsack &instance,
     qtg_gates_decomp = gate_count_qtg(converted_knapsack, FGREEDY, COPPERSMITH, TOFFOLI, true);
 
     /* obtain optimal solution via Combo */
-    exact = execute_combo(instance, true, false).objective_value;
+    exact = execute_combo(instance).objective_value;
 
     do {
         /*

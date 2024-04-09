@@ -1,83 +1,147 @@
 # Simulator for the Quantum Tree Generator
 
-This repository contains the source code for the simulated Quantum Tree Generator (QTG), described in INSERTPAPERNAME. Please cite this paper as:
-
-INSERTPAPERREFERENCE
-
-The corresponding BibTeX entry is 
-
-INSERTBIBTEXENTRY
-
-## Content
-
-Primarily, this module simulates the application of the Quantum Tree generator and the QMaxSearch routine to knapsack benchmark instances. For the simulation and further comparison, it contains slightly modified source code for the state-of-the-art exact knapsack solver: [Combo](http://hjemmesider.diku.dk/~pisinger/codes.html).
-Further contents are:
-- [cmbcount](apps/cmbcount.c): Isolated execution of Combo; compiled version is used for cycle and memory count
-- [combowrp](src/combo/combowrp.c): Wrapper for Combo to match module structure
-- [knapsack](src/common/knapsack.c): Provides underlying knapsack data structure, sorting and greedy routines, and benchmark instance formatting
-- [main](apps/main.c): Reads knapsack instances to be considered, executes Combo and QMaxSearch, and saves results in files
-- [makefile](makefile_old): Compiles the entire project and creates the cmbcount and main executables
-- [qtgcount](src/simulation/qtgcount.c): Evaluates the resources needed for applying the QTG to given knapsack instances
-- [simulate](src/simulation/simulate.c): Simulates quantum measurements, amplitude amplification, QSearch, and QMaxSearch
-- [stategen](src/common/stategen.c): Simulates the QTG
-- [syslinks](src/common/syslinks.c): Provides OS-dependent functionalities for Windows, Linux, and MacOS
+This repository contains the source code for the simulated Quantum Tree Generator (QTG), described in "A quantum
+algorithm for the solution of the 0-1 Knapsack problem".
 
 ## Installation
 
-The code in this repository can be build installed using the package manager pip:
+The code in this repository is mostly implemented in C++. For easier usage we build Python wrappers 
+around the code that can be build installed using the package manager pip:
+
 ```
 pip install .
 ```
 
-Note that the installation will use a "default" conan profile if not configured otherwise. 
-Due to the need for x86 assembly, you might have to setup a custom profile in `.conan2/profiles` if you are using an
-ARM Mac.
-Such a profile could look something like this
-```
-[settings]
-arch=x86_64
-build_type=Release
-compiler=apple-clang
-compiler.cppstd=gnu17
-compiler.libcxx=libc++
-compiler.version=14
-os=Macos
-```
+> [!WARNING]  
+> For ARM-based architectures, the installation might fail due to the need for x86 assembly.
+> The installer will use a "default" conan profile if not configured otherwise.
+> Due to the need for x86 assembly, you might have to setup a custom profile in `.conan2/profiles` if you are using an
+> ARM Mac.
+> Such a profile could look something like this
+> ```
+> [settings]
+> arch=x86_64
+> build_type=Release
+> compiler=apple-clang
+> compiler.cppstd=gnu17
+> compiler.libcxx=libc++
+> compiler.version=14
+> os=Macos
+> ```
+> The profile can then be set in the `setup.py`.
 
-The functions provided in [**knapsack.c**](src/common/knapsack.c) are able to format benchmark instances from two sources: [Pisinger's instances](http://hjemmesider.diku.dk/~pisinger/codes.html) described in [D. Pisinger, Computers & Operations Research 32, 2271 (2005)](https://doi.org/10.1016/j.cor.2004.03.002) and [Jooken et al.'s instances](https://github.com/JorikJooken/knapsackProblemInstances) described in [J. Jooken, P. Leyman, and P. De Causmaecker, European Journal of Operational Research 301, 841 (2022)](https://doi.org/10.1016/j.ejor.2021.12.009). The corresponding directories are assumed to exist within a folder called **instances**, but are not distributed within this repository.
 
-## Execution
+Once everything is installed properly, you can run the tests to verify the installation.
+For this, you need to install the `pytest` package using `pip install pytest`.
 
-After following all prepration instructions, move to the root directory of this repository and then compile its conent using `make`. The [**main.c**](apps/main.c) file reads the instances to be considered from a file called **benchmark_instances.txt** within the same directory. This file should contain the relative paths to the instances to be considered - one instance per line - and should end with a line break.
-
-```
-instances/problemInstances/n_400_c_10000000000_g_2_f_0.3_eps_0_s_100/test.in
-instances/largecoeff_pisinger/knapPI_4_50_100000.csv
-instances/problemInstances/n_1200_c_10000000000_g_2_f_0.3_eps_0.1_s_100/test.in
-
+```bash
+pytest
 ```
 
-After the compiling process call and the preparation of **benchmark_instances.txt**, call the main executable using `.\main bias qsearch_iter reps` on Windows or `./main bias qsearch_iter reps` on Linux and MacOS. Replace `bias` by a non-negative integer value for the bias that should be applied during the QTG. `qsearch_iter` is to be replaced by a non-negative integer value for a loose upper bound on the calls to the QTG within the QSearch routine. Lastly, `reps` should be replaced by a non-negative integer value for the number of repeating the execution of Combo and QMaxSearch (together with their resource estimation) on each instance.
+## Running the Code
 
-During the execution, the following data is created and stored:
-- optimal values Combo achieves on all relevant subinstances (stored in `ìnstance_name`/combo/size=`n`_capacity=`c`.txt, where `n` and `c`are the instances number of items and capacity, respectively)
-- peak memory usage and elapsed cycles of Combo when only calculating the optimal value (stored in ìnstance_name`/combo/combo_counts_def=false.csv)
-- peak memory usage and elapsed cycles of Combo when also finding a solution vector (stored in ìnstance_name`/combo/combo_counts_def=true.csv)
-- number of qubits, necessary quantum cycles and gates with and without decomposing arising Toffoli gates, and whether optimal value was achieved by QMaxSearch (stored in `instance_name`/QTG/qtg_statistics_bias=`bias`_maxiter=`qsearch_iter`.csv)
+We implemented several classical solvers and the quantum tree generator.
+
+**Combo**
+
+```python
+
+from qtg.bindings import execute_combo
+from qtg.utils import load_instance
+
+instance = load_instance("path/to/instance")
+solution = execute_combo(instance)
+```
+
+The `solution` contains three values
+* `objective_value` The objective value (always optimal)
+* `item_assignments` The assignment of items to the knapsack
+* `elapsed_cycles` The number of CPU cycles it took to solve the instance.
+
+**IP and CP-SAT**
+```python
+from qtg.solvers import KnapsackSolver
+from qtg.utils import load_instance
+
+instance = load_instance("path/to/instance")
+timeout = 60 # time limit in seconds
+
+# set model type to one of ["ip", "cp-sat"]
+solver = KnapsackSolver(instance, model_type="ip")
+solution = solver.solve(time_limit=timeout)
+```
+
+The `solution` contains five values: 
+* `objective_value` The objective value
+* `item_assignments` The assignment of items to the knapsack
+* `best_bound` The best bound found by the solver
+* `optimal` `True` if the solution is optimal, `False` otherwise
+* `elapsed_time` The time it took to solve the instance.
+
+**QTG**
+
+```python
+from qtg.bindings import execute_q_max_search
+from qtg.utils import load_instance
+
+instance = load_instance("path/to/instance")
+bias = 4
+qtg_iterations = 100
+seed = 42
+solution = execute_q_max_search(instance, bias, qtg_iterations, seed)
+```
+
+The `solution` contains seven values:
+* `objective_value` The objective value
+* `item_assignments` The assignment of items to the knapsack
+* `qubit_count` The number of qubits used
+* `cycle_count` The number of cycles used
+* `gate_count` The number of gates used
+* `cycle_count_decomp` The number of cycles used for the decomposition
+* `gate_count_decomp` The number of gates used for the decomposition
 
 ## Generate new instances
 
-New instances can be generated using the instance generator by Jooken et al. with the command
 
-`make generate`
+New instances can be generated using the instance generator
+from [J. Jooken, P. Leyman, and P. De Causmaecker, European Journal of Operational Research 301, 841 (2022)](https://doi.org/10.1016/j.ejor.2021.12.009).
+Sample instances were provided by the authors in the
+[Jooken et al.'s instance set](https://github.com/JorikJooken/knapsackProblemInstances).
+Our instance generator calls Jooken's code to generate new instances and can be called via the command line.
 
-The methods reads the `generator_input.txt` file, that has to be in the format
+```bash
+usage: evaluation/00_generate.py [-h] [-n N] [-Z Z] [-g G] [-f FRAC] [-e EPSILON] [-s SMALL] [-o OUT]
 
+options:
+  -h, --help            show this help message and exit
+  -n N
+  -Z Z
+  -g G
+  -f FRAC, --frac FRAC
+  -e EPSILON, --epsilon EPSILON
+  -s SMALL, --small SMALL
+  -o OUT, --out OUT
 ```
-n
-c
-g
-f
-eps
-s
+
+There are other instance sets like the
+[Pisinger's instances](http://hjemmesider.diku.dk/~pisinger/codes.html) described
+in [D. Pisinger, Computers & Operations Research 32, 2271 (2005)](https://doi.org/10.1016/j.cor.2004.03.002)
+which are not part of this work.
+
+## Cite this work
+
+Please cite this paper as:
+
+Wilkening, Sören, et al. "A quantum algorithm for the solution of the 0-1 Knapsack problem." arXiv preprint arXiv:
+2310.06623 (2023).
+
+The corresponding BibTeX entry is
+
+```bibtex
+@article{wilkening2023quantum,
+  title={A quantum algorithm for the solution of the 0-1 Knapsack problem},
+  author={Wilkening, S{\"o}ren and Lefterovici, Andreea-Iulia and Binkowski, Lennart and Perk, Michael and Fekete, S{\'a}ndor and Osborne, Tobias J},
+  journal={arXiv preprint arXiv:2310.06623},
+  year={2023}
+}
 ```

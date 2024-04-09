@@ -9,7 +9,7 @@ from qtg.bindings import execute_q_max_search, execute_combo
 if __name__ == "__main__":
     knapsack = load_instance("test_instances/100.knap")
     print("Running")
-    combo_result = execute_combo(knapsack, True, False)
+    combo_result = execute_combo(knapsack)
 
     for seed in range(1):
         qtg_result = execute_q_max_search(knapsack,

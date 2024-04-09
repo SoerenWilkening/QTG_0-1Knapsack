@@ -7,6 +7,6 @@ class KnapsackSolution:
     item_assignments: Optional[List[bool]]
     objective_value: float
     elapsed_time: float
-    lower_bound: float
+    best_bound: float
     optimal: bool
 

@@ -18,8 +18,6 @@ import slurminade
 slurminade.update_default_configuration(
     partition="alg",
     constraint="alggen03",
-    #cpus_per_task=4,
-    #mem_per_cpu="8G",
     exclusive=True,
     mail_type="FAIL",
 )  # global options for slurm

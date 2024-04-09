@@ -18,10 +18,10 @@ if __name__ == "__main__":
 
     if args.solver == "combo":
         start = time.time()
-        result = execute_combo(knapsack, True, False)
+        result = execute_combo(knapsack)
         result = {
             "objective_value": result.objective_value,
-            "lower_bound": result.objective_value,
+            "best_bound": result.objective_value,
             "elapsed_cycles": result.elapsed_cycles,
             "elapsed_time": time.time()-start,
             "item_assignments": result.item_assignments,
@@ -34,7 +34,7 @@ if __name__ == "__main__":
             "item_assignments": solution.item_assignments,
             "objective_value": solution.objective_value,
             "elapsed_time": solution.elapsed_time,
-            "lower_bound": solution.lower_bound,
+            "best_bound": solution.best_bound,
             "optimal": solution.optimal
         }
 

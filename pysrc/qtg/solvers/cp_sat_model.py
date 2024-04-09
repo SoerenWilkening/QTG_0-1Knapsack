@@ -31,6 +31,6 @@ class KnapsackCPModel(cp_model.CpModel):
             elapsed_time=solver.WallTime(),
             item_assignments=[solver.Value(self._vars[i]) == 1 for i in range(len(self._vars))]
             if status in [cp_model.FEASIBLE, cp_model.OPTIMAL] else None,
-            lower_bound=solver.BestObjectiveBound(),
+            best_bound=solver.BestObjectiveBound(),
             optimal=status == cp_model.OPTIMAL
         )

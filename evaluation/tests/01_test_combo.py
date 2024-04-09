@@ -10,7 +10,7 @@ if __name__ == "__main__":
     knapsack = load_instance("test_instances/large1.knap")
 
     print("Running")
-    result = execute_combo(knapsack, True, False)
+    result = execute_combo(knapsack)
     print(result.objective_value)
     print(result.elapsed_cycles)
 

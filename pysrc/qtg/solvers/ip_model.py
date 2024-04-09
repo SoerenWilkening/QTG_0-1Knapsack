@@ -26,7 +26,7 @@ class KnapsackIPModel(gp.Model):
             objective_value=self.objVal,
             elapsed_time=self.Runtime,
             item_assignments=[bool(self._vars[i].x) for i in self._vars] if self.SolCount > 0 else None,
-            lower_bound=self.objBound,
+            best_bound=self.objBound,
             optimal=self.status == GRB.OPTIMAL
         )
 

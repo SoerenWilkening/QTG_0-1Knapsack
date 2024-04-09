@@ -10,7 +10,7 @@ import numpy as np
 def test_combo():
     path = Path(__file__).parent / "data" / "example.knap"
     instance = load_instance(path)
-    solution = execute_combo(instance, True, False)
+    solution = execute_combo(instance)
 
     assert solution.objective_value == 7500303027
     assert all(a == b for a, b in zip(
@@ -33,12 +33,12 @@ def test_ip_model():
     solver = KnapsackSolver(instance=instance, model_type="ip")
     solution = solver.solve()
 
-    combo_solution = execute_combo(instance, True, False)
+    combo_solution = execute_combo(instance)
 
     assert solution.objective_value == combo_solution.objective_value
     assert all([a == b for a, b in zip(solution.item_assignments, combo_solution.item_assignments)])
     assert solution.elapsed_time > 0
-    assert solution.lower_bound == combo_solution.objective_value
+    assert solution.best_bound == combo_solution.objective_value
     assert solution.optimal
 
 
@@ -49,12 +49,12 @@ def test_cp_sat_model():
     solver = KnapsackSolver(instance=instance, model_type="cp-sat")
     solution = solver.solve()
 
-    combo_solution = execute_combo(instance, True, False)
+    combo_solution = execute_combo(instance)
 
     assert solution.objective_value == combo_solution.objective_value
     assert all([a == b for a, b in zip(solution.item_assignments, combo_solution.item_assignments)])
     assert solution.elapsed_time > 0
-    assert solution.lower_bound == combo_solution.objective_value
+    assert solution.best_bound == combo_solution.objective_value
     assert solution.optimal
 
 
