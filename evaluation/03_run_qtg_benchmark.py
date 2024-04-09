@@ -80,7 +80,7 @@ def run_benchmark(measure_params: dict, alg_params: dict, instance: dict, instan
 
 
 @slurminade.slurmify()
-def run(instance_path: str, benchmark_dir: str, iterations: int):
+def run(instance_name: str, instance_path: str, benchmark_dir: str, iterations: int):
     instance = load_instance(instance_path)
     benchmark = Benchmark(benchmark_dir)
 
@@ -136,7 +136,7 @@ if __name__ == "__main__":
             print("Solving instance", instance_name)
             instance_path = os.path.join(args.instances_dir, instance_name)
 
-            run.distribute(instance_path=instance_path, benchmark_dir=args.out, iterations=args.iterations)
+            run.distribute(instance_name=instance_name, instance_path=instance_path, benchmark_dir=args.out, iterations=args.iterations)
 
     slurminade.join()  # make sure that the clean up jobs runs after all other jobs
     clean_up.distribute(benchmark_dir=args.out)
