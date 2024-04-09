@@ -2,28 +2,43 @@ from pathlib import Path
 
 from qtg.solvers import KnapsackSolver
 from qtg.utils import load_instance
-from qtg.bindings import execute_combo
+from qtg.bindings import execute_combo, execute_expknap
 
 import numpy as np
 
+solutions_for_instance = {
+    Path(__file__).parent / "data" / "example.knap": [False, False, False, False, False, False,
+                                                      False, False, False, False, False, False,
+                                                      False, False, False, False, False, False,
+                                                      False, False, False, False, False, False,
+                                                      False, False, True, False, True, False, False,
+                                                      True, False, False, True, True, True, True,
+                                                      True, True, True, True, True, True, True,
+                                                      True, True, True, True, True]
+}
 
 def test_combo():
     path = Path(__file__).parent / "data" / "example.knap"
     instance = load_instance(path)
     solution = execute_combo(instance)
 
+    assert sum(instance.items[i].profit for i in range(len(instance.items))
+               if solution.item_assignments[i]) == solution.objective_value
     assert solution.objective_value == 7500303027
     assert all(a == b for a, b in zip(
         solution.item_assignments,
-        [False, False, False, False, False, False,
-         False, False, False, False, False, False,
-         False, False, False, False, False, False,
-         False, False, False, False, False, False,
-         False, False, True, False, True, False, False,
-         True, False, False, True, True, True, True,
-         True, True, True, True, True, True, True,
-         True, True, True, True, True]
+        solutions_for_instance[path]
     ))
+
+
+def test_expknap():
+    path = Path(__file__).parent / "data" / "example.knap"
+    instance = load_instance(path)
+    solution = execute_expknap(instance)
+
+    assert sum(instance.items[i].profit for i in range(len(instance.items))
+               if solution.item_assignments[i]) == solution.objective_value
+    assert solution.objective_value == 7500202083
 
 
 def test_ip_model():
@@ -35,6 +50,8 @@ def test_ip_model():
 
     combo_solution = execute_combo(instance)
 
+    assert sum(instance.items[i].profit for i in range(len(instance.items))
+               if solution.item_assignments[i]) == solution.objective_value
     assert solution.objective_value == combo_solution.objective_value
     assert all([a == b for a, b in zip(solution.item_assignments, combo_solution.item_assignments)])
     assert solution.elapsed_time > 0
@@ -51,6 +68,8 @@ def test_cp_sat_model():
 
     combo_solution = execute_combo(instance)
 
+    assert sum(instance.items[i].profit for i in range(len(instance.items))
+               if solution.item_assignments[i]) == solution.objective_value
     assert solution.objective_value == combo_solution.objective_value
     assert all([a == b for a, b in zip(solution.item_assignments, combo_solution.item_assignments)])
     assert solution.elapsed_time > 0

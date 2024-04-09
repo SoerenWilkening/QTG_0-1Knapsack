@@ -19,7 +19,7 @@ add_subdirectory(src)
 
 pybind11_add_module(_qtg_bindings src/bindings/_qtg_bindings.cpp)
 target_include_directories(_qtg_bindings PUBLIC ${INCLUDE_DIRECTORY})
-target_link_libraries(_qtg_bindings PUBLIC common generator combo qtg_lib)
+target_link_libraries(_qtg_bindings PUBLIC common generator combo qtg_lib expknap)
 
 # just more extensive warnings to spot bugs
 target_compile_options(

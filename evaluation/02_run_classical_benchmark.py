@@ -102,7 +102,7 @@ def run(benchmark_dir, instance_path, instance_name, gnu_time_cmd):
 
     benchmark = Benchmark(benchmark_dir)
 
-    for solver in ["ip", "cp-sat", "combo"]:
+    for solver in ["expknap"]:
         benchmark.run(run_benchmark,
                       solver=solver,
                       measure_params={

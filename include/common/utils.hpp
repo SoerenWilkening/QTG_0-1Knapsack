@@ -8,6 +8,7 @@
 #include <unistd.h>
 
 #include "combo/combo.h"
+#include "expknap/expknap.h"
 #include "knapsack.h"
 #include "simulation/simulate.h"
 
@@ -31,9 +32,13 @@ namespace utils {
         [[nodiscard]] inline combo_item to_combo_item() const {
             return combo_item{0, profit, cost, false};
         }
+
+        [[nodiscard]] inline exitem_2 to_expknap_item() const {
+            return exitem_2{0,profit, cost, false};
+        }
     };
 
-    struct combo_measurement {
+    struct pissinger_measurement {
         capacity_type objective_value;
         std::vector<bool> item_assignments;
         uint64_t elapsed_cycles;

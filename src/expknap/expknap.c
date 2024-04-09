@@ -53,11 +53,8 @@
 	                          definitions
    ====================================================================== */
 
-#if defined(_WIN32) || defined(_WIN64)
-#include "..\include\expknap.h"
-#else
-#include "../include/expknap.h"
-#endif
+#include "expknap/expknap.h"
+
 
 #define TESTS    50 /* Number of test instances to be generated */
 

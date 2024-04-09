@@ -6,7 +6,7 @@
  * =============================================================================
  */
 
-#include "knapsack.h"
+#include "../common/knapsack.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -25,6 +25,7 @@ extern "C" {
 				 type declarations
    ====================================================================== */
 /*typedef int  boolean;*/ /* boolean variables */
+typedef int ntype;   /* number of states/items   */
 typedef long itype;   /* item profits and weights */
 typedef long  stype;   /* sum of pofit or weight */
 typedef int           BOOL; /* logical variable         */
@@ -32,6 +33,7 @@ typedef int           boolean; /* logical variable         */
 
 /* item as seen externally */
 typedef struct {
+    ntype   idx;   /* index */
     itype   p;     /* profit */
     itype   w;     /* weight */
     BOOL x;     /* solution variable */
