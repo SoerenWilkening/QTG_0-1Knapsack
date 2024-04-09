@@ -58,6 +58,23 @@ The `solution` contains three values
 * `item_assignments` The assignment of items to the knapsack
 * `elapsed_cycles` The number of CPU cycles it took to solve the instance.
 
+**Expknap**
+
+```python
+
+from qtg.bindings import execute_expknap
+from qtg.utils import load_instance
+
+instance = load_instance("path/to/instance")
+solution = execute_expknap(instance)
+```
+
+The `solution` contains three values
+* `objective_value` The objective value (always optimal)
+* `item_assignments` The assignment of items to the knapsack
+* `elapsed_cycles` The number of CPU cycles it took to solve the instance.
+
+
 **IP and CP-SAT**
 ```python
 from qtg.solvers import KnapsackSolver
@@ -100,9 +117,17 @@ The `solution` contains seven values:
 * `cycle_count_decomp` The number of cycles used for the decomposition
 * `gate_count_decomp` The number of gates used for the decomposition
 
-## Generate new instances
+## Evaluation
 
+All evaluation scripts are located in the `evaluation` folder. The scripts are written in Python and can be run from the
+command line. See the following rundown of the folder structure:
 
+* `evaluation/instances` contains the instances used for the evaluation.
+    * `hard` contains instances that are hard to solver and thus only used for the comparison of classical algorithms.
+    * `easy` contains instances that are easy to solve and thus used for the evaluation of QTG.
+* `evaluation/results` contains the results of the evaluation.
+
+## Generate new Instances
 New instances can be generated using the instance generator
 from [J. Jooken, P. Leyman, and P. De Causmaecker, European Journal of Operational Research 301, 841 (2022)](https://doi.org/10.1016/j.ejor.2021.12.009).
 Sample instances were provided by the authors in the
@@ -132,7 +157,7 @@ which are not part of this work.
 
 Please cite this paper as:
 
-Wilkening, Sören, et al. "A quantum algorithm for the solution of the 0-1 Knapsack problem." arXiv preprint arXiv:
+> Wilkening, Sören, et al. "A quantum algorithm for the solution of the 0-1 Knapsack problem." arXiv preprint arXiv:
 2310.06623 (2023).
 
 The corresponding BibTeX entry is
