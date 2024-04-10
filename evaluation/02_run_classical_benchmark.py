@@ -12,7 +12,7 @@ import tempfile
 from algbench import Benchmark
 
 from qtg.utils import load_instance
-
+import numpy as np
 import slurminade
 
 slurminade.update_default_configuration(
@@ -99,7 +99,6 @@ def run_benchmark(measure_params: dict, instance: dict, solver: str):
 @slurminade.slurmify()
 def run(benchmark_dir, instance_path, instance_name, gnu_time_cmd):
     instance = load_instance(instance_path)
-
     benchmark = Benchmark(benchmark_dir)
 
     def retrieve_combo():
@@ -113,8 +112,6 @@ def run(benchmark_dir, instance_path, instance_name, gnu_time_cmd):
     assert len(combo_solution) <= 1, f"Expected at most one solution for {instance_name}, got {len(combo_solution)}"
 
     def run_solver(s, timeout=900):
-        print(f"Running {s} on {instance_name}")
-        """
         benchmark.run(run_benchmark,
                       solver=s,
                       measure_params={
@@ -131,7 +128,6 @@ def run(benchmark_dir, instance_path, instance_name, gnu_time_cmd):
                           "capacity": instance.capacity,
                           "size": instance.size,
                       })
-        """
 
     if len(combo_solution) == 0:
         run_solver("combo")
@@ -141,7 +137,7 @@ def run(benchmark_dir, instance_path, instance_name, gnu_time_cmd):
     combo_solution = combo_solution[0]
 
     for solver in ["expknap", "ip", "cp-sat"]:
-        timeout = int(combo_solution["result"]["elapsed_time"])
+        timeout = int(np.ceil(combo_solution["result"]["elapsed_real_time"]))
         run_solver(s=solver, timeout=timeout)
 
 
