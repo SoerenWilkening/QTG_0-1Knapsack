@@ -20,6 +20,7 @@ class KnapsackIPModel(gp.Model):
 
     def solve(self, time_limit):
         self.Params.TimeLimit = time_limit
+        self.Params.NumericFocus = 3
         self.optimize()
 
         return KnapsackSolution(

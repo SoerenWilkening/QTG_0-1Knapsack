@@ -15,10 +15,10 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    for n in range(1000, 2800, 50):
-        for g in [2, 3, 4, 6, 8, 10]:
-            for eps in [1e-05]:
-                for small in [300]:
+    for n in range(200, 3000, 200):
+        for g in [2]:
+            for eps in [0, 1e-05]:
+                for small in [100, 200, 300]:
                     knapsack = jooken_generate(n, args.Z, g, args.frac, eps, small)
                     knapsack.name = knapsack.name.replace("f_0.30", "f_0.3")
                     knapsack.name = knapsack.name.replace("0.00000", "0")

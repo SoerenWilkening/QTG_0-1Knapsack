@@ -39,7 +39,7 @@ typedef struct {
     BOOL x;     /* solution variable */
 } exitem_2;
 
-stype expknap(exitem_2 *f, exitem_2 *l, stype cap);
+stype expknap(exitem_2 *f, exitem_2 *l, stype cap, itype timeout);
 
 
 #ifdef __cplusplus

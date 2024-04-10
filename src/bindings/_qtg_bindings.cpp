@@ -76,7 +76,7 @@ utils::pissinger_measurement execute_combo(const utils::cpp_knapsack &instance) 
     };
 }
 
-utils::pissinger_measurement execute_expknap(const utils::cpp_knapsack &instance) {
+utils::pissinger_measurement execute_expknap(const utils::cpp_knapsack &instance, int timeout = 10) {
     /* check whether instance is trivial */
     if (instance.cost_sum() <= instance.capacity) {
         // Full knapsack
@@ -109,7 +109,7 @@ utils::pissinger_measurement execute_expknap(const utils::cpp_knapsack &instance
     auto last_item = &expknap_items[instance.items.size() - 1];
 
     uint64_t start = rdtsc();
-    auto opt_sol = expknap(first_item, last_item, instance.capacity);
+    auto opt_sol = expknap(first_item, last_item, instance.capacity, timeout);
     uint64_t end = rdtsc();
 
     std::vector<bool> solution = std::vector<bool>(instance.items.size(), false);

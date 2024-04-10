@@ -35,8 +35,14 @@ Once everything is installed properly, you can run the tests to verify the insta
 For this, you need to install the `pytest` package using `pip install pytest`.
 
 ```bash
-pytest
+pytest -m "not long"
 ```
+
+To run the long tests, run
+
+```bash
+pytest -m "long"
+``` 
 
 ## Running the Code
 

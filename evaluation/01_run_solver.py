@@ -30,7 +30,7 @@ if __name__ == "__main__":
         },
     elif args.solver == "expknap":
         start = time.time()
-        result = execute_expknap(knapsack)
+        result = execute_expknap(knapsack, int(args.timeout))
         result = {
             "solver": "expknap",
             "objective_value": result.objective_value,

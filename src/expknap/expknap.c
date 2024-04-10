@@ -90,7 +90,6 @@ typedef unsigned long long uint64;
 #define SORTSTACK 200
 #define MIN_TEST_TIME 0.25
 #define CONV_TO_MS 10000
-#define MAX_SOLVE_TIME 10
 
 
 /* ======================================================================
@@ -182,7 +181,7 @@ void endtime(long *time)
 }*/
 
 
-stype expknap(exitem_2 *f, exitem_2 *l, stype cap);
+stype expknap(exitem_2 *f, exitem_2 *l, stype cap, itype timeout);
 
 /* ======================================================================
                                    sumdata
@@ -540,13 +539,13 @@ boolean sorti(istack **stack)
 				elebranch
    ====================================================================== */
 
-short elebranch(itype ps, itype ws, item_2 *s, item_2 *t, struct timespec *start)
+short elebranch(itype ps, itype ws, item_2 *s, item_2 *t, struct timespec *start, itype timeout)
 {
   short improved;
 
   struct timespec now;
   clock_gettime(CLOCK_MONOTONIC, &now);
-  if ((now.tv_sec - start->tv_sec) + (now.tv_nsec - start->tv_nsec) / 1000000000.0 > MAX_SOLVE_TIME)
+  if ((now.tv_sec - start->tv_sec) + (now.tv_nsec - start->tv_nsec) / 1000000000.0 > timeout)
   {
 	  return -1;
   }
@@ -562,7 +561,7 @@ short elebranch(itype ps, itype ws, item_2 *s, item_2 *t, struct timespec *start
     for (;;) {
       if (t > lsort) { if (!sorti(&stack2)) break; }
       if (DET(ps-(z+1), ws, t->p, t->w) < 0) break;
-	  short out = elebranch(ps + t->p, ws + t->w, s, t+1, start);
+	  short out = elebranch(ps + t->p, ws + t->w, s, t+1, start, timeout);
 	  if (out < 0) {
 		  return -1;
 	  }
@@ -575,7 +574,7 @@ short elebranch(itype ps, itype ws, item_2 *s, item_2 *t, struct timespec *start
     for (;;) {
       if (s < fsort) { if (!sorti(&stack1)) break; }
       if (DET(ps-(z+1), ws, s->p, s->w) < 0) break;
-	  short out = elebranch(ps - s->p, ws - s->w, s-1, t, start);
+	  short out = elebranch(ps - s->p, ws - s->w, s-1, t, start, timeout);
 	  if (out < 0) {
 		  return -1;
 	  }
@@ -641,7 +640,7 @@ stype heuristic(item_2 *f, item_2 *l)
 				expknap
    ====================================================================== */
 
-stype expknap(exitem_2 *f, exitem_2 *l, stype cap)
+stype expknap(exitem_2 *f, exitem_2 *l, stype cap, itype timeout)
 {
   register item_2 *j;
   register exitem_2 *i;
@@ -675,7 +674,7 @@ stype expknap(exitem_2 *f, exitem_2 *l, stype cap)
   clock_gettime(CLOCK_MONOTONIC, &start);
   
   short out;
-  out = elebranch(0, wsb-c, br-1, br, &start);
+  out = elebranch(0, wsb-c, br-1, br, &start, timeout);
   if (out < 0) {
 	  return -1;
   }

@@ -16,3 +16,6 @@ xfail_strict = true
 filterwarnings = ["error"]
 log_cli_level = "info"
 testpaths = ["tests"]
+markers = [
+    "long: mark a test as very long to run",
+]

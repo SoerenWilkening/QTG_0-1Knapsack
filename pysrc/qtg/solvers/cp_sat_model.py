@@ -22,6 +22,8 @@ class KnapsackCPModel(cp_model.CpModel):
 
     def solve(self, time_limit):
         solver = cp_model.CpSolver()
+        solver.parameters.log_search_progress = True
+        solver.log_callback = print  # (str)->None
         solver.parameters.max_time_in_seconds = time_limit
 
         status = solver.Solve(self)

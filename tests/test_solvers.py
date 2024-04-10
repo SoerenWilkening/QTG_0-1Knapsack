@@ -17,6 +17,7 @@ solutions_for_instance = {
                                                       True, True, True, True, True]
 }
 
+
 def test_combo():
     path = Path(__file__).parent / "data" / "example.knap"
     instance = load_instance(path)
@@ -34,7 +35,7 @@ def test_combo():
 def test_expknap():
     path = Path(__file__).parent / "data" / "example.knap"
     instance = load_instance(path)
-    solution = execute_expknap(instance)
+    solution = execute_expknap(instance, 200)
 
     assert sum(instance.items[i].profit for i in range(len(instance.items))
                if solution.item_assignments[i]) == solution.objective_value

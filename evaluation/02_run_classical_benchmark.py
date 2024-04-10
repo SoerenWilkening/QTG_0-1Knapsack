@@ -102,12 +102,24 @@ def run(benchmark_dir, instance_path, instance_name, gnu_time_cmd):
 
     benchmark = Benchmark(benchmark_dir)
 
-    for solver in ["expknap"]:
+    def retrieve_combo():
+        return [
+            row for row in benchmark if row['parameters']['args']['instance']['name'] == instance_name
+                                        and row['parameters']['args']['solver'] == "combo"
+        ]
+
+    combo_solution = retrieve_combo()
+
+    assert len(combo_solution) <= 1, f"Expected at most one solution for {instance_name}, got {len(combo_solution)}"
+
+    def run_solver(s, timeout=900):
+        print(f"Running {s} on {instance_name}")
+        """
         benchmark.run(run_benchmark,
-                      solver=solver,
+                      solver=s,
                       measure_params={
                           "gnu_time_command": gnu_time_cmd,
-                          "timeout": 900
+                          "timeout": timeout
                       },
                       instance={
                           "instance_path": instance_path,
@@ -119,6 +131,18 @@ def run(benchmark_dir, instance_path, instance_name, gnu_time_cmd):
                           "capacity": instance.capacity,
                           "size": instance.size,
                       })
+        """
+
+    if len(combo_solution) == 0:
+        run_solver("combo")
+        combo_solution = retrieve_combo()
+        assert len(combo_solution) == 1, f"Expected exactly one solution for {instance_name}, got {len(combo_solution)}"
+
+    combo_solution = combo_solution[0]
+
+    for solver in ["expknap", "ip", "cp-sat"]:
+        timeout = int(combo_solution["result"]["elapsed_time"])
+        run_solver(s=solver, timeout=timeout)
 
 
 @slurminade.slurmify(mail_type="ALL")
