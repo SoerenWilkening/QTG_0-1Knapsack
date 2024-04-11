@@ -12,7 +12,7 @@ def test_ip_model_large():
     instance = load_instance(path)
 
     solver = KnapsackSolver(instance=instance, model_type="ip")
-    solution = solver.solve(time_limit=900) # expect a result after ~600 seconds
+    solution = solver.solve(time_limit=900)  # expect a result after ~600 seconds
 
     combo_solution = execute_combo(instance)
 
@@ -26,12 +26,14 @@ def test_ip_model_large():
     assert solution.optimal
 
 
+@pytest.mark.long
 def test_expknap_large():
     path = Path(__file__).parent / "data" / "1000.knap"
     instance = load_instance(path)
     solution = execute_expknap(instance, 60)
 
     assert solution.objective_value == -1
+
 
 """
 def test_cpsat_large():
@@ -41,5 +43,3 @@ def test_cpsat_large():
     solver = KnapsackSolver(instance=instance, model_type="cp-sat")
     solution = solver.solve(time_limit=900) # expect a result after ~600 seconds
 """
-
-
