@@ -19,7 +19,7 @@ class KnapsackIPModel(gp.Model):
                        self._instance.capacity)
 
     def solve(self, time_limit):
-        self.Params.SoftMemLimit = 120
+        self.Params.SoftMemLimit = 118
         self.Params.TimeLimit = time_limit
         self.Params.NumericFocus = 3
         self.optimize()
