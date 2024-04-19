@@ -12,7 +12,7 @@ if __name__ == "__main__":
     parser.add_argument("-o", "--out", type=str, required=False)
     parser.add_argument("-t", "--timeout", type=float, required=True)
     parser.add_argument("--solver", type=str,
-                        choices=["ip", "cp-sat", "combo", "expknap"], required=True)
+                        choices=["ip", "cp-sat", "combo", "greedy", "expknap"], required=True)
     args = parser.parse_args()
     knapsack = load_instance(args.instance)
 

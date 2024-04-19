@@ -136,7 +136,7 @@ def run(benchmark_dir, instance_path, instance_name, gnu_time_cmd):
 
     combo_solution = combo_solution[0]
 
-    for solver in ["expknap", "ip", "cp-sat"]:
+    for solver in ["expknap", "ip", "cp-sat", "greedy"]:
         timeout = int(np.ceil(combo_solution["result"]["elapsed_real_time"]))
         run_solver(s=solver, timeout=timeout)
 

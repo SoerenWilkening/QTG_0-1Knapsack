@@ -18,6 +18,10 @@ class KnapsackIPModel(gp.Model):
         self.addConstr(gp.quicksum(self._vars[i] * self._instance.items[i].cost for i in self._vars) <=
                        self._instance.capacity)
 
+    def add_solution(self, solution: KnapsackSolution):
+        for i, value in enumerate(solution.item_assignments):
+            self._vars[i].start = int(value)
+
     def solve(self, time_limit):
         self.Params.SoftMemLimit = 118
         self.Params.TimeLimit = time_limit

@@ -31,6 +31,22 @@ def test_combo():
         solutions_for_instance[path]
     ))
 
+def test_greedy():
+    path = Path(__file__).parent / "data" / "example.knap"
+    instance = load_instance(path)
+
+    solver = KnapsackSolver(instance=instance, model_type="greedy")
+    solution = solver.solve()
+
+    combo_solution = execute_combo(instance)
+
+    assert sum(instance.items[i].profit for i in range(len(instance.items))
+               if solution.item_assignments[i]) == solution.objective_value
+    assert solution.objective_value <= combo_solution.objective_value
+    assert solution.elapsed_time > 0
+    assert solution.best_bound == 0
+    assert solution.optimal == False
+
 
 def test_expknap():
     path = Path(__file__).parent / "data" / "example.knap"

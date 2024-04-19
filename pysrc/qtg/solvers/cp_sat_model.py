@@ -20,10 +20,13 @@ class KnapsackCPModel(cp_model.CpModel):
 
         self.Maximize(sum(self._vars[i] * item.profit for i, item in enumerate(self._instance.items)))
 
+    def add_solution(self, solution: KnapsackSolution):
+        for i, value in enumerate(solution.item_assignments):
+            self.AddHint(self._vars[i], int(value))
+
     def solve(self, time_limit):
         solver = cp_model.CpSolver()
         solver.parameters.log_search_progress = True
-        solver.log_callback = print  # (str)->None
         solver.parameters.max_time_in_seconds = time_limit
 
         status = solver.Solve(self)
