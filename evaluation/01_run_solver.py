@@ -27,7 +27,7 @@ if __name__ == "__main__":
             "elapsed_time": time.time()-start,
             "item_assignments": result.item_assignments,
             "optimal": True
-        },
+        }
     elif args.solver == "expknap":
         start = time.time()
         result = execute_expknap(knapsack, int(args.timeout))
