@@ -158,7 +158,7 @@ if __name__ == "__main__":
     parser.add_argument("--gnu-time-cmd", type=str, default="gtime")
     args = parser.parse_args()
 
-    with slurminade.JobBundling(max_size=1):  # automatically bundles up to 20 tasks
+    with slurminade.JobBundling(max_size=3):  # automatically bundles up to 20 tasks
         for instance_name in sorted(os.listdir(args.instances_dir)):
             if not instance_name.endswith(".knap"):
                 continue
