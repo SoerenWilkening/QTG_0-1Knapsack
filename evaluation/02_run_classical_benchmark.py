@@ -99,9 +99,9 @@ def run_benchmark(measure_params: dict, instance: dict, solver: str):
 @slurminade.slurmify()
 def run(benchmark_dir, instance_path, instance_name, gnu_time_cmd):
     instance = load_instance(instance_path)
-    benchmark = Benchmark(benchmark_dir)
 
     def retrieve_combo():
+        benchmark = Benchmark(benchmark_dir)
         return [
             row for row in benchmark if row['parameters']['args']['instance']['name'] == instance_name
                                         and row['parameters']['args']['solver'] == "combo"
@@ -112,6 +112,7 @@ def run(benchmark_dir, instance_path, instance_name, gnu_time_cmd):
     assert len(combo_solution) <= 1, f"Expected at most one solution for {instance_name}, got {len(combo_solution)}"
 
     def run_solver(s, timeout=900):
+        benchmark = Benchmark(benchmark_dir)
         benchmark.run(run_benchmark,
                       solver=s,
                       measure_params={
