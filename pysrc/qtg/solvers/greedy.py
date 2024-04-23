@@ -1,4 +1,6 @@
 import time
+
+import numpy as np
 from qtg.bindings._qtg_bindings import Knapsack
 
 from qtg.solvers.solution import KnapsackSolution
@@ -20,7 +22,9 @@ class GreedyKnapsack:
                                     optimal=False)
 
         items = list(self.instance.items)
-        sorted_indices = list(sorted(range(len(items)), key=lambda x: items[x].profit / items[x].cost, reverse=True))
+        sorted_indices = list(sorted(range(len(items)),
+                                     key=lambda x: items[x].profit / items[x].cost if items[x].cost > 0 else np.inf,
+                                     reverse=True))
 
         if time.time() - start > timelimit:
             return empty_solution()
