@@ -11,9 +11,30 @@ def save_instance(instance: Knapsack, out_dir: str):
         f.write(str(instance.capacity))
 
 
+def load_smith_miles(file_path, lines):
+    """
+    Load a Smith-Miles instance from a list of lines.
+    :param lines:
+    :return:
+    """
+    lines = lines[2:]
+    capacity = int(lines[0])
+    items = ItemVector()
+    for line in lines[1:]:
+        cost, profit = line.split("\t")
+        items.append(Item(int(profit), int(cost)))
+
+    knapsack = Knapsack(len(items), capacity, items, os.path.basename(file_path))
+    return knapsack
+
+
 def load_instance(file_path: str):
     with open(file_path, "r") as f:
         lines = f.readlines()
+
+        if not lines[0].rstrip().isnumeric():
+            return load_smith_miles(file_path, lines)
+
         size = int(lines[0])
         items = ItemVector()
         for line in lines[1:-1]:
