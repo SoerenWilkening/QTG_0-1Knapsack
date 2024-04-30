@@ -97,7 +97,7 @@ def run_benchmark(measure_params: dict, instance: dict, solver: str):
 
 
 @slurminade.slurmify()
-def run(benchmark_dir, instance_path, instance_name, gnu_time_cmd):
+def run(benchmark_dir, instance_path, instance_name, gnu_time_cmd, timeout):
     instance = load_instance(instance_path)
 
     def retrieve_combo():
@@ -137,8 +137,8 @@ def run(benchmark_dir, instance_path, instance_name, gnu_time_cmd):
 
     combo_solution = combo_solution[0]
 
+    timeout = int(np.ceil(combo_solution["result"]["elapsed_real_time"])) if timeout == 0 else timeout
     for solver in ["expknap", "ip", "cp-sat", "greedy"]:
-        timeout = int(np.ceil(combo_solution["result"]["elapsed_real_time"]))
         run_solver(s=solver, timeout=timeout)
 
 
@@ -156,6 +156,7 @@ if __name__ == "__main__":
     parser.add_argument("-d", "--instances-dir", type=str, required=True)
     parser.add_argument("-o", "--out", type=str, required=True)
     parser.add_argument("--gnu-time-cmd", type=str, default="gtime")
+    parser.add_argument("--timeout", type=int, default=0)
     args = parser.parse_args()
 
     with slurminade.JobBundling(max_size=3):  # automatically bundles up to 20 tasks
@@ -168,6 +169,7 @@ if __name__ == "__main__":
             run.distribute(benchmark_dir=args.out,
                            instance_path=instance_path,
                            instance_name=instance_name,
+                           timeout=args.timeout,
                            gnu_time_cmd=args.gnu_time_cmd)
 
     slurminade.join()  # make sure that the clean up jobs runs after all other jobs
