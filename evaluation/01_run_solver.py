@@ -47,7 +47,8 @@ if __name__ == "__main__":
             "objective_value": solution.objective_value,
             "elapsed_time": solution.elapsed_time,
             "best_bound": solution.best_bound,
-            "optimal": solution.optimal
+            "optimal": solution.optimal,
+            "node_count": solution.node_count
         }
 
     if args.out:

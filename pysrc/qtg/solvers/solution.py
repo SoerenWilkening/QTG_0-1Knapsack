@@ -9,4 +9,5 @@ class KnapsackSolution:
     elapsed_time: float
     best_bound: float
     optimal: bool
+    node_count: float = 0
 

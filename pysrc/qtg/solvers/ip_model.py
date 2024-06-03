@@ -23,17 +23,20 @@ class KnapsackIPModel(gp.Model):
             self._vars[i].start = int(value)
 
     def solve(self, time_limit):
-        self.Params.SoftMemLimit = 118
         self.Params.TimeLimit = time_limit
         self.Params.NumericFocus = 3
+        self.Params.MIPGap = 0.0
         self.optimize()
+
+        node_count = self.NodeCount
 
         return KnapsackSolution(
             objective_value=self.objVal,
             elapsed_time=self.Runtime,
             item_assignments=[bool(self._vars[i].x) for i in self._vars] if self.SolCount > 0 else None,
             best_bound=self.objBound,
-            optimal=self.status == GRB.OPTIMAL
+            optimal=self.status == GRB.OPTIMAL,
+            node_count=node_count
         )
 
 
