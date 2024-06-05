@@ -1,3 +1,5 @@
+from pathlib import Path, PosixPath
+
 from .bindings import Knapsack, Item, ItemVector
 import os
 
@@ -48,6 +50,9 @@ def load_kplib(file_path, lines):
 
 
 def load_instance(file_path: str):
+    if isinstance(file_path, PosixPath) or isinstance(file_path, Path):
+        file_path = str(file_path)
+
     with open(file_path, "r") as f:
         lines = f.readlines()
 
