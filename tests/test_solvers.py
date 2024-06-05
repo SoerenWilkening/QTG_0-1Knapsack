@@ -2,7 +2,7 @@ from pathlib import Path
 
 from qtg.solvers import KnapsackSolver
 from qtg.utils import load_instance
-from qtg.bindings import execute_combo, execute_expknap
+from qtg.bindings import execute_combo, execute_expknap, execute_qbnb, QBnBAlgorithm
 
 import numpy as np
 
@@ -30,6 +30,7 @@ def test_combo():
         solution.item_assignments,
         solutions_for_instance[path]
     ))
+
 
 def test_greedy():
     path = Path(__file__).parent / "data" / "example.knap"
@@ -114,3 +115,14 @@ def test_timeout_cp_sat():
 
     assert np.isclose(solution.elapsed_time, 10, rtol=1e-1), f"Elapsed time: {solution.elapsed_time}"
     assert not solution.optimal
+
+
+def test_qbnb():
+    path = Path(__file__).parent / "data" / "650.knap"
+    instance = load_instance(str(path))
+
+    for solver in [QBnBAlgorithm.Montanaro, QBnBAlgorithm.Ambainis]:
+        solution = execute_qbnb(instance, solver.value, int(1e10))
+
+        assert solution.objective_value > 0
+        assert solution.elapsed_cycles_lb > 0

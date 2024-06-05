@@ -314,7 +314,7 @@ count_t gate_count_comp(bit_t, num_t, mc_t, bool_t, bool_t);
  *		parameter4:	Decomposition method for any multi-controls.
  * Returns:			Number of qubits of one application of the QTG.
  */
-bit_t qubit_count_qtg(const knapsack_t*, ub_t, qft_t, mc_t);
+bit_t qubit_count_qtg(const knapsack_t *, ub_t, qft_t, mc_t);
 
 /*
  * Function: 		cycle_count_qtg
@@ -331,7 +331,7 @@ bit_t qubit_count_qtg(const knapsack_t*, ub_t, qft_t, mc_t);
  *      parameter5: Whether toffoli gates should be decomposed or not.
  * Returns:			Number of cycles of one application of the QTG.
  */
-count_t cycle_count_qtg(const knapsack_t*, ub_t, qft_t, mc_t, bool_t);
+count_t cycle_count_qtg(const knapsack_t *, ub_t, qft_t, mc_t, bool_t);
 
 /*
  * Function: 		gate_count_qtg
@@ -347,7 +347,7 @@ count_t cycle_count_qtg(const knapsack_t*, ub_t, qft_t, mc_t, bool_t);
  *      parameter5: Whether toffoli gates should be decomposed or not.
  * Returns:			Number of gates of one application of the QTG.
  */
-count_t gate_count_qtg(const knapsack_t*, ub_t, qft_t, mc_t, bool_t);
+count_t gate_count_qtg(const knapsack_t *, ub_t, qft_t, mc_t, bool_t);
 
 /*
  * Function:        print-qtg_counts
@@ -362,7 +362,12 @@ count_t gate_count_qtg(const knapsack_t*, ub_t, qft_t, mc_t, bool_t);
  *      parameter4: Decomposition method for any multi-controls.
  *      parameter5: Whether toffoli gates should be decomposed or not.
  */
-void print_qtg_counts(const knapsack_t*, ub_t, qft_t, mc_t, bool_t);
+void print_qtg_counts(const knapsack_t *, ub_t, qft_t, mc_t, bool_t);
+
+
+count_t cycleCountQbnbDiffucsionOperator(knapsack_t *k);
+
+count_t cycle_count_quantum_fractional_greedy(knapsack_t *k, int first_item, int assignment);
 
 #ifdef __cplusplus
 }

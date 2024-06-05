@@ -28,9 +28,31 @@ def load_smith_miles(file_path, lines):
     return knapsack
 
 
+def load_kplib(file_path, lines):
+    """
+    Load a KP-Lib instance from a list of lines.
+    :param lines:
+    :return:
+    """
+    size = int(lines[1])
+    capacity = int(lines[2])
+    items = ItemVector()
+    for line in lines[4:]:
+        cost, profit = line.split()
+        items.append(Item(int(profit), int(cost)))
+
+    assert size == len(items)
+
+    knapsack = Knapsack(size, capacity, items, os.path.basename(file_path))
+    return knapsack
+
+
 def load_instance(file_path: str):
     with open(file_path, "r") as f:
         lines = f.readlines()
+
+        if file_path.endswith(".kp"):
+            return load_kplib(file_path, lines)
 
         if not lines[0].rstrip().isnumeric():
             return load_smith_miles(file_path, lines)

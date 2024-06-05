@@ -44,6 +44,11 @@ namespace utils {
         uint64_t elapsed_cycles;
     };
 
+    struct qbnb_measurement {
+        capacity_type objective_value;
+        uint64_t elapsed_cycles_lb;
+    };
+
     struct cpp_knapsack {
         capacity_type size;
         capacity_type capacity;

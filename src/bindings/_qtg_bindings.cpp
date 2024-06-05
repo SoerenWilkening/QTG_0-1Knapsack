@@ -8,6 +8,7 @@
 #include "expknap/expknap.h"
 #include "common/syslinks.h"
 #include "simulation/simulate.h"
+#include "simulation/quantum_branch_and_bound.h"
 
 namespace py = pybind11;
 
@@ -76,6 +77,50 @@ utils::pissinger_measurement execute_combo(const utils::cpp_knapsack &instance) 
     };
 }
 
+utils::qbnb_measurement execute_qbnb(const utils::cpp_knapsack &instance,
+                                     int method,
+                                     std::size_t max_node_count = 1e10) {
+    long exact = execute_combo(instance).objective_value;
+
+    int exec = 1; // is set to 0 once the bnb should stop
+
+    size_t count_nodes = 0;
+
+    // We have to convert the knapsack instance into the used knapsack_t type.
+    auto converted_knapsack = create_empty_knapsack((int) instance.size, instance.capacity);
+
+    converted_knapsack->name = (char *) instance.name.c_str();
+
+    for (int i = 0; i < instance.items.size(); i++) {
+        converted_knapsack->items[i].idx = i;
+        converted_knapsack->items[i].cost = instance.items[i].cost;
+        converted_knapsack->items[i].profit = instance.items[i].profit;
+    }
+
+    auto bnb = branch_and_bound(converted_knapsack,
+                                0,
+                                exact,
+                                &count_nodes,
+                                0L,
+                                converted_knapsack->capacity,
+                                &exec,
+                                method,
+                                max_node_count);
+
+    /* The walk operator contains two diffusion operators */
+    count_t cycle_count = 2 * cycleCountQbnbDiffucsionOperator(converted_knapsack);
+    uint64_t phase_estimation_oracles = (1. + 1. / std::pow(.1, 1.5)) *
+                                        std::pow(2, std::ceil(
+                                                std::log2(std::sqrt(count_nodes * converted_knapsack->size))) + 1);
+
+    uint64_t total_count = phase_estimation_oracles * cycle_count;
+
+    return utils::qbnb_measurement{
+            .objective_value = bnb,
+            .elapsed_cycles_lb = total_count
+    };
+}
+
 utils::pissinger_measurement execute_expknap(const utils::cpp_knapsack &instance, int timeout = 10) {
     /* check whether instance is trivial */
     if (instance.cost_sum() <= instance.capacity) {
@@ -100,9 +145,9 @@ utils::pissinger_measurement execute_expknap(const utils::cpp_knapsack &instance
         expknap_items[i] = instance.items[i].to_expknap_item();
         expknap_items[i].idx = i;
 
-        assert(combo_items[i].p == instance.items[i].profit);
-        assert(combo_items[i].w == instance.items[i].cost);
-        assert(combo_items[i].x == false);
+        assert(expknap_items[i].p == instance.items[i].profit);
+        assert(expknap_items[i].w == instance.items[i].cost);
+        assert(expknap_items[i].x == false);
     }
 
     auto first_item = expknap_items;
@@ -308,44 +353,61 @@ utils::qtg_measurement execute_q_max_search(const utils::cpp_knapsack &instance,
 }
 
 
-PYBIND11_MODULE(_qtg_bindings, m) {
+PYBIND11_MODULE(_qtg_bindings, m
+) {
     m.def("jooken_generate", &generator::generate);
     m.def("execute_combo", &execute_combo);
     m.def("execute_expknap", &execute_expknap);
     m.def("execute_q_max_search", &execute_q_max_search);
 
-    py::bind_vector <std::vector<utils::cpp_item>>(m, "ItemVector");
+    py::bind_vector<std::vector<utils::cpp_item>>(m,
+                                                  "ItemVector");
 
-    py::class_<resource_t>(m, "QTGResources")
-    .def_readwrite("cycle_count", &resource_t::cycle_count)
-    .def_readwrite("cycle_count_decomp", &resource_t::cycle_count_decomp)
-    .def_readwrite("gate_count", &resource_t::gate_count)
-    .def_readwrite("gate_count_decomp", &resource_t::gate_count_decomp)
-    .def_readwrite("qubit_count", &resource_t::qubit_count);
+    py::class_<resource_t>(m,
+                           "QTGResources")
+            .def_readwrite("cycle_count", &resource_t::cycle_count)
+            .def_readwrite("cycle_count_decomp", &resource_t::cycle_count_decomp)
+            .def_readwrite("gate_count", &resource_t::gate_count)
+            .def_readwrite("gate_count_decomp", &resource_t::gate_count_decomp)
+            .def_readwrite("qubit_count", &resource_t::qubit_count);
 
     py::class_<utils::qtg_measurement>(m,
-    "QTGMeasurement")
-    .def_readwrite("remaining_cost", &utils::qtg_measurement::remaining_cost)
-    .def_readwrite("objective_value", &utils::qtg_measurement::objective_value)
-    .def_readwrite("item_assignments", &utils::qtg_measurement::item_assignments)
-    .def_readwrite("resources", &utils::qtg_measurement::resources);
+                                       "QTGMeasurement")
+            .def_readwrite("remaining_cost", &utils::qtg_measurement::remaining_cost)
+            .def_readwrite("objective_value", &utils::qtg_measurement::objective_value)
+            .def_readwrite("item_assignments", &utils::qtg_measurement::item_assignments)
+            .def_readwrite("resources", &utils::qtg_measurement::resources);
 
-    py::class_<utils::cpp_knapsack>(m,"Knapsack").def(py::init<utils::capacity_type,
-                                                      utils::capacity_type,
-                                                      std::vector < utils::cpp_item>, std::string>())
-    .def_readwrite("size", &utils::cpp_knapsack::size)
-    .def_readwrite("capacity", &utils::cpp_knapsack::capacity)
-    .def_readwrite("items", &utils::cpp_knapsack::items)
-    .def_readwrite("name", &utils::cpp_knapsack::name);
+    py::class_<utils::cpp_knapsack>(m,
+                                    "Knapsack").
+                    def(py::init<utils::capacity_type,
+                    utils::capacity_type,
+                    std::vector<utils::cpp_item>, std::string
+            >())
+            .def_readwrite("size", &utils::cpp_knapsack::size)
+            .def_readwrite("capacity", &utils::cpp_knapsack::capacity)
+            .def_readwrite("items", &utils::cpp_knapsack::items)
+            .def_readwrite("name", &utils::cpp_knapsack::name);
 
-    py::class_<utils::cpp_item>(m,"Item").def (py::init<utils::capacity_type, utils::capacity_type>())
-    .def_readwrite("profit", &utils::cpp_item::profit)
-    .def_readwrite("cost", &utils::cpp_item::cost);
+    py::class_<utils::cpp_item>(m,
+                                "Item").
+
+                    def(py::init<utils::capacity_type, utils::capacity_type>())
+
+            .def_readwrite("profit", &utils::cpp_item::profit)
+            .def_readwrite("cost", &utils::cpp_item::cost);
 
 
-    py::class_<utils::pissinger_measurement>(m,"ComboMeasurement")
-    .def_readwrite("objective_value", &utils::pissinger_measurement::objective_value)
-    .def_readwrite("item_assignments", &utils::pissinger_measurement::item_assignments)
-    .def_readwrite("elapsed_cycles", &utils::pissinger_measurement::elapsed_cycles);
+    py::class_<utils::pissinger_measurement>(m,
+                                             "ComboMeasurement")
+            .def_readwrite("objective_value", &utils::pissinger_measurement::objective_value)
+            .def_readwrite("item_assignments", &utils::pissinger_measurement::item_assignments)
+            .def_readwrite("elapsed_cycles", &utils::pissinger_measurement::elapsed_cycles);
 
+
+    py::class_<utils::qbnb_measurement>(m, "QBNBMeasurement")
+            .def_readwrite("objective_value", &utils::qbnb_measurement::objective_value)
+            .def_readwrite("elapsed_cycles_lb", &utils::qbnb_measurement::elapsed_cycles_lb);
+
+    m.def("execute_qbnb", &execute_qbnb);
 }

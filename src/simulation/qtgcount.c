@@ -283,7 +283,7 @@ gate_count_comp(bit_t reg_size, num_t to_compare, mc_t method, \
 }
 
 bit_t
-qubit_count_qtg(const knapsack_t* k, ub_t method_ub, qft_t method_qft, \
+qubit_count_qtg(const knapsack_t *k, ub_t method_ub, qft_t method_qft, \
                 mc_t method_mc) {
     bit_t reg_a = path_reg_size(k);
     bit_t reg_b = cost_reg_size(k);
@@ -296,7 +296,7 @@ qubit_count_qtg(const knapsack_t* k, ub_t method_ub, qft_t method_qft, \
 }
 
 count_t
-cycle_count_qtg(const knapsack_t* k, ub_t method_ub, qft_t method_qft, \
+cycle_count_qtg(const knapsack_t *k, ub_t method_ub, qft_t method_qft, \
                 mc_t method_mc, bool_t tof_decomp) {
     bit_t reg_b = cost_reg_size(k);
     bit_t reg_c = profit_reg_size(k, method_ub);
@@ -362,7 +362,7 @@ cycle_count_qtg(const knapsack_t* k, ub_t method_ub, qft_t method_qft, \
 
     second_block += MAX(num_bits(reg_b - lso(k->items[break__item].cost) - 1), \
                         num_bits(reg_c - lso(k->items[break__item].profit) - 1)) \
-                        + 1 + cost_qft;
+ + 1 + cost_qft;
 
 
     for (bit_t i = break__item + 1; i < k->size - 1; ++i) {
@@ -417,7 +417,7 @@ cycle_count_qtg(const knapsack_t* k, ub_t method_ub, qft_t method_qft, \
 }
 
 count_t
-gate_count_qtg(const knapsack_t* k, ub_t method_ub, qft_t method_qft, \
+gate_count_qtg(const knapsack_t *k, ub_t method_ub, qft_t method_qft, \
                mc_t method_mc, bool_t tof_decomp) {
     bit_t reg_b = cost_reg_size(k);
     bit_t reg_c = profit_reg_size(k, method_ub);
@@ -445,16 +445,16 @@ gate_count_qtg(const knapsack_t* k, ub_t method_ub, qft_t method_qft, \
     add_gates += gate_count_add(reg_c, k->items[k->size - 1].profit);
 
     return comp_gates /* all comparison gates */ \
-           + (2 * ((count_t)(k->size) - 1 - break__item - 1) + 1)
-             * gate_count_qft(reg_b, method_qft, tof_decomp) /* (un)QFT-ing cost register */ \
-           + sub_gates /* all subtraction gates */ 
+ + (2 * ((count_t) (k->size) - 1 - break__item - 1) + 1)
+   * gate_count_qft(reg_b, method_qft, tof_decomp) /* (un)QFT-ing cost register */ \
+ + sub_gates /* all subtraction gates */
            /* (un)QFT-ing profit register */ \
-           + 2 * gate_count_qft(reg_c, method_qft, tof_decomp) \
-           + add_gates; // all addition gates
+ + 2 * gate_count_qft(reg_c, method_qft, tof_decomp) \
+ + add_gates; // all addition gates
 }
 
 void
-print_qtg_counts(const knapsack_t* k, ub_t method_ub, qft_t method_qft,
+print_qtg_counts(const knapsack_t *k, ub_t method_ub, qft_t method_qft,
                  mc_t method_mc, bool_t tof_decomp) {
     printf("The QTG ressources are estimated with the following methods:\n");
     printf("Upper bound on the total profit (for profit register size): %s\n", \
@@ -471,4 +471,60 @@ print_qtg_counts(const knapsack_t* k, ub_t method_ub, qft_t method_qft,
                                                      method_mc, tof_decomp));
     printf("Number of gates: %u\n\n", gate_count_qtg(k, method_ub, method_qft, \
                                                      method_mc, tof_decomp));
+}
+
+count_t cycleCountQbnbDiffucsionOperator(knapsack_t *k) {
+    count_t cycle_count = 0;
+    count_t single_count;
+    int frac_register = profit_reg_size(k, 0);
+    int cap_register = cost_reg_size(k);
+//    int cap_register = 34;
+
+    for (int item = 0; item < k->size; ++item) {
+        single_count = 0;
+        /* Adding up the profits of all the already assigned items
+         * also the remaining capacities have to be calculated
+         * When fractional greedy for both assignments is calculated in parallel,
+         * the profit and the remaining cost has to be calculated on seperate registers */
+        single_count += cycle_count_qft(MAX(frac_register, cap_register), COPPERSMITH, 0);
+        for (int i = 0; i < item; ++i) {
+            single_count += 2 * num_bits(frac_register) + 4;
+        }
+        single_count += cycle_count_qft(MAX(frac_register, cap_register), COPPERSMITH, 0);
+
+        /* apply fractional greedy.
+         * we assume, we can compute fractional greedy for both assignments in parallel
+         * only the longer circuit accounts to the total cycle count */
+        if (item < k->size - 1)
+            /* fractional greedy will only be applied, if there is at least one non-assigned variable */
+            single_count += MAX(cycle_count_quantum_fractional_greedy(k, item, 0),
+                                cycle_count_quantum_fractional_greedy(k, item, 1));
+        cycle_count = MAX(cycle_count, single_count);
+
+    }
+
+    /* In the diffusion operator the upper bound has to be reverted */
+    return 2 * cycle_count;
+}
+
+
+count_t cycle_count_quantum_fractional_greedy(knapsack_t *k, int first_item, int assignment) {
+    /* if the first item is assigned to 0 we can already skip to the next one */
+    int item = first_item + (1 - assignment);
+    int b = break_item(k);
+    int cost_reg = cost_reg_size(k);
+
+    count_t cycle_count = 0;
+
+    for (int i = item; i < b; i++) {
+        /* Check, if item can be included */
+        cycle_count += cycle_count_comp(cost_reg,
+                                        k->items[item].cost,
+                                        TOFFOLI, TRUE, FALSE);
+
+        /* Subtract the weight */
+        cycle_count += 2 * cycle_count_qft(cost_reg, COPPERSMITH, 0) + 3;
+    }
+
+    return cycle_count;
 }
