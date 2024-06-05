@@ -2,7 +2,7 @@ from pathlib import Path
 
 from qtg.solvers import KnapsackSolver
 from qtg.utils import load_instance
-from qtg.bindings import execute_combo, execute_expknap, execute_qbnb, QBnBAlgorithm
+from qtg.bindings import execute_combo, execute_expknap, execute_qbnb, QBnBAlgorithm, execute_ctg
 
 import numpy as np
 
@@ -126,3 +126,18 @@ def test_qbnb():
 
         assert solution.objective_value > 0
         assert solution.elapsed_cycles_lb > 0
+
+
+def test_ctg():
+    path = Path(__file__).parent / "data" / "650.knap"
+    instance = load_instance(path)
+
+    solution = execute_ctg(instance, 10, 10, 12345)
+    print(solution)
+    print(solution.objective_values)
+    print(solution.elapsed_cycles)
+    print(solution.total_iterations)
+    print(solution.qtg_estimate_cycles)
+    print(solution.bias)
+    print(solution.qtg_cycles)
+

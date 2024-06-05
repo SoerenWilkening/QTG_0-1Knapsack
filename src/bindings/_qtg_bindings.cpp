@@ -14,6 +14,8 @@ namespace py = pybind11;
 
 PYBIND11_MAKE_OPAQUE(std::vector<utils::cpp_item>);
 
+#define SWAP(a, b, T)  do { T q; q = *(a); *(a) = *(b); *(b) = q; } while(0);
+
 utils::pissinger_measurement execute_combo(const utils::cpp_knapsack &instance) {
     bool relx = false;
     /* check whether instance is trivial */
@@ -75,6 +77,114 @@ utils::pissinger_measurement execute_combo(const utils::cpp_knapsack &instance) 
             solution,
             end - start
     };
+}
+
+
+utils::ctg_measurement execute_ctg(const utils::cpp_knapsack &instance, size_t max_iter,
+                                   size_t n_iterations, size_t seed) {
+    gsl_rng *rng;
+    gsl_rng_env_setup();
+    rng = gsl_rng_alloc(gsl_rng_default);
+
+    gsl_rng_set(rng, seed);
+
+    auto converted_knapsack = create_empty_knapsack((int) instance.size, instance.capacity);
+
+    converted_knapsack->name = (char *) instance.name.c_str();
+
+    for (int i = 0; i < instance.items.size(); i++) {
+        converted_knapsack->items[i].idx = i;
+        converted_knapsack->items[i].cost = instance.items[i].cost;
+        converted_knapsack->items[i].profit = instance.items[i].profit;
+    }
+
+    double random_num;
+    int j;
+
+    double bias = (double) converted_knapsack->size / 4;
+    sort_knapsack(converted_knapsack, RATIO);
+
+    // optimal solution
+    auto combo_result = execute_combo(instance).objective_value;
+
+    // number of cycles required by quantum routine
+    long qtg_cycles = cycle_count_qtg(converted_knapsack, FGREEDY, COPPERSMITH, TOFFOLI, false);
+
+    auto result = utils::ctg_measurement{
+            .bias = bias,
+            .qtg_cycles = qtg_cycles,
+            .elapsed_cycles = std::vector<uint64_t>(),
+            .total_iterations = std::vector<int>(),
+            .qtg_estimate_cycles = std::vector<uint64_t>()
+    };
+
+    // runs_per_instance defines, how often ctg is repeated, to get success probability
+    for (int run = 0; run < n_iterations; ++run) {
+        uint64_t t1 = rdtsc();
+        auto cur_sol = new path_t();
+        mpz_init2(cur_sol->vector, converted_knapsack->size);
+
+        apply_int_greedy(converted_knapsack);
+        // store greedy results in state
+        cur_sol->tot_profit = converted_knapsack->tot_profit;
+        for (int i = 0; i < converted_knapsack->size; i++) {
+            if (converted_knapsack->items[i].included) {
+                mpz_setbit(cur_sol->vector, i);
+            } else {
+                mpz_clrbit(cur_sol->vector, i);
+            }
+        }
+
+        int iteration = 0;
+
+        double c = 6. / 5;
+        int rounds = 0;
+        int total_iteratioins = 0;
+
+        while (iteration < max_iter) {
+            int m = ceil(pow(c, rounds));
+            j = gsl_rng_uniform_int(rng, m) + 1;
+            iteration += 2 * j + 1;
+            total_iteratioins += iteration;
+            rounds++;
+
+            path_t* new_sol = static_cast<path_t *>(malloc(sizeof(path_t)));
+            for (int l = 0; l < 4 * j * j; l++) {
+                new_sol->tot_profit = 0;
+                mpz_init2(new_sol->vector, converted_knapsack->size);
+                long remain = converted_knapsack->capacity;
+                for (bit_t i = 0; i < converted_knapsack->size; ++i) {
+                    if (converted_knapsack->items[i].cost <= remain) {
+                        // random number for sampling from probability distr.
+                        random_num = gsl_rng_uniform(rng);
+                        int bit = mpz_tstbit(cur_sol->vector, i);
+                        if (random_num > (1 + (1 - bit) * bias) / (bias + 2)) {
+                            mpz_setbit(new_sol->vector, i);
+                            remain -= converted_knapsack->items[i].cost;
+                            new_sol->tot_profit += converted_knapsack->items[i].profit;
+                        }
+                    }
+                }
+                if (new_sol->tot_profit > cur_sol->tot_profit) {
+                    SWAP(cur_sol, new_sol, path_t);
+                    iteration = 0;
+                    rounds = 0;
+                    break;
+                }
+            }
+            free_path(new_sol);
+        }
+        uint64_t elapsed_cycles = rdtsc() - t1;
+
+        result.objective_values.push_back(cur_sol->tot_profit);
+        result.elapsed_cycles.push_back(elapsed_cycles);
+        result.total_iterations.push_back(total_iteratioins);
+        result.qtg_estimate_cycles.push_back((uint64_t) (((double) total_iteratioins * qtg_cycles) / 10));
+    }
+
+    gsl_rng_free(rng);
+
+    return result;
 }
 
 utils::qbnb_measurement execute_qbnb(const utils::cpp_knapsack &instance,
@@ -410,4 +520,15 @@ PYBIND11_MODULE(_qtg_bindings, m
             .def_readwrite("elapsed_cycles_lb", &utils::qbnb_measurement::elapsed_cycles_lb);
 
     m.def("execute_qbnb", &execute_qbnb);
+
+
+    m.def("execute_ctg", &execute_ctg);
+
+    py::class_<utils::ctg_measurement>(m, "CTGMeasurement")
+            .def_readwrite("bias", &utils::ctg_measurement::bias)
+            .def_readwrite("qtg_cycles", &utils::ctg_measurement::qtg_cycles)
+            .def_readwrite("elapsed_cycles", &utils::ctg_measurement::elapsed_cycles)
+            .def_readwrite("total_iterations", &utils::ctg_measurement::total_iterations)
+            .def_readwrite("qtg_estimate_cycles", &utils::ctg_measurement::qtg_estimate_cycles)
+            .def_readwrite("objective_values", &utils::ctg_measurement::objective_values);
 }

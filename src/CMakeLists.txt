@@ -13,7 +13,9 @@ add_library(expknap expknap/expknap.c)
 target_include_directories(expknap PUBLIC ${INCLUDE_DIRECTORY})
 target_link_libraries(expknap PUBLIC common map)
 
-add_library(qtg_lib simulation/simulate.c simulation/qtgcount.c simulation/quantum_branch_and_bound.c)
+add_library(qtg_lib simulation/simulate.c
+        simulation/qtgcount.c
+        simulation/quantum_branch_and_bound.c)
 target_include_directories(qtg_lib PUBLIC ${INCLUDE_DIRECTORY})
 target_link_libraries(qtg_lib PUBLIC common combo)
 

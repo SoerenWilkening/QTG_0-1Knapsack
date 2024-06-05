@@ -49,6 +49,15 @@ namespace utils {
         uint64_t elapsed_cycles_lb;
     };
 
+    struct ctg_measurement {
+        double bias;
+        long qtg_cycles;
+        std::vector<uint64_t> elapsed_cycles;
+        std::vector<int> total_iterations;
+        std::vector<uint64_t> qtg_estimate_cycles;
+        std::vector<capacity_type> objective_values;
+    };
+
     struct cpp_knapsack {
         capacity_type size;
         capacity_type capacity;
