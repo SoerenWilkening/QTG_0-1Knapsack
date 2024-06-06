@@ -67,7 +67,7 @@ def run(instance_name: str, instance_path: str, benchmark_dir: str):
     benchmark = Benchmark(benchmark_dir)
     benchmark.run(run_benchmark,
                   alg_params={
-                      "max_iter": 100 + instance.size // 4,
+                      "max_iter": 500 + instance.size // 4,
                       "bias": len(instance.items) / 4,
                       "n_iterations": 100,
                       "seed": 42,
