@@ -57,7 +57,6 @@ def run_benchmark(alg_params: dict, instance: dict, instance_: Knapsack):
         "elapsed_cycles": ctg_result.elapsed_cycles,
         "total_iterations": ctg_result.total_iterations,
         "qtg_estimate_cycles": ctg_result.qtg_estimate_cycles,
-        "bias": ctg_result.bias,
         "qtg_cycles": ctg_result.qtg_cycles,
     }
 
