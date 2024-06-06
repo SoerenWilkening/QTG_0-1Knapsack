@@ -80,7 +80,9 @@ utils::pissinger_measurement execute_combo(const utils::cpp_knapsack &instance) 
 }
 
 
-utils::ctg_measurement execute_ctg(const utils::cpp_knapsack &instance, size_t max_iter,
+utils::ctg_measurement execute_ctg(const utils::cpp_knapsack &instance,
+                                   double bias,
+                                   size_t max_iter,
                                    size_t n_iterations, size_t seed) {
     gsl_rng *rng;
     gsl_rng_env_setup();
@@ -101,17 +103,12 @@ utils::ctg_measurement execute_ctg(const utils::cpp_knapsack &instance, size_t m
     double random_num;
     int j;
 
-    double bias = (double) converted_knapsack->size / 4;
     sort_knapsack(converted_knapsack, RATIO);
-
-    // optimal solution
-    auto combo_result = execute_combo(instance).objective_value;
 
     // number of cycles required by quantum routine
     long qtg_cycles = cycle_count_qtg(converted_knapsack, FGREEDY, COPPERSMITH, TOFFOLI, false);
 
     auto result = utils::ctg_measurement{
-            .bias = bias,
             .qtg_cycles = qtg_cycles,
             .elapsed_cycles = std::vector<uint64_t>(),
             .total_iterations = std::vector<int>(),
@@ -139,13 +136,13 @@ utils::ctg_measurement execute_ctg(const utils::cpp_knapsack &instance, size_t m
 
         double c = 6. / 5;
         int rounds = 0;
-        int total_iteratioins = 0;
+        int total_iterations = 0;
 
         while (iteration < max_iter) {
             int m = ceil(pow(c, rounds));
             j = gsl_rng_uniform_int(rng, m) + 1;
             iteration += 2 * j + 1;
-            total_iteratioins += iteration;
+            total_iterations += iteration;
             rounds++;
 
             path_t* new_sol = static_cast<path_t *>(malloc(sizeof(path_t)));
@@ -178,8 +175,8 @@ utils::ctg_measurement execute_ctg(const utils::cpp_knapsack &instance, size_t m
 
         result.objective_values.push_back(cur_sol->tot_profit);
         result.elapsed_cycles.push_back(elapsed_cycles);
-        result.total_iterations.push_back(total_iteratioins);
-        result.qtg_estimate_cycles.push_back((uint64_t) (((double) total_iteratioins * qtg_cycles) / 10));
+        result.total_iterations.push_back(total_iterations);
+        result.qtg_estimate_cycles.push_back((uint64_t) (((double) total_iterations * qtg_cycles) / 10));
     }
 
     gsl_rng_free(rng);
@@ -313,7 +310,7 @@ utils::pissinger_measurement execute_expknap(const utils::cpp_knapsack &instance
  * Side Effect:     Allocates dynamically; pointer should eventually be freed.
  */
 utils::qtg_measurement execute_q_max_search(const utils::cpp_knapsack &instance,
-                                            size_t bias, size_t maxiter, size_t seed) {
+                                            double bias, size_t maxiter, size_t seed) {
 
 
     // This is the default parameter and does not need to be set from within Python
@@ -525,7 +522,6 @@ PYBIND11_MODULE(_qtg_bindings, m
     m.def("execute_ctg", &execute_ctg);
 
     py::class_<utils::ctg_measurement>(m, "CTGMeasurement")
-            .def_readwrite("bias", &utils::ctg_measurement::bias)
             .def_readwrite("qtg_cycles", &utils::ctg_measurement::qtg_cycles)
             .def_readwrite("elapsed_cycles", &utils::ctg_measurement::elapsed_cycles)
             .def_readwrite("total_iterations", &utils::ctg_measurement::total_iterations)

@@ -46,7 +46,11 @@ def run_benchmark(alg_params: dict, instance: dict, instance_: Knapsack):
     :return: A dictionary with the results of the benchmark.
     """
 
-    ctg_result = execute_ctg(instance_, alg_params["max_iter"], alg_params["n_iterations"], alg_params["seed"])
+    ctg_result = execute_ctg(instance_,
+                             alg_params["bias"],
+                             alg_params["max_iter"],
+                             alg_params["n_iterations"],
+                             alg_params["seed"])
 
     return {
         "objective_values": ctg_result.objective_values,
@@ -64,8 +68,9 @@ def run(instance_name: str, instance_path: str, benchmark_dir: str):
     benchmark = Benchmark(benchmark_dir)
     benchmark.run(run_benchmark,
                   alg_params={
-                      "max_iter": 200,
-                      "n_iterations": 1000,
+                      "max_iter": 100 + instance.size // 4,
+                      "bias": len(instance.items) / 4,
+                      "n_iterations": 100,
                       "seed": 42,
                   },
                   instance={

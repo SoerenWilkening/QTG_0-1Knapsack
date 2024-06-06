@@ -131,13 +131,12 @@ def test_qbnb():
 def test_ctg():
     path = Path(__file__).parent / "data" / "650.knap"
     instance = load_instance(path)
+    n_iterations = 10
+    solution = execute_ctg(instance, instance.size / 4, 10, n_iterations, 12345)
 
-    solution = execute_ctg(instance, 10, 10, 12345)
-    print(solution)
-    print(solution.objective_values)
-    print(solution.elapsed_cycles)
-    print(solution.total_iterations)
-    print(solution.qtg_estimate_cycles)
-    print(solution.bias)
-    print(solution.qtg_cycles)
-
+    assert solution.objective_values[-1] > 0
+    assert solution.elapsed_cycles[-1] > 0
+    assert solution.total_iterations[-1] > 0
+    assert solution.qtg_estimate_cycles[-1] > 0
+    assert solution.qtg_cycles > 0
+    assert len(solution.objective_values) == n_iterations

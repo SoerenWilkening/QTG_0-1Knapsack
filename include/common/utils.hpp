@@ -50,7 +50,6 @@ namespace utils {
     };
 
     struct ctg_measurement {
-        double bias;
         long qtg_cycles;
         std::vector<uint64_t> elapsed_cycles;
         std::vector<int> total_iterations;
