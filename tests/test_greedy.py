@@ -9,8 +9,8 @@ from qtg.bindings import execute_combo
 def test_greedy_all_smith_miles():
     path = Path(__file__).parent / ".." / "evaluation" / "instances" / "smith_miles"
 
-    for name in os.listdir(path):
-        instance = load_instance(path / name)
+    for file in path.glob("*.knap"):
+        instance = load_instance(file)
 
         solver = KnapsackSolver(instance=instance, model_type="greedy")
         solution = solver.solve()

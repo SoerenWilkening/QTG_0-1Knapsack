@@ -3,7 +3,6 @@ from pathlib import Path
 from qtg.utils import load_instance
 
 
-@pytest.mark.long
 def test_parse_jooken():
     path = Path(__file__).parent / "data" / "650.knap"
     instance = load_instance(path)
@@ -14,7 +13,6 @@ def test_parse_jooken():
     assert instance.items[0].cost == 5000100300
 
 
-@pytest.mark.long
 def test_parse_smith_miles():
     path = Path(__file__).parent / "data" / "smith_miles.knap"
     instance = load_instance(path)

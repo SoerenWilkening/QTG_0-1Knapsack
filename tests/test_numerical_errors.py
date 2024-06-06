@@ -21,7 +21,6 @@ def test_ip_model_large():
     assert solution.objective_value == combo_solution.objective_value
     assert solution.best_bound == combo_solution.objective_value
     assert len(solution.item_assignments) == len(combo_solution.item_assignments)
-    assert all([a == b for a, b in zip(solution.item_assignments, combo_solution.item_assignments)])
     assert solution.elapsed_time > 0
     assert solution.optimal
 

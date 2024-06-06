@@ -25,7 +25,7 @@ class KnapsackIPModel(gp.Model):
     def solve(self, time_limit):
         self.Params.TimeLimit = time_limit
         self.Params.NumericFocus = 3
-        self.Params.MIPGap = 0.0
+        self.Params.MIPGap = 1e-9
         self.optimize()
 
         node_count = self.NodeCount
