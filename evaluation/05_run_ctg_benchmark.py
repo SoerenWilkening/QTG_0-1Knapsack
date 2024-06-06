@@ -65,7 +65,7 @@ def run(instance_name: str, instance_path: str, benchmark_dir: str):
     benchmark.run(run_benchmark,
                   alg_params={
                       "max_iter": 200,
-                      "n_iterations": 10,
+                      "n_iterations": 1000,
                       "seed": 42,
                   },
                   instance={
