@@ -255,6 +255,71 @@ cycle_count_comp(bit_t reg_size, num_t to_compare, mc_t method, \
     return cycle_count;
 }
 
+count_t cycle_count_comp_new(bit_t reg_size, num_t to_compare, bool_t unnegated, comp_t comp, bool_t precomp) {
+    count_t cycle_count = !unnegated;
+    bit_t bits = num_bits(to_compare);
+    int mc_gates[bits];
+
+    int a = 0;
+    if (unnegated) {
+        for (int i = bits - 1; i >= 0; --i) {
+            if (!(((to_compare - 1) >> i) & 1)) {
+                mc_gates[a++] = reg_size - i;
+            }
+        }
+    } else {
+        for (int i = bits - 1; i >= 0; --i) {
+            if (((to_compare >> i) & 1)) {
+                mc_gates[a++] = reg_size - i;
+            }
+        }
+    }
+
+    if (a > 2 && mc_gates[0] > 8 && precomp) {
+        cycle_count += 2 * num_bits(mc_gates[0] - 1);
+        int all_controls = mc_gates[0];
+        for (int i = 0; i < a; ++i) {
+            mc_gates[i] -= all_controls;
+            mc_gates[i] += 2;
+        }
+    }
+
+    int x = 0;
+    switch (comp) {
+        case CASCADING:
+            for (int i = 0; i < a; ++i) {
+                if (mc_gates[i] == 1) cycle_count += 1;
+                else if (mc_gates[i] == 2) cycle_count += 3;
+                else if ((mc_gates[i] - x > 1) && i > 0) cycle_count += 2 * ((int) ceil(log2(mc_gates[i] - x + 1))) + 3;
+                else if ((mc_gates[i] >= 2) && i == 0) cycle_count += 2 * ((int) ceil(log2(mc_gates[i] - 1))) + 3;
+                else cycle_count += 5;
+                x = mc_gates[i];
+            }
+            break;
+        case MC_DECOMPOSITION:
+            for (int i = 0; i < a; ++i) {
+                cycle_count += 2 * num_bits(mc_gates[i] - 1) + 1;
+            }
+            break;
+    }
+    return cycle_count;
+}
+
+count_t cycle_count_comp_optimal(bit_t reg_size, num_t to_compare) {
+//    return cycle_count_comp_new(reg_size, to_compare, false, MC_DECOMPOSITION, false);
+    count_t c1 = MIN(cycle_count_comp_new(reg_size, to_compare, true, CASCADING, true),
+                     cycle_count_comp_new(reg_size, to_compare, true, CASCADING, false));
+    count_t c2 = MIN(cycle_count_comp_new(reg_size, to_compare, false, CASCADING, true),
+                     cycle_count_comp_new(reg_size, to_compare, false, CASCADING, false));
+    count_t c3 = MIN(cycle_count_comp_new(reg_size, to_compare, true, MC_DECOMPOSITION, true),
+                     cycle_count_comp_new(reg_size, to_compare, true, MC_DECOMPOSITION, false));
+    count_t c4 = MIN(cycle_count_comp_new(reg_size, to_compare, false, MC_DECOMPOSITION, true),
+                     cycle_count_comp_new(reg_size, to_compare, false, MC_DECOMPOSITION, false));
+
+    return MIN(c1, MIN(c2, MIN(c3, c4)));
+}
+
+
 count_t
 gate_count_comp(bit_t reg_size, num_t to_compare, mc_t method, \
                 bool_t unnegated, bool_t tof_decomp) {
@@ -367,13 +432,9 @@ cycle_count_qtg(const knapsack_t *k, ub_t method_ub, qft_t method_qft, \
 
     for (bit_t i = break__item + 1; i < k->size - 1; ++i) {
         /*
-         * for each item, check whether unnegated or netaged comparison is more
-         * efficient
+         * for each item, use the  most efficient comparison method
          */
-        second_comp = MIN(cycle_count_comp(reg_b, ((k->items)[i]).cost, \
-                                           method_mc, TRUE, tof_decomp), \
-                          cycle_count_comp(reg_b, ((k->items)[i]).cost, \
-                                           method_mc, FALSE, tof_decomp));
+        second_comp = cycle_count_comp_optimal(reg_b, ((k->items)[i]).cost);
 
         second_block += second_comp + 2 * cost_qft + 1;
         /* 
@@ -397,13 +458,9 @@ cycle_count_qtg(const knapsack_t *k, ub_t method_ub, qft_t method_qft, \
      *       for further applications.
      */
     count_t third_block;
-    /* check whether unnegated or netaged last comparison is more efficient */
-    count_t last_comp = MIN(cycle_count_comp(reg_b, \
-                                             k->items[k->size - 1].cost, \
-                                             method_mc, TRUE, tof_decomp), \
-                            cycle_count_comp(reg_b, \
-                                             k->items[k->size - 1].cost, \
-                                             method_mc, FALSE, tof_decomp));
+
+    /* use most efficient comparison */
+    second_comp = cycle_count_comp_optimal(reg_b, ((k->items)[i]).cost);
 
     count_t last_add = num_bits(reg_c - lso(k->items[k->size - 1].profit) - 1) + 1;
     /*
