@@ -18,7 +18,7 @@
 num_t combo_wrap(const knapsack_t *k, bit_t first_item, num_t capacity, bool_t def, bool_t relx) {
     static map value_map;
 
-    if (map_size(value_map) > 100000) { // Destroy if too large to prevent oom errors.
+    if (value_map != NULL && map_size(value_map) > 100000) { // Destroy if too large to prevent oom errors.
         map_destroy(value_map);
         value_map = NULL;
     }
