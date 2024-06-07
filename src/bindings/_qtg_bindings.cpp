@@ -14,8 +14,6 @@ namespace py = pybind11;
 
 PYBIND11_MAKE_OPAQUE(std::vector<utils::cpp_item>);
 
-#define SWAP(a, b, T)  do { T q; q = *(a); *(a) = *(b); *(b) = q; } while(0);
-
 utils::pissinger_measurement execute_combo(const utils::cpp_knapsack &instance) {
     bool relx = false;
     /* check whether instance is trivial */
@@ -118,7 +116,7 @@ utils::ctg_measurement execute_ctg(const utils::cpp_knapsack &instance,
     // runs_per_instance defines, how often ctg is repeated, to get success probability
     for (int run = 0; run < n_iterations; ++run) {
         uint64_t t1 = rdtsc();
-        auto cur_sol = new path_t();
+        auto cur_sol = std::make_unique<path_t>();
         mpz_init2(cur_sol->vector, converted_knapsack->size);
 
         apply_int_greedy(converted_knapsack);
@@ -145,8 +143,9 @@ utils::ctg_measurement execute_ctg(const utils::cpp_knapsack &instance,
             total_iterations += iteration;
             rounds++;
 
-            path_t* new_sol = static_cast<path_t *>(malloc(sizeof(path_t)));
+            auto new_sol = std::make_unique<path_t>();
             mpz_init2(new_sol->vector, converted_knapsack->size);
+
             for (int l = 0; l < 4 * j * j; l++) {
                 new_sol->tot_profit = 0;
                 mpz_set_ui(new_sol->vector, 0);
@@ -164,13 +163,17 @@ utils::ctg_measurement execute_ctg(const utils::cpp_knapsack &instance,
                     }
                 }
                 if (new_sol->tot_profit > cur_sol->tot_profit) {
-                    SWAP(cur_sol, new_sol, path_t);
+                    cur_sol->tot_profit = new_sol->tot_profit;
+                    cur_sol->remain_cost = remain;
+                    mpz_set(cur_sol->vector, new_sol->vector);
+
                     iteration = 0;
                     rounds = 0;
                     break;
                 }
             }
-            free_path(new_sol);
+
+            mpz_clear(new_sol->vector);
         }
         uint64_t elapsed_cycles = rdtsc() - t1;
 
@@ -178,9 +181,14 @@ utils::ctg_measurement execute_ctg(const utils::cpp_knapsack &instance,
         result.elapsed_cycles.push_back(elapsed_cycles);
         result.total_iterations.push_back(total_iterations);
         result.qtg_estimate_cycles.push_back((uint64_t) (((double) total_iterations * qtg_cycles) / 10));
+
+        mpz_clear(cur_sol->vector);
     }
 
     gsl_rng_free(rng);
+
+    //free(converted_knapsack->items);
+    //free(converted_knapsack);
 
     return result;
 }

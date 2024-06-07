@@ -18,6 +18,11 @@
 num_t combo_wrap(const knapsack_t *k, bit_t first_item, num_t capacity, bool_t def, bool_t relx) {
     static map value_map;
 
+    if (map_size(value_map) > 100000) { // Destroy if too large to prevent oom errors.
+        map_destroy(value_map);
+        value_map = NULL;
+    }
+
     if (value_map == NULL) {
         value_map = map_create();
     }
@@ -54,7 +59,7 @@ num_t combo_wrap(const knapsack_t *k, bit_t first_item, num_t capacity, bool_t d
     /* either start combo or return 0 */
     opt_sol = combo(f, l, k_copy.capacity, 0, 0, def, relx);
 
-    long long *val = malloc(sizeof (long long));
+    long long *val = malloc(sizeof(long long));
     *val = opt_sol;
     map_set(value_map, key, val);
 

@@ -134,9 +134,14 @@ def test_ctg():
     n_iterations = 10
     solution = execute_ctg(instance, instance.size / 4, 10, n_iterations, 12345)
 
-    assert solution.objective_values[-1] > 0
+    print(solution.objective_values)
+    print(solution.elapsed_cycles)
+    print(solution.total_iterations)
+    print(solution.qtg_estimate_cycles)
+    print(solution.qtg_cycles)
+    assert solution.objective_values == [7500330190, 7500330190, 7500330190, 7500330190, 7500330190, 7500330190, 7500330190, 7500330190, 7500330190, 7500330190]
     assert solution.elapsed_cycles[-1] > 0
-    assert solution.total_iterations[-1] > 0
-    assert solution.qtg_estimate_cycles[-1] > 0
+    assert solution.total_iterations == [30, 32, 22, 24, 22, 22, 22, 32, 20, 24]
+    assert solution.qtg_estimate_cycles == [356694, 380473, 261575, 285355, 261575, 261575, 261575, 380473, 237796, 285355]
     assert solution.qtg_cycles > 0
     assert len(solution.objective_values) == n_iterations
