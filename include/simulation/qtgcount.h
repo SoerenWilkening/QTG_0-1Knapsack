@@ -286,6 +286,19 @@ bit_t anc_count_comp(bit_t, num_t, mc_t, bool_t);
 count_t cycle_count_comp(bit_t, num_t, mc_t, bool_t, bool_t);
 
 /*
+ * Function:        cycle_count_comp_optimal
+ * ---------------------------------
+ * Description:     This function is an improved version of cycle_count_comp.
+ *                  It compares all different possible implementations and chooses the best
+ *
+ * Parameters:
+ *      parameter1: Size of the compared register.
+ *      parameter2: Integer that is being compared.
+ * Returns:         Number of cycles of the integer comparison method.
+ */
+count_t cycle_count_comp_optimal(bit_t reg_size, num_t to_compare)
+
+/*
  * Function:        gate_count_comp
  * --------------------------------
  * Description:     This function counts the gates of an integer comparison on a
