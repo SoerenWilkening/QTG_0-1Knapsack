@@ -98,8 +98,8 @@ def run(instance_name: str, instance_path: str, benchmark_dir: str, iterations: 
                   },
                   alg_params={
                       "bias": bias,
-                      "qtg_iterations": 700 + len(instance.items) // 2,
-                      "qtg_iterations_str": "700 + n / 2",
+                      "qtg_iterations": 700 + (instance.size * instance.size // 16),
+                      "qtg_iterations_str": "700 + n^2 / 16",
                   },
                   instance={
                       "instance_path": instance_path,
