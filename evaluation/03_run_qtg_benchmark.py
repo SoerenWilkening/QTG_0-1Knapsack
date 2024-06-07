@@ -2,7 +2,7 @@
 This script runs the benchmark for the QTG algorithm.
 """
 import os
-
+import re
 from algbench import Benchmark
 
 from qtg.bindings import execute_combo, Knapsack, execute_q_max_search
@@ -12,10 +12,12 @@ import slurminade
 slurminade.update_default_configuration(
     partition="alg",
     constraint="alggen03",
+    mem=0,
     exclusive=True,
     mail_type="FAIL",
 )  # global options for slurm
 
+slurminade.set_dispatch_limit(500)
 
 def configure_grb_license_path():
     import socket
@@ -83,8 +85,8 @@ def run(instance_name: str, instance_path: str, benchmark_dir: str, iterations: 
     instance = load_instance(instance_path)
     benchmark = Benchmark(benchmark_dir)
 
-    bias = len(instance.items) // 4
-    qtg_iterations = 100 if len(instance.items) == 30 else 200
+    bias = len(instance.items) / 4
+    qtg_iterations = 100 +  len(instance.items) // 4
 
     # Execute once without measurements to verify that all solutions were correct.
     base_result = execute_combo(instance)
@@ -124,13 +126,16 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser()
     parser.add_argument("-d", "--instances-dir", type=str, required=True)
-    parser.add_argument("--iterations", type=int, default=10)
+    parser.add_argument("--iterations", type=int, default=100)
     parser.add_argument("-o", "--out")
     args = parser.parse_args()
 
-    with slurminade.JobBundling(max_size=5):  # automatically bundles up to 20 tasks
+    with slurminade.JobBundling(max_size=10):  # automatically bundles up to 20 tasks
         for instance_name in sorted(os.listdir(args.instances_dir)):
             if not instance_name.endswith(".knap"):
+                continue
+            g = int(re.match(r'.+\_g\_([0-9]+)\_.+', instance_name).group(1))
+            if g > 3:
                 continue
             print("Solving instance", instance_name)
             instance_path = os.path.join(args.instances_dir, instance_name)

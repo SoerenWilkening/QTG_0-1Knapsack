@@ -67,7 +67,7 @@ def run(instance_name: str, instance_path: str, benchmark_dir: str):
     benchmark = Benchmark(benchmark_dir)
     benchmark.run(run_benchmark,
                   alg_params={
-                      "max_iter": 700 + instance.size / 2,
+                      "max_iter": 700 + instance.size // 2,
                       "max_iter_str": "700 + n / 2",
                       "bias": len(instance.items) / 4,
                       "n_iterations": 100,
@@ -101,7 +101,7 @@ if __name__ == "__main__":
     parser.add_argument("-o", "--out")
     args = parser.parse_args()
 
-    with slurminade.JobBundling(max_size=5):  # automatically bundles up to 20 tasks
+    with slurminade.JobBundling(max_size=10):  # automatically bundles up to 20 tasks
         for instance_path in list(Path(args.instances_dir).glob("**/*.kp")) + \
                              list(Path(args.instances_dir).glob("**/*.knap")):
             instance_name = instance_path.name
