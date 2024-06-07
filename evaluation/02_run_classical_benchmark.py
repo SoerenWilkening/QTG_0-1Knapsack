@@ -18,6 +18,8 @@ import slurminade
 slurminade.update_default_configuration(
     partition="alg",
     constraint="alggen03",
+    cpus_per_task=1,
+    mem_per_cpu="40G",
     exclusive=True,
     mail_type="FAIL",
 )  # global options for slurm
@@ -97,7 +99,7 @@ def run_benchmark(measure_params: dict, instance: dict, solver: str):
 
 
 @slurminade.slurmify()
-def run(benchmark_dir, instance_path, instance_name, gnu_time_cmd, timeout):
+def run(benchmark_dir, instance_path, instance_name, gnu_time_cmd, timeout, combo_only):
     instance = load_instance(instance_path)
 
     def retrieve_combo():
@@ -135,11 +137,11 @@ def run(benchmark_dir, instance_path, instance_name, gnu_time_cmd, timeout):
         combo_solution = retrieve_combo()
         assert len(combo_solution) == 1, f"Expected exactly one solution for {instance_name}, got {len(combo_solution)}"
 
-    combo_solution = combo_solution[0]
-
-    timeout = int(np.ceil(combo_solution["result"]["elapsed_real_time"])) if timeout == 0 else timeout
-    for solver in ["expknap", "ip", "cp-sat", "greedy"]:
-        run_solver(s=solver, timeout=timeout)
+    if not combo_only:
+        combo_solution = combo_solution[0]
+        timeout = int(np.ceil(combo_solution["result"]["elapsed_real_time"])) if timeout == 0 else timeout
+        for solver in ["expknap", "ip", "cp-sat", "greedy"]:
+            run_solver(s=solver, timeout=timeout)
 
 
 @slurminade.slurmify(mail_type="ALL")
@@ -157,6 +159,7 @@ if __name__ == "__main__":
     parser.add_argument("-o", "--out", type=str, required=True)
     parser.add_argument("--gnu-time-cmd", type=str, default="gtime")
     parser.add_argument("--timeout", type=int, default=0)
+    parser.add_argument("--combo-only", action="store_true")
     args = parser.parse_args()
 
     with slurminade.JobBundling(max_size=3):  # automatically bundles up to 20 tasks
@@ -170,6 +173,7 @@ if __name__ == "__main__":
                            instance_path=instance_path,
                            instance_name=instance_name,
                            timeout=args.timeout,
+                           combo_only=args.combo_only,
                            gnu_time_cmd=args.gnu_time_cmd)
 
     slurminade.join()  # make sure that the clean up jobs runs after all other jobs
