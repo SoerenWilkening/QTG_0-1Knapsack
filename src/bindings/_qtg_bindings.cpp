@@ -355,7 +355,7 @@ utils::qtg_measurement execute_q_max_search(const utils::cpp_knapsack &instance,
     count_t qtg_cycles, qtg_gates, qtg_cycles_decomp, qtg_gates_decomp;
     num_t exact; /* exact optimal profit for the knapsack instance */
 
-    node_t *cur_nodes; /* set of states after applying QTG and filtering */
+    node_t *initial_nodes; /* set of states after applying QTG and filtering */
     path_t *cur_path; /* current result of applying QSearch */
 
     /*
@@ -387,23 +387,31 @@ utils::qtg_measurement execute_q_max_search(const utils::cpp_knapsack &instance,
 
     /* obtain optimal solution via Combo */
     exact = execute_combo(instance).objective_value;
+    initial_nodes = qtg(converted_knapsack, cur_sol->tot_profit, exact, bias, method, \
+                    cur_sol->vector, &num_states);
 
     do {
         /*
          * The application of the QTG is simulated. Only states (paths) with
          * total profit above the threshold are stored in cur_nodes.
          */
-        cur_nodes = qtg(converted_knapsack, cur_sol->tot_profit, exact, bias, method, \
-                        cur_sol->vector, &num_states);
+         size_t new_num_states = 0;
+         node_t *cur_nodes = updated(   initial_nodes,
+                                        num_states,
+                                        &new_num_states,
+                                        cur_sol->tot_profit,
+                                        cur_sol->vector,
+                                        converted_knapsack,
+                                        bias);
         /*
          * QSearch is executed on the nodes created by the QTG. If this yields a
          * better solution, cur_sol (carrying the current threshold) is updated.
          * Otherwise, the routine is interrupted and prior cur_sol is returned.
          */
-        cur_path = q_search(cur_nodes, num_states, &rounds, &iter, maxiter, \
+        cur_path = q_search(cur_nodes, new_num_states, &rounds, &iter, maxiter, \
                             rng);
         if (cur_nodes != NULL) {
-            free_nodes(cur_nodes, num_states);
+            free_nodes(cur_nodes, new_num_states);
         }
         /*
          * The cycle is updated after applying QSearch. The QTG is applied at
@@ -463,6 +471,9 @@ utils::qtg_measurement execute_q_max_search(const utils::cpp_knapsack &instance,
             free_path(cur_sol);
             gsl_rng_free(rng);
 
+            if (initial_nodes != NULL) {
+                free_nodes(initial_nodes, num_states);
+            }
             return result;
         }
     } while (true);

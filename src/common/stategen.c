@@ -295,3 +295,42 @@ qtg(const knapsack_t *k, num_t threshold, num_t exact, size_t bias, \
     // printf("Number of states after QTG: %zu\n", *num_states);
     return parent;
 }
+
+
+node_t *updated(node_t *bnb,
+                size_t number_states,
+                size_t *new_number,
+                num_t threshold,
+                mpz_t cur_sol,
+                knapsack_t *k,
+                double bias) {
+    node_t *up = calloc(number_states, sizeof(node_t));
+    size_t a = 0;
+
+    for (size_t i = 0; i < number_states; ++i) {
+        if (bnb[i].path.tot_profit > threshold) {
+            up[a].path.tot_profit = bnb[i].path.tot_profit;
+            // copy the vector
+            mpz_init2(up[a].path.vector, k->size);
+            mpz_set(up[a].path.vector, bnb[i].path.vector);
+            up[a].prob = 1;
+            long Z_ = k->capacity;
+            for(int j = 0; j < k->size; j++){
+                int bit1 = mpz_tstbit(up[a].path.vector, j);
+                int bit2 = mpz_tstbit(cur_sol, j);
+
+                // update prob, if item fits and based on current solution
+                if(Z_ >= k->items[j].cost){
+                    up[a].prob *= (1. + bias * (bit1 == bit2) ) / (bias + 2);
+                }
+                // only reduce remaining cap, if bit1 is 1
+                Z_ -= bit1 * k->items[j].cost;
+            }
+            a++;
+        }
+    }
+    *new_number = a;
+    up = realloc(up, a * sizeof(node_t));
+
+    return up;
+}

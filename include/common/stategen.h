@@ -129,6 +129,9 @@ double branch_prob(const knapsack_t *, bit_t, size_t, bool_t, branch_t, mpz_t);
  */
 node_t *qtg(const knapsack_t *, num_t, num_t, size_t, branch_t, mpz_t, size_t *);
 
+
+node_t *updated(node_t *bnb, size_t number_states, size_t *new_number, num_t threshold, mpz_t cur_sol, knapsack_t *k, double bias);
+
 #ifdef __cplusplus
 }
 #endif
