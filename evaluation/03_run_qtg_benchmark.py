@@ -2,7 +2,6 @@
 This script runs the benchmark for the QTG algorithm.
 """
 import os
-import re
 from algbench import Benchmark
 
 from qtg.bindings import execute_combo, Knapsack, execute_q_max_search
@@ -11,13 +10,14 @@ import slurminade
 
 slurminade.update_default_configuration(
     partition="alg",
-    constraint="alggen03",
+    constraint="alggen04",
     mem=0,
     exclusive=True,
     mail_type="FAIL",
 )  # global options for slurm
 
 slurminade.set_dispatch_limit(500)
+
 
 def configure_grb_license_path():
     import socket
@@ -86,7 +86,6 @@ def run(instance_name: str, instance_path: str, benchmark_dir: str, iterations: 
     benchmark = Benchmark(benchmark_dir)
 
     bias = len(instance.items) / 4
-    qtg_iterations = 100 +  len(instance.items) // 4
 
     # Execute once without measurements to verify that all solutions were correct.
     base_result = execute_combo(instance)
@@ -99,7 +98,8 @@ def run(instance_name: str, instance_path: str, benchmark_dir: str, iterations: 
                   },
                   alg_params={
                       "bias": bias,
-                      "qtg_iterations": qtg_iterations,
+                      "qtg_iterations": 700 + len(instance.items) // 2,
+                      "qtg_iterations_str": "700 + n / 2",
                   },
                   instance={
                       "instance_path": instance_path,
@@ -134,13 +134,11 @@ if __name__ == "__main__":
         for instance_name in sorted(os.listdir(args.instances_dir)):
             if not instance_name.endswith(".knap"):
                 continue
-            g = int(re.match(r'.+\_g\_([0-9]+)\_.+', instance_name).group(1))
-            if g > 3:
-                continue
             print("Solving instance", instance_name)
             instance_path = os.path.join(args.instances_dir, instance_name)
 
-            run.distribute(instance_name=instance_name, instance_path=instance_path, benchmark_dir=args.out, iterations=args.iterations)
+            run.distribute(instance_name=instance_name, instance_path=instance_path, benchmark_dir=args.out,
+                           iterations=args.iterations)
 
     slurminade.join()  # make sure that the clean up jobs runs after all other jobs
     clean_up.distribute(benchmark_dir=args.out)
