@@ -102,7 +102,9 @@ if __name__ == "__main__":
     parser.add_argument("-o", "--out")
     args = parser.parse_args()
 
-    with slurminade.JobBundling(max_size=10):  # automatically bundles up to 20 tasks
+    benchmark = Benchmark(args.out)
+
+    with slurminade.JobBundling(max_size=2):  # automatically bundles up to 20 tasks
         for instance_path in list(Path(args.instances_dir).glob("**/*.kp")) + \
                              list(Path(args.instances_dir).glob("**/*.knap")):
             instance_name = instance_path.name
