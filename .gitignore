@@ -1,8 +1,8 @@
 gurobi_test.py
 .DS_Store
 .calculations
-instances
 src/.DS_Store
+
 
 .idea
 .conan

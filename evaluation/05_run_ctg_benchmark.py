@@ -13,7 +13,8 @@ import slurminade
 slurminade.update_default_configuration(
     partition="alg",
     constraint="alggen03",
-    exclusive=True,
+    cpus_per_task=1,
+    mem_per_cpu="8G",
     mail_type="FAIL",
 )  # global options for slurm
 
@@ -67,8 +68,8 @@ def run(instance_name: str, instance_path: str, benchmark_dir: str):
     benchmark = Benchmark(benchmark_dir)
     benchmark.run(run_benchmark,
                   alg_params={
-                      "max_iter": 700 + instance.size // 2,
-                      "max_iter_str": "700 + n / 2",
+                      "max_iter": 700 + (instance.size * instance.size // 16),
+                      "max_iter_str": "700 + n^2 / 16",
                       "bias": len(instance.items) / 4,
                       "n_iterations": 100,
                       "seed": 42,
