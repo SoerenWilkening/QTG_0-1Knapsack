@@ -11,8 +11,8 @@ import slurminade
 slurminade.update_default_configuration(
     partition="alg",
     constraint="alggen04",
-    mem=0,
-    exclusive=True,
+    cpus_per_task=1,
+    mem_per_cpu="8G",
     mail_type="FAIL",
 )  # global options for slurm
 
@@ -130,7 +130,7 @@ if __name__ == "__main__":
     parser.add_argument("-o", "--out")
     args = parser.parse_args()
 
-    with slurminade.JobBundling(max_size=10):  # automatically bundles up to 20 tasks
+    with slurminade.JobBundling(max_size=2):  # automatically bundles up to 20 tasks
         for instance_name in sorted(os.listdir(args.instances_dir)):
             if not instance_name.endswith(".knap"):
                 continue
