@@ -47,6 +47,11 @@ typedef enum mc {
     TOFFOLI,
 } mc_t;
 
+typedef enum comp{
+    MC_DECOMPOSITION,
+    CASCADING,
+} comp_t;
+
 /* 
  * =============================================================================
  *                            enum names

@@ -306,7 +306,6 @@ count_t cycle_count_comp_new(bit_t reg_size, num_t to_compare, bool_t unnegated,
 }
 
 count_t cycle_count_comp_optimal(bit_t reg_size, num_t to_compare) {
-//    return cycle_count_comp_new(reg_size, to_compare, false, MC_DECOMPOSITION, false);
     count_t c1 = MIN(cycle_count_comp_new(reg_size, to_compare, true, CASCADING, true),
                      cycle_count_comp_new(reg_size, to_compare, true, CASCADING, false));
     count_t c2 = MIN(cycle_count_comp_new(reg_size, to_compare, false, CASCADING, true),
