@@ -20,7 +20,7 @@ slurminade.update_default_configuration(
     constraint="alggen03",
     cpus_per_task=1,
     mem_per_cpu="16G",
-    exclusive=True,
+    #exclusive=True,
     mail_type="FAIL",
 )  # global options for slurm
 
