@@ -306,14 +306,14 @@ count_t cycle_count_comp_new(bit_t reg_size, num_t to_compare, bool_t unnegated,
 }
 
 count_t cycle_count_comp_optimal(bit_t reg_size, num_t to_compare) {
-    count_t c1 = MIN(cycle_count_comp_new(reg_size, to_compare, true, CASCADING, true),
-                     cycle_count_comp_new(reg_size, to_compare, true, CASCADING, false));
-    count_t c2 = MIN(cycle_count_comp_new(reg_size, to_compare, false, CASCADING, true),
-                     cycle_count_comp_new(reg_size, to_compare, false, CASCADING, false));
-    count_t c3 = MIN(cycle_count_comp_new(reg_size, to_compare, true, MC_DECOMPOSITION, true),
-                     cycle_count_comp_new(reg_size, to_compare, true, MC_DECOMPOSITION, false));
-    count_t c4 = MIN(cycle_count_comp_new(reg_size, to_compare, false, MC_DECOMPOSITION, true),
-                     cycle_count_comp_new(reg_size, to_compare, false, MC_DECOMPOSITION, false));
+    count_t c1 = MIN(cycle_count_comp_new(reg_size, to_compare, TRUE, CASCADING, TRUE),
+                     cycle_count_comp_new(reg_size, to_compare, TRUE, CASCADING, FALSE));
+    count_t c2 = MIN(cycle_count_comp_new(reg_size, to_compare, FALSE, CASCADING, TRUE),
+                     cycle_count_comp_new(reg_size, to_compare, FALSE, CASCADING, FALSE));
+    count_t c3 = MIN(cycle_count_comp_new(reg_size, to_compare, TRUE, MC_DECOMPOSITION, TRUE),
+                     cycle_count_comp_new(reg_size, to_compare, TRUE, MC_DECOMPOSITION, FALSE));
+    count_t c4 = MIN(cycle_count_comp_new(reg_size, to_compare, FALSE, MC_DECOMPOSITION, TRUE),
+                     cycle_count_comp_new(reg_size, to_compare, FALSE, MC_DECOMPOSITION, FALSE));
 
     return MIN(c1, MIN(c2, MIN(c3, c4)));
 }
@@ -411,8 +411,8 @@ cycle_count_qtg(const knapsack_t *k, ub_t method_ub, qft_t method_qft, \
     count_t second_comp;
     count_t second_sub;
     count_t second_add;
-
-    for (bit_t i = 1; i < break__item; ++i) {
+    bit_t i;
+    for (i = 1; i < break__item; ++i) {
         second_block += 2 * MAX(num_bits(reg_b - lso(k->items[i].cost) - 1), \
                                 num_bits(reg_c - lso(k->items[i].profit) - 1)) + 2;
         /*
@@ -428,8 +428,7 @@ cycle_count_qtg(const knapsack_t *k, ub_t method_ub, qft_t method_qft, \
                         num_bits(reg_c - lso(k->items[break__item].profit) - 1)) \
  + 1 + cost_qft;
 
-
-    for (bit_t i = break__item + 1; i < k->size - 1; ++i) {
+    for (i = break__item + 1; i < k->size - 1; ++i) {
         /*
          * for each item, use the  most efficient comparison method
          */
@@ -459,7 +458,7 @@ cycle_count_qtg(const knapsack_t *k, ub_t method_ub, qft_t method_qft, \
     count_t third_block;
 
     /* use most efficient comparison */
-    second_comp = cycle_count_comp_optimal(reg_b, ((k->items)[i]).cost);
+    count_t last_comp = cycle_count_comp_optimal(reg_b, ((k->items)[k->size - 1]).cost);
 
     count_t last_add = num_bits(reg_c - lso(k->items[k->size - 1].profit) - 1) + 1;
     /*

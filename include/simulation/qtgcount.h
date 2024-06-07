@@ -301,7 +301,7 @@ count_t cycle_count_comp(bit_t, num_t, mc_t, bool_t, bool_t);
  *      parameter2: Integer that is being compared.
  * Returns:         Number of cycles of the integer comparison method.
  */
-count_t cycle_count_comp_optimal(bit_t reg_size, num_t to_compare)
+count_t cycle_count_comp_optimal(bit_t reg_size, num_t to_compare);
 
 /*
  * Function:        gate_count_comp

@@ -146,9 +146,10 @@ utils::ctg_measurement execute_ctg(const utils::cpp_knapsack &instance,
             rounds++;
 
             path_t* new_sol = static_cast<path_t *>(malloc(sizeof(path_t)));
+            mpz_init2(new_sol->vector, converted_knapsack->size);
             for (int l = 0; l < 4 * j * j; l++) {
                 new_sol->tot_profit = 0;
-                mpz_init2(new_sol->vector, converted_knapsack->size);
+                mpz_set_ui(new_sol->vector, 0);
                 long remain = converted_knapsack->capacity;
                 for (bit_t i = 0; i < converted_knapsack->size; ++i) {
                     if (converted_knapsack->items[i].cost <= remain) {
