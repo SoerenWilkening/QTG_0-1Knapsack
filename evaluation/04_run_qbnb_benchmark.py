@@ -13,7 +13,9 @@ import slurminade
 slurminade.update_default_configuration(
     partition="alg",
     constraint="alggen03",
-    exclusive=True,
+    # exclusive=True,
+    cpus_per_task=1,
+    mem_per_cpu="16G",
     mail_type="FAIL",
 )  # global options for slurm
 
@@ -103,7 +105,6 @@ if __name__ == "__main__":
     with slurminade.JobBundling(max_size=5):  # automatically bundles up to 20 tasks
         for instance_path in list(Path(args.instances_dir).glob("**/*.kp")) + \
                              list(Path(args.instances_dir).glob("**/*.knap")):
-
             instance_name = instance_path.name
             print("Solving instance", instance_name)
 
