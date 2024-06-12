@@ -104,13 +104,22 @@ if __name__ == "__main__":
 
     benchmark = Benchmark(args.out)
 
+    instances = {
+        row["parameters"]["args"]["instance"]["name"] for row in benchmark
+    }
+
     with slurminade.JobBundling(max_size=2):  # automatically bundles up to 20 tasks
         for instance_path in list(Path(args.instances_dir).glob("**/*.kp")) + \
                              list(Path(args.instances_dir).glob("**/*.knap")):
             instance_name = instance_path.name
-            print("Solving instance", instance_name)
 
             instance = load_instance(str(instance_path))
+
+            if instance_name in instances:
+                print("Skipping", instance_name)
+                continue
+
+            print("Solving instance", instance_name)
 
             run.distribute(instance_name=instance_name,
                            instance_path=str(instance_path),
