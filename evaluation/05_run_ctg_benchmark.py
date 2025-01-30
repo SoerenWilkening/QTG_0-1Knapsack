@@ -51,7 +51,8 @@ def run_benchmark(alg_params: dict, instance: dict, instance_: Knapsack):
                              alg_params["bias"],
                              alg_params["max_iter"],
                              alg_params["n_iterations"],
-                             alg_params["seed"])
+                             alg_params["seed"],
+                             -1) # dont apply stopping value
 
     return {
         "objective_values": ctg_result.objective_values,
