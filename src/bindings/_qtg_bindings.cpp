@@ -81,7 +81,8 @@ utils::pissinger_measurement execute_combo(const utils::cpp_knapsack &instance) 
 utils::ctg_measurement execute_ctg(const utils::cpp_knapsack &instance,
                                    double bias,
                                    size_t max_iter,
-                                   size_t n_iterations, size_t seed) {
+                                   size_t n_iterations, size_t seed,
+                                   unsigned long long stop_val) { // set stop_val to stop, if surpassed
     gsl_rng *rng;
     gsl_rng_env_setup();
     rng = gsl_rng_alloc(gsl_rng_default);
@@ -172,7 +173,7 @@ utils::ctg_measurement execute_ctg(const utils::cpp_knapsack &instance,
                     break;
                 }
             }
-
+            if ((stop_val != -1) && stop_val <= cur_sol->tot_profit) break; // stopping condition if needed
             mpz_clear(new_sol->vector);
         }
         uint64_t elapsed_cycles = rdtsc() - t1;
