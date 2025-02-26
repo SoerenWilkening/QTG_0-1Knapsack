@@ -20,6 +20,9 @@ class KnapsackCPModel(cp_model.CpModel):
 
         self.Maximize(sum(self._vars[i] * item.profit for i, item in enumerate(self._instance.items)))
 
+    def set_bound(self, bound):
+        self.Add(sum(self._vars[i] * item.profit for i, item in enumerate(self._instance.items)) <= bound)
+
     def add_solution(self, solution: KnapsackSolution):
         for i, value in enumerate(solution.item_assignments):
             self.AddHint(self._vars[i], int(value))
