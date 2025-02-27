@@ -5,6 +5,8 @@ from algbench import Benchmark
 from qtg.solvers import KnapsackSolver
 from qtg.utils import load_instance
 import slurminade
+import hwcounter
+
 
 slurminade.update_default_configuration(
     partition="alg",
@@ -13,6 +15,7 @@ slurminade.update_default_configuration(
     mail_type="FAIL",
 )  # global options for slurm
 
+slurminade.set_dispatch_limit(200)
 
 def configure_grb_license_path():
     import socket
@@ -34,7 +37,7 @@ configure_grb_license_path()
 
 
 @slurminade.slurmify()
-def run(benchmark_dir, instance_path, instance_name, timeout):
+def run(benchmark_dir, instance_path, instance_name):
     instance = load_instance(instance_path)
 
     with open("cached/optimal_solutions.json", "r") as f:
@@ -44,12 +47,15 @@ def run(benchmark_dir, instance_path, instance_name, timeout):
 
     def run_solver(solver, bound, measure_params, **kwargs):
         solver = KnapsackSolver(instance, model_type=solver)
+        start = hwcounter.count()
         solution = solver.solve(time_limit=measure_params["timeout"], bound=bound)
+        elapsed_cycles = hwcounter.count_end() - start
         return {
             "solver": solver,
             "item_assignments": solution.item_assignments,
             "objective_value": solution.objective_value,
             "elapsed_time": solution.elapsed_time,
+            "elapsed_cycles": elapsed_cycles,
             "best_bound": solution.best_bound,
             "optimal": solution.optimal,
             "node_count": solution.node_count
@@ -59,9 +65,9 @@ def run(benchmark_dir, instance_path, instance_name, timeout):
         benchmark = Benchmark(benchmark_dir)
         benchmark.run(run_solver,
                       solver=solver,
-                      bound=optimal_solutions[instance_name],
+                      bound=optimal_solutions[instance_name]["objective"],
                       measure_params={
-                          "timeout": timeout
+                          "timeout": optimal_solutions[instance_name]["runtime"]
                       },
                       instance={
                           "instance_path": instance_path,
@@ -86,9 +92,8 @@ if __name__ == "__main__":
 
     instances_dirs = ["instances/classical_qtg_comparison/small", "instances/classical_qtg_comparison/large"]
     out_dir = "results/heuristics"
-    timeout = 900
 
-    with slurminade.JobBundling(max_size=3):  # automatically bundles up to 20 tasks
+    with slurminade.JobBundling(max_size=5):  # automatically bundles up to 20 tasks
         for instances_dir in instances_dirs:
             for instance_name in sorted(os.listdir(instances_dir)):
                 if not instance_name.endswith(".knap"):
@@ -98,8 +103,7 @@ if __name__ == "__main__":
                 instance_path = os.path.join(instances_dir, instance_name)
                 run.distribute(benchmark_dir=out_dir,
                                instance_path=instance_path,
-                               instance_name=instance_name,
-                               timeout=timeout)
+                               instance_name=instance_name)
 
     slurminade.join()  # make sure that the clean up jobs runs after all other jobs
     clean_up.distribute(benchmark_dir=out_dir)
